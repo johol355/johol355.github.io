@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.306">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2023-12-09">
+
+<title>Test of case ascertainment 1</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="10-case-ascertainment-december-2023_files/libs/clipboard/clipboard.min.js"></script>
+<script src="10-case-ascertainment-december-2023_files/libs/quarto-html/quarto.js"></script>
+<script src="10-case-ascertainment-december-2023_files/libs/quarto-html/popper.min.js"></script>
+<script src="10-case-ascertainment-december-2023_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="10-case-ascertainment-december-2023_files/libs/quarto-html/anchor.min.js"></script>
+<link href="10-case-ascertainment-december-2023_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="10-case-ascertainment-december-2023_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="10-case-ascertainment-december-2023_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="10-case-ascertainment-december-2023_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="10-case-ascertainment-december-2023_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Test of case ascertainment 1</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Johan Olsson </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">December 9, 2023</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="a-modified-ascertainment-strategy-december-2023" class="level2">
+<h2 class="anchored" data-anchor-id="a-modified-ascertainment-strategy-december-2023">A modified ascertainment strategy (december 2023)</h2>
+<p>Based on earlier experiments and ascertainment strategies, I will here propose a new version. The graph gives the outline.</p>
+<div class="cell" data-execution_count="1">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graphviz</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> graphviz <span class="im">import</span> Digraph</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Variable assignments for node labels</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>node_label_1 <span class="op">=</span> <span class="st">'VTF i SIR </span><span class="ch">\n</span><span class="st"> vid icke-NIVA sjukhus </span><span class="ch">\n</span><span class="st"> &gt;= 18 år </span><span class="ch">\n</span><span class="st"> (n=51978)'</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>node_label_1a <span class="op">=</span> <span class="st">'VTF i SIR där patienten har </span><span class="ch">\n</span><span class="st"> föregående VTF vid MVO NK i PAR'</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>node_label_1b <span class="op">=</span> <span class="st">'Ja Exkludera (n=6458)'</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>node_label_1c <span class="op">=</span> <span class="st">'Nej (n=45520)'</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>node_label_2 <span class="op">=</span> <span class="st">'VTF i SIR där patietienten har </span><span class="ch">\n</span><span class="st"> VTF i PAR vid MVO NK </span><span class="ch">\n</span><span class="st"> ≤ 1d från SIR utskrivning'</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>node_label_3 <span class="op">=</span> <span class="st">'Nej (n=??)'</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>node_label_3a <span class="op">=</span> <span class="st">'VTF i SIR \ med samtidigt VTF i PAR </span><span class="ch">\n</span><span class="st"> vid MVO icke-NK ***'</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>node_label_3b <span class="op">=</span>  <span class="st">'Ja (n=????)'</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>node_label_3c <span class="op">=</span>  <span class="st">'Nej (n=??)'</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>node_label_4 <span class="op">=</span> <span class="st">'Ja (n=6357)'</span> </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>node_label_4a <span class="op">=</span> <span class="st">'Dublett?***'</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>node_label_4b <span class="op">=</span> <span class="st">'Ja Exkludera (n=47)'</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>node_label_4c <span class="op">=</span> <span class="st">'Nej (n=6310)'</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>node_label_5 <span class="op">=</span> <span class="st">'aSAH på MVO NK*'</span> </span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>node_label_6 <span class="op">=</span> <span class="st">'aSAH på MVO icke-NK**'</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>node_label_7 <span class="op">=</span> <span class="st">'Ja \ Inkludera (n=?)'</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>node_label_8 <span class="op">=</span> <span class="st">'Nej \ Exkludera (n=?)'</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>node_label_9 <span class="op">=</span> <span class="st">'Ja Inkludera (n=1679)'</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>node_label_10 <span class="op">=</span> <span class="st">'Nej \ Exkludera (n=4631)'</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>node_label_11 <span class="op">=</span> <span class="st">'* aSAH på MVO NK </span><span class="ch">\n</span><span class="st"> Huvuddiagnos I60.0-I60.9 </span><span class="ch">\n</span><span class="st"> ej bidiagnoser S06.0-S06.9/Q28.0-Q28.9 </span><span class="ch">\n</span><span class="st"> alt. </span><span class="ch">\n</span><span class="st"> KVÅ coil/clip eller underliggande dödsorsak I60.0-I60.9 &lt;30d '</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>node_label_12 <span class="op">=</span> <span class="st">'** aSAH på MVO icke-NK </span><span class="ch">\n</span><span class="st"> Huvuddiagnos I60.0-I60.9 </span><span class="ch">\n</span><span class="st"> ej bidiagnoser S06.0-S06.9/Q28.0-Q28.9'</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>node_label_13 <span class="op">=</span> <span class="st">'Ja'</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>node_label_14 <span class="op">=</span> <span class="st">'Nej'</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>node_label_15 <span class="op">=</span> <span class="st">'Avlider &lt; 1 år'</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>node_label_16 <span class="op">=</span> <span class="st">'Nej'</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>node_label_17 <span class="op">=</span> <span class="st">'Ja'</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>node_label_18 <span class="op">=</span> <span class="st">'Underliggande </span><span class="ch">\n</span><span class="st"> dödsorsak  </span><span class="ch">\n</span><span class="st"> I60.0-I60.9'</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>node_label_19 <span class="op">=</span> <span class="st">'Ja'</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>node_label_20 <span class="op">=</span> <span class="st">'Nej'</span></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>node_label_21 <span class="op">=</span> <span class="st">'*** T.ex. patient med &gt;1 Vtf i SIR samma dygn </span><span class="ch">\n</span><span class="st"> dvs. återinläggning primär IVA </span><span class="ch">\n</span><span class="st"> behåll senaste VTF'</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Create Digraph object</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>dot <span class="op">=</span> Digraph()</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Add nodes with labels using variables</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node1'</span>, label<span class="op">=</span>node_label_1, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node1a'</span>, label<span class="op">=</span>node_label_1a, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node1b'</span>, label<span class="op">=</span>node_label_1b, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'red'</span>)</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node1c'</span>, label<span class="op">=</span>node_label_1c, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node2'</span>, label<span class="op">=</span>node_label_2, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node3'</span>, label<span class="op">=</span>node_label_3, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node4'</span>, label<span class="op">=</span>node_label_4, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node4a'</span>, label<span class="op">=</span>node_label_4a, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node4b'</span>, label<span class="op">=</span>node_label_4b, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'red'</span>)</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node4c'</span>, label<span class="op">=</span>node_label_4c, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node5'</span>, label<span class="op">=</span>node_label_5, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node6'</span>, label<span class="op">=</span>node_label_6, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node7'</span>, label<span class="op">=</span>node_label_7, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'green'</span>)</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node8'</span>, label<span class="op">=</span>node_label_8, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'red'</span>)</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node9'</span>, label<span class="op">=</span>node_label_9, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'green'</span>)</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node10'</span>, label<span class="op">=</span>node_label_10, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'filled'</span>, fillcolor<span class="op">=</span><span class="st">'red'</span>)</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node11'</span>, label<span class="op">=</span>node_label_11, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'dotted'</span>, fillcolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node12'</span>, label<span class="op">=</span>node_label_12, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'dotted'</span>, fillcolor<span class="op">=</span><span class="st">'white'</span>)</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node13'</span>, label<span class="op">=</span>node_label_13, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'dotted'</span>)</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node14'</span>, label<span class="op">=</span>node_label_14, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'dotted'</span>)</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node15'</span>, label<span class="op">=</span>node_label_15, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'dotted'</span>)</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node16'</span>, label<span class="op">=</span>node_label_16, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'dotted'</span>)</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node17'</span>, label<span class="op">=</span>node_label_17, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'dotted'</span>)</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node18'</span>, label<span class="op">=</span>node_label_18, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'dotted'</span>)</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node19'</span>, label<span class="op">=</span>node_label_19, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'dotted'</span>)</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node20'</span>, label<span class="op">=</span>node_label_20, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'dotted'</span>)</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>dot.node(<span class="st">'node21'</span>, label<span class="op">=</span>node_label_21, shape<span class="op">=</span><span class="st">'box'</span>, style<span class="op">=</span><span class="st">'dotted'</span>)</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="co"># Connect nodes</span></span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node1'</span>, <span class="st">'node1a'</span>)</span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node1a'</span>, <span class="st">'node1b'</span>)</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node1a'</span>, <span class="st">'node1c'</span>)</span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node1c'</span>, <span class="st">'node2'</span>)</span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node2'</span>, <span class="st">'node3'</span>)</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node2'</span>, <span class="st">'node4'</span>)</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node4'</span>, <span class="st">'node4a'</span>)</span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node4a'</span>, <span class="st">'node4b'</span>)</span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node4a'</span>, <span class="st">'node4c'</span>)</span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node4c'</span>, <span class="st">'node5'</span>)</span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node3'</span>, <span class="st">'node6'</span>)</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node6'</span>, <span class="st">'node7'</span>)</span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node6'</span>, <span class="st">'node8'</span>)</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node5'</span>, <span class="st">'node9'</span>)</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node5'</span>, <span class="st">'node10'</span>)</span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node11'</span>, <span class="st">'node13'</span>)</span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node11'</span>, <span class="st">'node14'</span>)</span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node12'</span>, <span class="st">'node15'</span>)</span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node15'</span>, <span class="st">'node17'</span>)</span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node15'</span>, <span class="st">'node16'</span>)</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node17'</span>, <span class="st">'node18'</span>)</span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node18'</span>, <span class="st">'node19'</span>)</span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a>dot.edge(<span class="st">'node18'</span>, <span class="st">'node20'</span>)</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a>dot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<p><img src="10-case-ascertainment-december-2023_files/figure-html/cell-2-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<section id="explanation" class="level3">
+<h3 class="anchored" data-anchor-id="explanation">Explanation</h3>
+<section id="non-transferred-patients" class="level4">
+<h4 class="anchored" data-anchor-id="non-transferred-patients">Non-transferred patients</h4>
+<p>I’m not sure the data will be used for these patients, therefore these queries are not yet written.</p>
+</section>
+<section id="issues-during-case-ascertainment" class="level4">
+<h4 class="anchored" data-anchor-id="issues-during-case-ascertainment">Issues During Case ascertainment</h4>
+<ul>
+<li><p>Some issues arise from the necessity of using SIR (since this is the entry point to the dataset) to identify patients and trying to tie them to PAR admissions.</p></li>
+<li><p>The case ascertainment strategy revolves around admissions (vårdtillfällen) rather than patients. However, in the latter stages of the algorithm, certain criteria will make sure that the number of admissions and unique patients is equal. This is acheived by, for example, omitting admissions where the patient has had a previous neurosurgical admission of any sort.</p></li>
+<li><p>The only way to “link” a SIR admission to a primary ICU and a PAR admission to a neurosurigcal unit is by looking at discharge/admissions dates. I’ve allowed for the admission date at the tertiary center to be the same or next day counting from the primary ICU discharge.</p></li>
+<li><p>Prolonging the said “transfer period” to 2-3 days adds a few more cases, but it will complicate things. Could be reasonable for TBI patients that would be transferred to a surgical unit and only after a few days formally admitted to neurosurgery.</p></li>
+<li><p>In “linking” admissions by date as above, a few edge cases appear. For example, there are patients being transferred in odd patterns on Day 0 + Day 1:</p>
+<ol type="1">
+<li><p>Primary ICU #1 -&gt; Primary ICU #2 -&gt; Neurosurgical unit #1</p></li>
+<li><p>Primary ICU #1 -&gt; (ward?) -&gt; Primary ICU #1 -&gt; Neurosurgical unit #1</p></li>
+<li><p>Primary ICU #1 -&gt; Neurosurgical unit #1 -&gt; Neurosurgical unit #2</p></li>
+</ol>
+<p>This leads to “duplicate” rows in the queries. Case 1 is rare (11 admissions/patients), and difficult to fix since VtfId_LopNr (admission ID for ICU admissions) is only consecutive WITHIN the ICUs. I’ve choosen to exclude the patients since I can’t really figure out which ICU did the transfer to the tertiary center.</p>
+<p>Case 2 Is a bit more common, i.e.&nbsp;the patient has two ICU admissions on the transfer day to the same primary ICU. I presume (although I can’t show it) that this is a readmission to the primary ICU. Due to the consecutive nature of VtfId_LopNr within ICUs I choose to pick the latter ICU admission as the “sending admission”.</p>
+<p>Case 3 Is interesting. There are 20+ patients like this. Quite commonly you see the patient transferred to the closest neurosurgical unit for an EVD (sometimes aneurysm repair) before being sent on.</p></li>
+</ul>
+</section>
+</section>
+<section id="lets-try-the-ascertainment-strategy-and-plot-some-data-for-fun" class="level3">
+<h3 class="anchored" data-anchor-id="lets-try-the-ascertainment-strategy-and-plot-some-data-for-fun">Let’s try the ascertainment strategy and plot some data for fun</h3>
+<p>First, we’ll set up a database connection using <code>sqlalchemy</code>.</p>
+<div class="cell" data-execution_count="2">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sqlalchemy</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sqlalchemy <span class="im">import</span> create_engine</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the SQLalchemy engine</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>engine <span class="op">=</span> create_engine(<span class="ss">f"sqlite:////Users/JO/PhD/neurocritical-transfers/data/db.sqlite"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The query itself is written in <code>SQLite</code> and could be saved in a separate file for brevity. Below you’ll find a commented version.</p>
+<div class="cell" data-execution_count="3">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>query <span class="op">=</span> <span class="st">"""</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="st">--- Redefine the PAR table by adding a unique hospital admission identifier (HADM_ID) to ALL admissions</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="st">WITH PAR_HADM AS (</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT *,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="st">           ROW_NUMBER() OVER ( </span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="st">               ORDER BY LopNr,</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="st">                        INDATUM,</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="st">                        UTDATUM,</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="st">                        CASE WHEN SJUKHUS NOT IN ('11001', '11003', '51001', '12001', '21001', '64001', '41001') THEN 0 ELSE 1 END</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="st">           ) as HADM_ID,</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="st">           date(INDATUM * 86400, 'unixepoch') AS ADM_DATE_PAR,</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="st">           date(UTDATUM * 86400, 'unixepoch') AS DSC_DATE_PAR</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="st">    FROM PAR</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="st">    WHERE ALDER &gt;= 18</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="st">),</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="st">--- Identify the SIR VtfId_LopNr subset of ICU admissions to a ICU without a neuro-ICU in-house</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="st">--- "avdelningsnamn" needs to used, because, for example, IVA Östra is categorized as a "regionsjukhus"</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="st">sir_pricu_adm AS </span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="st">    (SELECT</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="st">        Distinct(VtfId_LopNr)</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a><span class="st">    FROM</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="st">        SIR_BASDATA</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a><span class="st">    WHERE</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="st">        AvdNamn NOT IN </span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="st">        ('S-CIVA',</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="st">        'S-NIVA',</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="st">        'KS/THIVA',</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="st">        'KS ECMO',</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="st">        'Astrid Lindgren',</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="st">        'IVA Lund',</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a><span class="st">        'Lund - BIVA',</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a><span class="st">        'Lund - NIVA',</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="st">        'Linköping',</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="st">        'Linköping NIVA',</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="st">        'Linköping BRIVA',</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="st">        'SU/NIVA',</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="st">        'SU/CIVA',</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="st">        'SU/TIVA',</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="st">        'Umeå IVA',</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="st">        'Umeå - Thorax',</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="st">        'Uppsala',</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="st">        'Uppsala BRIVA',</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="st">        'Uppsala TIVA',</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="st">        'Uppsala BIVA',</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="st">        'Uppsala NIVA'</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a><span class="st">        )</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="st">    AND</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="st">        ALDER &gt;= 18)</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="st">,</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="st">-- Identify the subset of sir_pricu_adm where the patient has no prior neurosurigcal admission in PAR.</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="st">-- Will possibly return &gt;1 ICU admission for a patient. Possible performance hit by date-refactoring.</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a><span class="st">sir_pricu_adm_no_prior_ns_adm AS</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="st">(</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT</span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="st">        S.VtfId_LopNr</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a><span class="st">    FROM</span></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="st">        SIR_BASDATA S</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="st">    LEFT JOIN</span></span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a><span class="st">        PAR_HADM P</span></span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a><span class="st">        ON S.LopNr = P.LopNr</span></span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a><span class="st">    WHERE </span></span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a><span class="st">        S.VtfId_LopNr IN (SELECT VtfId_LopNr FROM sir_pricu_adm)</span></span>
+<span id="cb3-65"><a href="#cb3-65" aria-hidden="true" tabindex="-1"></a><span class="st">    GROUP BY S.VtfId_LopNr</span></span>
+<span id="cb3-66"><a href="#cb3-66" aria-hidden="true" tabindex="-1"></a><span class="st">    HAVING MAX(</span></span>
+<span id="cb3-67"><a href="#cb3-67" aria-hidden="true" tabindex="-1"></a><span class="st">        CASE WHEN P.MVO = 331 AND (JULIANDAY(DATE(P.INDATUM * 86400, 'unixepoch')) &lt; JULIANDAY(DATE(DATETIME(S.InskrTidpunkt, 'unixepoch')))) THEN 1 ELSE 0 END</span></span>
+<span id="cb3-68"><a href="#cb3-68" aria-hidden="true" tabindex="-1"></a><span class="st">    ) = 0</span></span>
+<span id="cb3-69"><a href="#cb3-69" aria-hidden="true" tabindex="-1"></a><span class="st">),</span></span>
+<span id="cb3-70"><a href="#cb3-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-71"><a href="#cb3-71" aria-hidden="true" tabindex="-1"></a><span class="st">-- Identify the subset of the PRICU admissions in sir_pricu_adm_no_prior_ns_adm where the patient has a neurosurgical admission</span></span>
+<span id="cb3-72"><a href="#cb3-72" aria-hidden="true" tabindex="-1"></a><span class="st">-- in PAR within 1 day of the PRICU discharge. This will return a few patients with patterns like</span></span>
+<span id="cb3-73"><a href="#cb3-73" aria-hidden="true" tabindex="-1"></a><span class="st">-- PRICU1-&gt;PRICU2-NSICU (11 patients)</span></span>
+<span id="cb3-74"><a href="#cb3-74" aria-hidden="true" tabindex="-1"></a><span class="st">-- PRICU1-&gt;ward-&gt;PRICU1-&gt;NSICU (35-ish patients)</span></span>
+<span id="cb3-75"><a href="#cb3-75" aria-hidden="true" tabindex="-1"></a><span class="st">-- PRICU1-&gt;NSICU1-&gt;NSICU2 (10+ patients)</span></span>
+<span id="cb3-76"><a href="#cb3-76" aria-hidden="true" tabindex="-1"></a><span class="st">-- All in all there are 6321 patients like this, sometimes with multiple ICU admits or PAR admits</span></span>
+<span id="cb3-77"><a href="#cb3-77" aria-hidden="true" tabindex="-1"></a><span class="st">-- In the dropped version, we will drop rows by removing the patients that are moving PRICU1-&gt;PRICU2-&gt;NSICU (Bollnäs-&gt;Gävle-&gt;UAS)</span></span>
+<span id="cb3-78"><a href="#cb3-78" aria-hidden="true" tabindex="-1"></a><span class="st">-- Choose the highest (latest VtfId_LopNr) to get the latest ICU admission in case of readmissions</span></span>
+<span id="cb3-79"><a href="#cb3-79" aria-hidden="true" tabindex="-1"></a><span class="st">-- Choose the lowest HADM_ID to get the earliest NS admission</span></span>
+<span id="cb3-80"><a href="#cb3-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-81"><a href="#cb3-81" aria-hidden="true" tabindex="-1"></a><span class="st">-- This is more a more verbose CET for testing</span></span>
+<span id="cb3-82"><a href="#cb3-82" aria-hidden="true" tabindex="-1"></a><span class="st">sir_pricu_adm_no_prior_ns_adm_impending_transfer AS</span></span>
+<span id="cb3-83"><a href="#cb3-83" aria-hidden="true" tabindex="-1"></a><span class="st">(</span></span>
+<span id="cb3-84"><a href="#cb3-84" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT</span></span>
+<span id="cb3-85"><a href="#cb3-85" aria-hidden="true" tabindex="-1"></a><span class="st">        S.VtfId_LopNr,</span></span>
+<span id="cb3-86"><a href="#cb3-86" aria-hidden="true" tabindex="-1"></a><span class="st">        S.AvdNamn,</span></span>
+<span id="cb3-87"><a href="#cb3-87" aria-hidden="true" tabindex="-1"></a><span class="st">        S.InskrTidpunkt / 86400 as SIR_Indatum,</span></span>
+<span id="cb3-88"><a href="#cb3-88" aria-hidden="true" tabindex="-1"></a><span class="st">        S.UtskrTidpunkt / 86400 as SIR_Utdatum,</span></span>
+<span id="cb3-89"><a href="#cb3-89" aria-hidden="true" tabindex="-1"></a><span class="st">        P.LopNr,</span></span>
+<span id="cb3-90"><a href="#cb3-90" aria-hidden="true" tabindex="-1"></a><span class="st">        P.HADM_ID,</span></span>
+<span id="cb3-91"><a href="#cb3-91" aria-hidden="true" tabindex="-1"></a><span class="st">        P.INDATUM as PAR_Indatum,</span></span>
+<span id="cb3-92"><a href="#cb3-92" aria-hidden="true" tabindex="-1"></a><span class="st">        P.UTDATUM as PAR_Utdatum,</span></span>
+<span id="cb3-93"><a href="#cb3-93" aria-hidden="true" tabindex="-1"></a><span class="st">        P.MVO,</span></span>
+<span id="cb3-94"><a href="#cb3-94" aria-hidden="true" tabindex="-1"></a><span class="st">        P.Sjukhus,</span></span>
+<span id="cb3-95"><a href="#cb3-95" aria-hidden="true" tabindex="-1"></a><span class="st">        P.Diagnos,</span></span>
+<span id="cb3-96"><a href="#cb3-96" aria-hidden="true" tabindex="-1"></a><span class="st">        P.Op,</span></span>
+<span id="cb3-97"><a href="#cb3-97" aria-hidden="true" tabindex="-1"></a><span class="st">        P.INDATUM - S.UtskrTidpunkt / 86400 as date_diff</span></span>
+<span id="cb3-98"><a href="#cb3-98" aria-hidden="true" tabindex="-1"></a><span class="st">    FROM</span></span>
+<span id="cb3-99"><a href="#cb3-99" aria-hidden="true" tabindex="-1"></a><span class="st">        SIR_BASDATA S</span></span>
+<span id="cb3-100"><a href="#cb3-100" aria-hidden="true" tabindex="-1"></a><span class="st">    LEFT JOIN</span></span>
+<span id="cb3-101"><a href="#cb3-101" aria-hidden="true" tabindex="-1"></a><span class="st">        PAR_HADM P</span></span>
+<span id="cb3-102"><a href="#cb3-102" aria-hidden="true" tabindex="-1"></a><span class="st">        ON S.LopNr = P.LopNr</span></span>
+<span id="cb3-103"><a href="#cb3-103" aria-hidden="true" tabindex="-1"></a><span class="st">    WHERE</span></span>
+<span id="cb3-104"><a href="#cb3-104" aria-hidden="true" tabindex="-1"></a><span class="st">        S.VtfId_LopNr IN (SELECT VtfId_LopNr FROM sir_pricu_adm_no_prior_ns_adm)</span></span>
+<span id="cb3-105"><a href="#cb3-105" aria-hidden="true" tabindex="-1"></a><span class="st">    AND</span></span>
+<span id="cb3-106"><a href="#cb3-106" aria-hidden="true" tabindex="-1"></a><span class="st">        P.MVO == 331</span></span>
+<span id="cb3-107"><a href="#cb3-107" aria-hidden="true" tabindex="-1"></a><span class="st">    AND</span></span>
+<span id="cb3-108"><a href="#cb3-108" aria-hidden="true" tabindex="-1"></a><span class="st">        (CASE WHEN P.INDATUM - (S.UtskrTidpunkt / 86400) IN (0, 1) THEN 1 ELSE 0 END) = 1</span></span>
+<span id="cb3-109"><a href="#cb3-109" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb3-110"><a href="#cb3-110" aria-hidden="true" tabindex="-1"></a><span class="st">,</span></span>
+<span id="cb3-111"><a href="#cb3-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-112"><a href="#cb3-112" aria-hidden="true" tabindex="-1"></a><span class="st">-- This is a sleeker CET doing the same as above. The last part discards patients with &gt;1 PRICU admit prior to transfer,</span></span>
+<span id="cb3-113"><a href="#cb3-113" aria-hidden="true" tabindex="-1"></a><span class="st">-- other conditions make sure that the transfer is within 0-1 calendar days, the MAX() condition makes sure that only</span></span>
+<span id="cb3-114"><a href="#cb3-114" aria-hidden="true" tabindex="-1"></a><span class="st">-- the latest PRICU admit is choosen (in case of readmission at same PRICU) and the MIN() condition makes sure that only</span></span>
+<span id="cb3-115"><a href="#cb3-115" aria-hidden="true" tabindex="-1"></a><span class="st">-- the first neurosurgical admission is choosen in case of early NSICU-&gt;NSICU transfers.</span></span>
+<span id="cb3-116"><a href="#cb3-116" aria-hidden="true" tabindex="-1"></a><span class="st">sir_pricu_adm_no_prior_ns_adm_impending_transfer_dropped AS</span></span>
+<span id="cb3-117"><a href="#cb3-117" aria-hidden="true" tabindex="-1"></a><span class="st">(</span></span>
+<span id="cb3-118"><a href="#cb3-118" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT</span></span>
+<span id="cb3-119"><a href="#cb3-119" aria-hidden="true" tabindex="-1"></a><span class="st">        S.LopNr,</span></span>
+<span id="cb3-120"><a href="#cb3-120" aria-hidden="true" tabindex="-1"></a><span class="st">        MAX(S.VtfId_LopNr) AS VtfId_LopNr,</span></span>
+<span id="cb3-121"><a href="#cb3-121" aria-hidden="true" tabindex="-1"></a><span class="st">        MIN(P.HADM_ID) AS HADM_ID</span></span>
+<span id="cb3-122"><a href="#cb3-122" aria-hidden="true" tabindex="-1"></a><span class="st">    FROM</span></span>
+<span id="cb3-123"><a href="#cb3-123" aria-hidden="true" tabindex="-1"></a><span class="st">        SIR_BASDATA S</span></span>
+<span id="cb3-124"><a href="#cb3-124" aria-hidden="true" tabindex="-1"></a><span class="st">    LEFT JOIN</span></span>
+<span id="cb3-125"><a href="#cb3-125" aria-hidden="true" tabindex="-1"></a><span class="st">        PAR_HADM P ON S.LopNr = P.LopNr</span></span>
+<span id="cb3-126"><a href="#cb3-126" aria-hidden="true" tabindex="-1"></a><span class="st">    WHERE</span></span>
+<span id="cb3-127"><a href="#cb3-127" aria-hidden="true" tabindex="-1"></a><span class="st">        S.VtfId_LopNr IN (SELECT VtfId_LopNr FROM sir_pricu_adm_no_prior_ns_adm)</span></span>
+<span id="cb3-128"><a href="#cb3-128" aria-hidden="true" tabindex="-1"></a><span class="st">    AND </span></span>
+<span id="cb3-129"><a href="#cb3-129" aria-hidden="true" tabindex="-1"></a><span class="st">        P.MVO = 331</span></span>
+<span id="cb3-130"><a href="#cb3-130" aria-hidden="true" tabindex="-1"></a><span class="st">    AND</span></span>
+<span id="cb3-131"><a href="#cb3-131" aria-hidden="true" tabindex="-1"></a><span class="st">        (P.INDATUM - (S.UtskrTidpunkt / 86400) IN (0, 1))</span></span>
+<span id="cb3-132"><a href="#cb3-132" aria-hidden="true" tabindex="-1"></a><span class="st">    GROUP BY</span></span>
+<span id="cb3-133"><a href="#cb3-133" aria-hidden="true" tabindex="-1"></a><span class="st">        S.LopNr</span></span>
+<span id="cb3-134"><a href="#cb3-134" aria-hidden="true" tabindex="-1"></a><span class="st">    HAVING</span></span>
+<span id="cb3-135"><a href="#cb3-135" aria-hidden="true" tabindex="-1"></a><span class="st">        COUNT(DISTINCT S.AvdNamn) = 1</span></span>
+<span id="cb3-136"><a href="#cb3-136" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb3-137"><a href="#cb3-137" aria-hidden="true" tabindex="-1"></a><span class="st">,</span></span>
+<span id="cb3-138"><a href="#cb3-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-139"><a href="#cb3-139" aria-hidden="true" tabindex="-1"></a><span class="st">-- Identify the subset of transfers in CET sir_pricu_adm_no_prior_ns_adm_impending_transfer_dropped that end up having a SAH diagnosis</span></span>
+<span id="cb3-140"><a href="#cb3-140" aria-hidden="true" tabindex="-1"></a><span class="st">-- at the neurosurgical center. Criteria are: I60.0-.9 primary dx OR coiling/clipping AND NOT AVM/TBI dx. Also, if no coiling/clipping</span></span>
+<span id="cb3-141"><a href="#cb3-141" aria-hidden="true" tabindex="-1"></a><span class="st">-- and no primary I60.0-.9 dx, patient can be included if there is a cause of death I60.0-.9 within 30 days of neurosurgery admit.</span></span>
+<span id="cb3-142"><a href="#cb3-142" aria-hidden="true" tabindex="-1"></a><span class="st">sah_dx_transfers AS</span></span>
+<span id="cb3-143"><a href="#cb3-143" aria-hidden="true" tabindex="-1"></a><span class="st">(</span></span>
+<span id="cb3-144"><a href="#cb3-144" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT</span></span>
+<span id="cb3-145"><a href="#cb3-145" aria-hidden="true" tabindex="-1"></a><span class="st">        S.VtfId_LopNr,</span></span>
+<span id="cb3-146"><a href="#cb3-146" aria-hidden="true" tabindex="-1"></a><span class="st">        P.HADM_ID</span></span>
+<span id="cb3-147"><a href="#cb3-147" aria-hidden="true" tabindex="-1"></a><span class="st">    FROM</span></span>
+<span id="cb3-148"><a href="#cb3-148" aria-hidden="true" tabindex="-1"></a><span class="st">        SIR_BASDATA S</span></span>
+<span id="cb3-149"><a href="#cb3-149" aria-hidden="true" tabindex="-1"></a><span class="st">    LEFT JOIN</span></span>
+<span id="cb3-150"><a href="#cb3-150" aria-hidden="true" tabindex="-1"></a><span class="st">        PAR_HADM P ON S.LopNr = P.LopNr</span></span>
+<span id="cb3-151"><a href="#cb3-151" aria-hidden="true" tabindex="-1"></a><span class="st">    LEFT JOIN</span></span>
+<span id="cb3-152"><a href="#cb3-152" aria-hidden="true" tabindex="-1"></a><span class="st">        DORS D ON S.LopNr = D.LopNr</span></span>
+<span id="cb3-153"><a href="#cb3-153" aria-hidden="true" tabindex="-1"></a><span class="st">    WHERE</span></span>
+<span id="cb3-154"><a href="#cb3-154" aria-hidden="true" tabindex="-1"></a><span class="st">        S.VtfId_LopNr IN (SELECT VtfId_LopNr FROM sir_pricu_adm_no_prior_ns_adm_impending_transfer_dropped)</span></span>
+<span id="cb3-155"><a href="#cb3-155" aria-hidden="true" tabindex="-1"></a><span class="st">    -- The following part identifies patients with primary dx of SAH OR repair and no dx of AVM/TBI</span></span>
+<span id="cb3-156"><a href="#cb3-156" aria-hidden="true" tabindex="-1"></a><span class="st">        AND</span></span>
+<span id="cb3-157"><a href="#cb3-157" aria-hidden="true" tabindex="-1"></a><span class="st">        P.HADM_ID IN (SELECT HADM_ID FROM sir_pricu_adm_no_prior_ns_adm_impending_transfer_dropped)</span></span>
+<span id="cb3-158"><a href="#cb3-158" aria-hidden="true" tabindex="-1"></a><span class="st">        AND</span></span>
+<span id="cb3-159"><a href="#cb3-159" aria-hidden="true" tabindex="-1"></a><span class="st">        (</span></span>
+<span id="cb3-160"><a href="#cb3-160" aria-hidden="true" tabindex="-1"></a><span class="st">        ((P.Diagnos LIKE "I60%" OR P.Op LIKE "%AAC00%" OR P.Op LIKE "%AAL00%")</span></span>
+<span id="cb3-161"><a href="#cb3-161" aria-hidden="true" tabindex="-1"></a><span class="st">        AND</span></span>
+<span id="cb3-162"><a href="#cb3-162" aria-hidden="true" tabindex="-1"></a><span class="st">        (P.Diagnos NOT LIKE "%S06%")</span></span>
+<span id="cb3-163"><a href="#cb3-163" aria-hidden="true" tabindex="-1"></a><span class="st">        AND</span></span>
+<span id="cb3-164"><a href="#cb3-164" aria-hidden="true" tabindex="-1"></a><span class="st">        (P.Diagnos NOT LIKE "%Q28%"))</span></span>
+<span id="cb3-165"><a href="#cb3-165" aria-hidden="true" tabindex="-1"></a><span class="st">    -- The following part identifies patients with SAH cause of death &lt;30d and NO dx of SAH, AVM, TBI</span></span>
+<span id="cb3-166"><a href="#cb3-166" aria-hidden="true" tabindex="-1"></a><span class="st">        OR</span></span>
+<span id="cb3-167"><a href="#cb3-167" aria-hidden="true" tabindex="-1"></a><span class="st">        ((D.Ulorsak LIKE "I60%")</span></span>
+<span id="cb3-168"><a href="#cb3-168" aria-hidden="true" tabindex="-1"></a><span class="st">        AND (JULIANDAY(strftime('%Y-%m-</span><span class="sc">%d</span><span class="st">', substr(D.DODSDAT, 1, 4) || '-' || substr(D.DODSDAT, 5, 2) || '-' || substr(D.DODSDAT, 7, 2) || ' 00:00:00')) - JULIANDAY(date(P.INDATUM * 86400, 'unixepoch')) &lt;= 30))</span></span>
+<span id="cb3-169"><a href="#cb3-169" aria-hidden="true" tabindex="-1"></a><span class="st">        AND (P.Diagnos NOT LIKE "%S06%")</span></span>
+<span id="cb3-170"><a href="#cb3-170" aria-hidden="true" tabindex="-1"></a><span class="st">        AND (P.Diagnos NOT LIKE "%Q28%")</span></span>
+<span id="cb3-171"><a href="#cb3-171" aria-hidden="true" tabindex="-1"></a><span class="st">        )</span></span>
+<span id="cb3-172"><a href="#cb3-172" aria-hidden="true" tabindex="-1"></a><span class="st">),</span></span>
+<span id="cb3-173"><a href="#cb3-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-174"><a href="#cb3-174" aria-hidden="true" tabindex="-1"></a><span class="st">plot_query AS (</span></span>
+<span id="cb3-175"><a href="#cb3-175" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT</span></span>
+<span id="cb3-176"><a href="#cb3-176" aria-hidden="true" tabindex="-1"></a><span class="st">        S.AvdNamn,</span></span>
+<span id="cb3-177"><a href="#cb3-177" aria-hidden="true" tabindex="-1"></a><span class="st">        S.VtfId_LopNr,</span></span>
+<span id="cb3-178"><a href="#cb3-178" aria-hidden="true" tabindex="-1"></a><span class="st">        S.VardTidMinuter,</span></span>
+<span id="cb3-179"><a href="#cb3-179" aria-hidden="true" tabindex="-1"></a><span class="st">        S.InskrTidPunkt,</span></span>
+<span id="cb3-180"><a href="#cb3-180" aria-hidden="true" tabindex="-1"></a><span class="st">        P.SJUKHUS,</span></span>
+<span id="cb3-181"><a href="#cb3-181" aria-hidden="true" tabindex="-1"></a><span class="st">        S.Alder,</span></span>
+<span id="cb3-182"><a href="#cb3-182" aria-hidden="true" tabindex="-1"></a><span class="st">        S.Kon,</span></span>
+<span id="cb3-183"><a href="#cb3-183" aria-hidden="true" tabindex="-1"></a><span class="st">        SAPS3.SAPS3_RLS85,</span></span>
+<span id="cb3-184"><a href="#cb3-184" aria-hidden="true" tabindex="-1"></a><span class="st">        SAPS3.SAPS3_GCS,</span></span>
+<span id="cb3-185"><a href="#cb3-185" aria-hidden="true" tabindex="-1"></a><span class="st">        CASE WHEN</span></span>
+<span id="cb3-186"><a href="#cb3-186" aria-hidden="true" tabindex="-1"></a><span class="st">            (SAPS3.SAPS3_GCS &lt;=8 OR SAPS3.SAPS3_RLS85 &gt; 3) THEN 1 ELSE 0 END AS unc,</span></span>
+<span id="cb3-187"><a href="#cb3-187" aria-hidden="true" tabindex="-1"></a><span class="st">        CASE WHEN</span></span>
+<span id="cb3-188"><a href="#cb3-188" aria-hidden="true" tabindex="-1"></a><span class="st">            JULIANDAY(strftime('%Y-%m-</span><span class="sc">%d</span><span class="st">', substr(D.DODSDAT, 1, 4) || '-' || substr(D.DODSDAT, 5, 2) || '-' || substr(D.DODSDAT, 7, 2) || ' 00:00:00')) - JULIANDAY(date(P.INDATUM * 86400, 'unixepoch')) &lt; 30 THEN 1 ELSE 0 END AS d30</span></span>
+<span id="cb3-189"><a href="#cb3-189" aria-hidden="true" tabindex="-1"></a><span class="st">        FROM SIR_BASDATA S</span></span>
+<span id="cb3-190"><a href="#cb3-190" aria-hidden="true" tabindex="-1"></a><span class="st">    LEFT JOIN PAR_HADM P ON S.LopNr = P.LopNr</span></span>
+<span id="cb3-191"><a href="#cb3-191" aria-hidden="true" tabindex="-1"></a><span class="st">    LEFT JOIN SIR_SAPS3 SAPS3 on S.VtfId_LopNr = SAPS3.VtfId_LopNr</span></span>
+<span id="cb3-192"><a href="#cb3-192" aria-hidden="true" tabindex="-1"></a><span class="st">    LEFT JOIN DORS D on S.LopNr = D.LopNr</span></span>
+<span id="cb3-193"><a href="#cb3-193" aria-hidden="true" tabindex="-1"></a><span class="st">    WHERE</span></span>
+<span id="cb3-194"><a href="#cb3-194" aria-hidden="true" tabindex="-1"></a><span class="st">        S.VtfId_LopNr IN (SELECT VtfId_LopNr FROM sah_dx_transfers)</span></span>
+<span id="cb3-195"><a href="#cb3-195" aria-hidden="true" tabindex="-1"></a><span class="st">        AND</span></span>
+<span id="cb3-196"><a href="#cb3-196" aria-hidden="true" tabindex="-1"></a><span class="st">        P.HADM_ID IN (SELECT HADM_ID FROM sah_dx_transfers)</span></span>
+<span id="cb3-197"><a href="#cb3-197" aria-hidden="true" tabindex="-1"></a><span class="st">)</span></span>
+<span id="cb3-198"><a href="#cb3-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-199"><a href="#cb3-199" aria-hidden="true" tabindex="-1"></a><span class="st">SELECT * FROM plot_query</span></span>
+<span id="cb3-200"><a href="#cb3-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-201"><a href="#cb3-201" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="cb3-202"><a href="#cb3-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-203"><a href="#cb3-203" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_sql(query, engine)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="taking-a-look-at-the-data" class="level3">
+<h3 class="anchored" data-anchor-id="taking-a-look-at-the-data">Taking a look at the data</h3>
+<section id="plot-age-and-gender-distribution" class="level4">
+<h4 class="anchored" data-anchor-id="plot-age-and-gender-distribution">Plot age and gender distribution</h4>
+<div class="cell" data-execution_count="4">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>sns.histplot(df.Alder, bins<span class="op">=</span><span class="dv">70</span>)<span class="op">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Mean age: "</span>,df.Alder.mean())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Mean age:  58.93746277546158</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="10-case-ascertainment-december-2023_files/figure-html/cell-5-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="5">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df.Kon.value_counts().plot(kind<span class="op">=</span><span class="st">"bar"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="10-case-ascertainment-december-2023_files/figure-html/cell-6-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="plot-time-in-icu" class="level4">
+<h4 class="anchored" data-anchor-id="plot-time-in-icu">Plot time in ICU</h4>
+<p>Now, let’s plot “VardTidMinuter” (i.e.&nbsp;time spent at primary ICU prior to transfer).</p>
+<div class="cell" data-execution_count="6">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Box plot showing TransferTimeInMinutes for each category in AnkomstVag</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>median_order <span class="op">=</span> df.groupby(<span class="st">'AvdNamn'</span>)[<span class="st">'VardTidMinuter'</span>].median().sort_values().index</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>))</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>sns.boxplot(x<span class="op">=</span><span class="st">'AvdNamn'</span>, y<span class="op">=</span><span class="st">'VardTidMinuter'</span>, data<span class="op">=</span>df, order<span class="op">=</span>median_order, whis<span class="op">=</span>[<span class="dv">5</span>,<span class="dv">95</span>])</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Transfer Time Distribution by Sending ICU (minutes)'</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation<span class="op">=</span><span class="dv">90</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>plt.ylim(<span class="dv">0</span>, <span class="dv">720</span>) </span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="10-case-ascertainment-december-2023_files/figure-html/cell-7-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="plot-conciousness-level" class="level4">
+<h4 class="anchored" data-anchor-id="plot-conciousness-level">Plot conciousness level</h4>
+<p>Next, let’s plot the RLS85-level of the patients at admission to the primary ICU.</p>
+<div class="cell" data-execution_count="7">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Group data by 'AvdNamn' and 'SAPS3_RLS85' and calculate the proportions</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>grouped <span class="op">=</span> df.groupby([<span class="st">'AvdNamn'</span>, <span class="st">'SAPS3_RLS85'</span>]).size().unstack(fill_value<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>grouped <span class="op">=</span> grouped.div(grouped.<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>), axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Order ICUs based on the fraction of RLS 1</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>ordered_icus <span class="op">=</span> grouped.loc[grouped[<span class="dv">1</span>].sort_values(ascending<span class="op">=</span><span class="va">False</span>).index]</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">8</span>))</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>ordered_icus.plot(kind<span class="op">=</span><span class="st">'bar'</span>, stacked<span class="op">=</span><span class="va">True</span>, figsize<span class="op">=</span>(<span class="dv">12</span>,<span class="dv">8</span>), colormap<span class="op">=</span><span class="st">'coolwarm'</span>, edgecolor<span class="op">=</span><span class="st">'black'</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Fraction of RLS at ICUs'</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'ICU'</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Fraction'</span>)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation<span class="op">=</span><span class="dv">90</span>)</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>plt.legend(title<span class="op">=</span><span class="st">'RLS'</span>, loc<span class="op">=</span><span class="st">'upper right'</span>)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<pre><code>&lt;Figure size 1200x800 with 0 Axes&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="10-case-ascertainment-december-2023_files/figure-html/cell-8-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>A bit messy! Let’s instead plot the proportion of concious/unconcious patients at admission to the primary ICU per recieving tertiary center. RLS &gt;3 and GCS &lt;=8 is used as a marker for “unconciousness”.</p>
+<div class="cell" data-execution_count="8">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Hospital codes need to be remapped</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>hospitals_map <span class="op">=</span> {<span class="st">"11001"</span>: <span class="st">"Karolinska universitetssjukhuset"</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a> <span class="st">"11003"</span>: <span class="st">"Karolinska universitetssjukhuset"</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a> <span class="st">"51001"</span>: <span class="st">"Sahlgrenska universitetssjukhuset"</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a> <span class="st">"12001"</span>: <span class="st">"Akademiska sjukhuset"</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a> <span class="st">"21001"</span>: <span class="st">"Universitetssjukhuset i Linköping"</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a> <span class="st">"64001"</span>: <span class="st">"Norrlands universitetssjukhus"</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a> <span class="st">"41001"</span>: <span class="st">"Universitetssjukhuset i Lund"</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a> <span class="st">"41002"</span>: <span class="st">"Universitetssjukhuset i Lund"</span>}</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"SJUKHUS"</span>] <span class="op">=</span> df[<span class="st">"SJUKHUS"</span>].<span class="bu">map</span>(hospitals_map)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Group data by 'AvdNamn' and 'SAPS3_RLS85' and calculate the proportions</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>grouped <span class="op">=</span> df.groupby([<span class="st">'SJUKHUS'</span>, <span class="st">'unc'</span>]).size().unstack(fill_value<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>grouped <span class="op">=</span> grouped.div(grouped.<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>), axis<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Order ICUs based on the fraction of RLS 1</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>ordered_icus <span class="op">=</span> grouped.loc[grouped[<span class="dv">1</span>].sort_values(ascending<span class="op">=</span><span class="va">False</span>).index]</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">8</span>))</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>ordered_icus.plot(kind<span class="op">=</span><span class="st">'bar'</span>, stacked<span class="op">=</span><span class="va">True</span>, figsize<span class="op">=</span>(<span class="dv">12</span>,<span class="dv">8</span>), colormap<span class="op">=</span><span class="st">'coolwarm'</span>, edgecolor<span class="op">=</span><span class="st">'black'</span>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Fraction of unconcious at sending ICUs'</span>)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'ICU'</span>)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Fraction'</span>)</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation<span class="op">=</span><span class="dv">45</span>)</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>plt.legend(title<span class="op">=</span><span class="st">'Unconcious'</span>, loc<span class="op">=</span><span class="st">'upper right'</span>)</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<pre><code>&lt;Figure size 1200x800 with 0 Axes&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="10-case-ascertainment-december-2023_files/figure-html/cell-9-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Lund seems to recieve more unconcious patients, UAS the least. This could be caused by differences in care processes where good grade SAH in Skåne never goes to the primary ICU prior to transfer. The opposite could be true in Uppsala, where patients are transferred for longer distances (and thus more likely needs involvement of the intensivist, if not for medical reasons then at least for logistical reasons).</p>
+</section>
+<section id="a-quick-model-of-30-day-mortality" class="level4">
+<h4 class="anchored" data-anchor-id="a-quick-model-of-30-day-mortality">A quick model of 30 day mortality</h4>
+<p>Next, lets model 30 day mortality as a Bernoulli trial for each neurosurgery center respectively where the parameter p will denote the probabilty of death.</p>
+<div class="cell" data-execution_count="9">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pymc <span class="im">as</span> pm</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the model</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pm.Model() <span class="im">as</span> mortality_model:</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create a dictionary to hold hospital-specific mortality rates</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    hospital_mortality_rates <span class="op">=</span> {}</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Priors for hospital-specific mortality rates</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, hospital <span class="kw">in</span> <span class="bu">enumerate</span>(df[<span class="st">'SJUKHUS'</span>].unique()):</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        hospital_mortality_rates[hospital] <span class="op">=</span> pm.Beta(<span class="ss">f'30d_mortality_rate_</span><span class="sc">{</span>hospital<span class="sc">}</span><span class="ss">'</span>, alpha<span class="op">=</span><span class="dv">1</span>, beta<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Likelihood - Bernoulli distribution for each hospital</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> hospital, rate <span class="kw">in</span> hospital_mortality_rates.items():</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        hospital_data <span class="op">=</span> df[df[<span class="st">'SJUKHUS'</span>] <span class="op">==</span> hospital]</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        pm.Bernoulli(<span class="ss">f'mortality_</span><span class="sc">{</span>hospital<span class="sc">}</span><span class="ss">'</span>, p<span class="op">=</span>rate, observed<span class="op">=</span>hospital_data[<span class="st">'d30'</span>].values)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sampling</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    trace <span class="op">=</span> pm.sample(<span class="dv">2000</span>, tune<span class="op">=</span><span class="dv">1000</span>)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Summarize the results</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>pm.summary(trace)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [30d_mortality_rate_Universitetssjukhuset i Linköping, 30d_mortality_rate_Akademiska sjukhuset, 30d_mortality_rate_Universitetssjukhuset i Lund, 30d_mortality_rate_Karolinska universitetssjukhuset, 30d_mortality_rate_Norrlands universitetssjukhus, 30d_mortality_rate_Sahlgrenska universitetssjukhuset]
+Sampling 4 chains for 1_000 tune and 2_000 draw iterations (4_000 + 8_000 draws total) took 2 seconds.</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="12000" class="" max="12000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [12000/12000 00:01&lt;00:00 Sampling 4 chains, 0 divergences]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">hdi_3%</th>
+<th data-quarto-table-cell-role="th">hdi_97%</th>
+<th data-quarto-table-cell-role="th">mcse_mean</th>
+<th data-quarto-table-cell-role="th">mcse_sd</th>
+<th data-quarto-table-cell-role="th">ess_bulk</th>
+<th data-quarto-table-cell-role="th">ess_tail</th>
+<th data-quarto-table-cell-role="th">r_hat</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">30d_mortality_rate_Universitetssjukhuset i Linköping</td>
+<td>0.172</td>
+<td>0.027</td>
+<td>0.124</td>
+<td>0.223</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>12195.0</td>
+<td>6880.0</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">30d_mortality_rate_Akademiska sjukhuset</td>
+<td>0.098</td>
+<td>0.012</td>
+<td>0.077</td>
+<td>0.120</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>12381.0</td>
+<td>6604.0</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">30d_mortality_rate_Universitetssjukhuset i Lund</td>
+<td>0.335</td>
+<td>0.036</td>
+<td>0.272</td>
+<td>0.406</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>10370.0</td>
+<td>6471.0</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">30d_mortality_rate_Karolinska universitetssjukhuset</td>
+<td>0.198</td>
+<td>0.034</td>
+<td>0.138</td>
+<td>0.267</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>11414.0</td>
+<td>6680.0</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">30d_mortality_rate_Norrlands universitetssjukhus</td>
+<td>0.152</td>
+<td>0.022</td>
+<td>0.111</td>
+<td>0.193</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>11290.0</td>
+<td>6361.0</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">30d_mortality_rate_Sahlgrenska universitetssjukhuset</td>
+<td>0.173</td>
+<td>0.023</td>
+<td>0.129</td>
+<td>0.215</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>11263.0</td>
+<td>6453.0</td>
+<td>1.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>And let’s look at a forest plot with 99% credible intervals of the parameters for the tertiary centers.</p>
+<div class="cell" data-execution_count="10">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> arviz <span class="im">as</span> az</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>sns.<span class="bu">set</span>(style<span class="op">=</span><span class="st">"white"</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>az.plot_forest(trace, hdi_prob<span class="op">=</span><span class="fl">0.99</span>, combined<span class="op">=</span><span class="va">True</span>, figsize<span class="op">=</span>(<span class="dv">4</span>,<span class="dv">6</span>))<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="10-case-ascertainment-december-2023_files/figure-html/cell-11-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Keep in mind that this is an unadjusted model!</p>
+</section>
+<section id="mapping-distances" class="level4">
+<h4 class="anchored" data-anchor-id="mapping-distances">Mapping distances</h4>
+<p>This is a rough test. Code is not optimal. First, I’ve written a mapping of ICU ward to city.</p>
+<div class="cell" data-execution_count="11">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>primary_icu_city <span class="op">=</span> {</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IVA Västervik"</span>: <span class="st">"Västervik"</span>,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IVAUSÖ"</span>: <span class="st">"Örebro"</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IVA Falun"</span>: <span class="st">"Falun"</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IVA Länssjukhuset Halmstad"</span>: <span class="st">"Halmstad"</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"STGIVA"</span>: <span class="st">"Stockholm"</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Karlstad-IVA"</span>: <span class="st">"Karlstad"</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Sunderby"</span>: <span class="st">"Sunderbyn"</span>,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Varberg"</span>: <span class="st">"Varberg"</span>,</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Sundsvall IVA"</span>: <span class="st">"Sundsvall"</span>,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Norrköping"</span>: <span class="st">"Norrköping"</span>,</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Nyköping"</span>: <span class="st">"Nyköping"</span>,</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IVA Kristianstad"</span>: <span class="st">"Kristianstad"</span>,</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Karlskrona"</span>: <span class="st">"Karlskrona"</span>,</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Jönköping-IVA"</span>: <span class="st">"Jönköping"</span>,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Sollefteå Intensivvårdsavdelni"</span>: <span class="st">"Sollefteå"</span>,</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IVAKGA"</span>: <span class="st">"Karlskoga"</span>,</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Växjö IVA"</span>: <span class="st">"Växjö"</span>,</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Östersund"</span>: <span class="st">"Östersund"</span>,</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Karlstad-VAIVA"</span>: <span class="st">"Karlstad"</span>,</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Borås-IVA"</span>: <span class="st">"Borås"</span>,</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Kalmar"</span>: <span class="st">"Kalmar"</span>,</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Västerås"</span>: <span class="st">"Västerås"</span>,</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Skaraborg-IVA KSS"</span>: <span class="st">"Skövde"</span>,</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Värnamo-IVA"</span>: <span class="st">"Värnamo"</span>,</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">"NU Trollhättan"</span>: <span class="st">"Trollhättan"</span>,</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"H-IVA"</span>: <span class="st">"Huddinge"</span>,</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Piteå"</span>: <span class="st">"Piteå"</span>,</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Visby IVA"</span>: <span class="st">"Visby"</span>,</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Skellefteå"</span>: <span class="st">"Skellefteå"</span>,</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Gällivare"</span>: <span class="st">"Gällivare"</span>,</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Gävle"</span>: <span class="st">"Gävle"</span>,</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Helsingborg"</span>: <span class="st">"Helsingborg"</span>,</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Ystad"</span>: <span class="st">"Ystad"</span>,</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>    <span class="st">"SÖS Med IVA"</span>: <span class="st">"Stockholm"</span>,</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IVA Hudiksvall"</span>: <span class="st">"Hudiksvall"</span>,</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Örnsköldsvik IVA"</span>: <span class="st">"Örnsköldsvik"</span>,</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Karlstad-NOIVA"</span>: <span class="st">"Karlstad"</span>,</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IVA UMAS"</span>: <span class="st">"Malmö"</span>,</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Kungälv"</span>: <span class="st">"Kungälv"</span>,</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Skaraborg-IVA SIL"</span>: <span class="st">"Lidköping"</span>,</span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Danderyd"</span>: <span class="st">"Danderyd"</span>,</span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Ljungby IVA"</span>: <span class="st">"Ljungby"</span>,</span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IVALBG"</span>: <span class="st">"Lindesberg"</span>,</span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Bollnäs"</span>: <span class="st">"Bollnäs"</span>,</span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a>    <span class="st">"IVA Mora"</span>: <span class="st">"Mora"</span>,</span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Södertälje-IVA"</span>: <span class="st">"Södertälje"</span>,</span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Norrtälje"</span>: <span class="st">"Norrtälje"</span>,</span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>    <span class="st">"SU/IVA-ÖS"</span>: <span class="st">"Göteborg"</span>,</span>
+<span id="cb15-50"><a href="#cb15-50" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Eskilstuna"</span>: <span class="st">"Eskilstuna"</span>,</span>
+<span id="cb15-51"><a href="#cb15-51" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Eksjö-IVA"</span>: <span class="st">"Eksjö"</span>,</span>
+<span id="cb15-52"><a href="#cb15-52" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Kalix"</span>: <span class="st">"Kalix"</span>,</span>
+<span id="cb15-53"><a href="#cb15-53" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Alingsås"</span>: <span class="st">"Alingsås"</span>,</span>
+<span id="cb15-54"><a href="#cb15-54" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Malmö Inf"</span>: <span class="st">"Malmö"</span>,</span>
+<span id="cb15-55"><a href="#cb15-55" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Lycksele"</span>: <span class="st">"Lycksele"</span>,</span>
+<span id="cb15-56"><a href="#cb15-56" aria-hidden="true" tabindex="-1"></a>    <span class="st">"SÖSIVA"</span>: <span class="st">"Stockholm"</span>,</span>
+<span id="cb15-57"><a href="#cb15-57" aria-hidden="true" tabindex="-1"></a>    <span class="st">"SU/IVA-INF"</span>: <span class="st">"Göteborg"</span>,</span>
+<span id="cb15-58"><a href="#cb15-58" aria-hidden="true" tabindex="-1"></a>    <span class="st">"SU/IVA-MS"</span>: <span class="st">"Göteborg"</span>,   </span>
+<span id="cb15-59"><a href="#cb15-59" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-60"><a href="#cb15-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-61"><a href="#cb15-61" aria-hidden="true" tabindex="-1"></a>tertiary_icu_city <span class="op">=</span> {</span>
+<span id="cb15-62"><a href="#cb15-62" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Karolinska universitetssjukhuset"</span>: <span class="st">"Stockholm"</span>,</span>
+<span id="cb15-63"><a href="#cb15-63" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Sahlgrenska universitetssjukhuset"</span>: <span class="st">"Göteborg"</span>,</span>
+<span id="cb15-64"><a href="#cb15-64" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Akademiska sjukhuset"</span>: <span class="st">"Uppsala"</span>,</span>
+<span id="cb15-65"><a href="#cb15-65" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Universitetssjukhuset i Linköping"</span>: <span class="st">"Linköping"</span>,</span>
+<span id="cb15-66"><a href="#cb15-66" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Norrlands universitetssjukhus"</span>: <span class="st">"Umeå"</span>,</span>
+<span id="cb15-67"><a href="#cb15-67" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Universitetssjukhuset i Lund"</span>: <span class="st">"Lund"</span></span>
+<span id="cb15-68"><a href="#cb15-68" aria-hidden="true" tabindex="-1"></a> }</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Next, we’ll use <code>geopy</code> to get the coordinates of the ICUs (cities rather).</p>
+<div class="cell" data-execution_count="12">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Geocode ICU Cities and Create a GeoDataFrame for ICUs</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> geopy.geocoders <span class="im">import</span> ArcGIS</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>geolocator <span class="op">=</span> ArcGIS(user_agent<span class="op">=</span><span class="st">"icu_mapping"</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>pricu_coordinates <span class="op">=</span> []</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> icu, city <span class="kw">in</span> primary_icu_city.items():</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    location <span class="op">=</span> geolocator.geocode(city <span class="op">+</span> <span class="st">", Sweden"</span>)</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> location:</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        pricu_coordinates.append({<span class="st">'ICU'</span>: icu, <span class="st">'Latitude'</span>: location.latitude, <span class="st">'Longitude'</span>: location.longitude})</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Coordinates not found for </span><span class="sc">{</span>icu<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>pricu_df <span class="op">=</span> pd.DataFrame(pricu_coordinates)</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Same thing for NSICU</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>nsicu_coordinates <span class="op">=</span> []</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> icu, city <span class="kw">in</span> tertiary_icu_city.items():</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    location <span class="op">=</span> geolocator.geocode(city <span class="op">+</span> <span class="st">", Sweden"</span>)</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> location:</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>        nsicu_coordinates.append({<span class="st">'ICU'</span>: icu, <span class="st">'Latitude'</span>: location.latitude, <span class="st">'Longitude'</span>: location.longitude})</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Coordinates not found for </span><span class="sc">{</span>icu<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>nsicu_df <span class="op">=</span> pd.DataFrame(nsicu_coordinates)</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>all_icu_df <span class="op">=</span> pd.concat((pricu_df, nsicu_df))</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Let's start merging dfs</span></span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>merged_df <span class="op">=</span> df.merge(pricu_df[[<span class="st">'ICU'</span>, <span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]], how<span class="op">=</span><span class="st">'left'</span>, left_on<span class="op">=</span><span class="st">'AvdNamn'</span>, right_on<span class="op">=</span><span class="st">'ICU'</span>)</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop the redundant 'ICU' column after merging, if needed</span></span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>merged_df.drop(<span class="st">'ICU'</span>, axis<span class="op">=</span><span class="dv">1</span>, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename the Latitude and Longitude columns with the prefix "pricu-"</span></span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>merged_df.rename(columns<span class="op">=</span>{<span class="st">'Latitude'</span>: <span class="st">'pricu-Latitude'</span>, <span class="st">'Longitude'</span>: <span class="st">'pricu-Longitude'</span>}, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge the coordinates based on the 'SJUKHUS' column in merged_df and 'SJUKHUS' column in nsicu_df</span></span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>final_merged_df <span class="op">=</span> merged_df.merge(nsicu_df[[<span class="st">'ICU'</span>, <span class="st">'Latitude'</span>, <span class="st">'Longitude'</span>]], how<span class="op">=</span><span class="st">'left'</span>, left_on<span class="op">=</span><span class="st">'SJUKHUS'</span>, right_on<span class="op">=</span><span class="st">'ICU'</span>)</span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a><span class="co"># Drop the redundant 'SJUKHUS' column after merging, if needed</span></span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>final_merged_df.drop(<span class="st">'ICU'</span>, axis<span class="op">=</span><span class="dv">1</span>, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename the Latitude and Longitude columns with the prefix "nsicu-"</span></span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a>final_merged_df.rename(columns<span class="op">=</span>{<span class="st">'Latitude'</span>: <span class="st">'nsicu-Latitude'</span>, <span class="st">'Longitude'</span>: <span class="st">'nsicu-Longitude'</span>}, inplace<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Next, let’s calculate geodesic distances.</p>
+<div class="cell" data-execution_count="13">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> geopy.distance <span class="im">import</span> geodesic</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to calculate geodesic distance</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> calculate_geodesic_distance(row):</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    pricu_coords <span class="op">=</span> (row[<span class="st">'pricu-Latitude'</span>], row[<span class="st">'pricu-Longitude'</span>])</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    nsicu_coords <span class="op">=</span> (row[<span class="st">'nsicu-Latitude'</span>], row[<span class="st">'nsicu-Longitude'</span>])</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> geodesic(pricu_coords, nsicu_coords).kilometers</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply the function to calculate geodesic distance for each row</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>final_merged_df[<span class="st">'geodesic_distance'</span>] <span class="op">=</span> final_merged_df.<span class="bu">apply</span>(calculate_geodesic_distance, axis<span class="op">=</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now for a violin plot of distance for each recieving center:</p>
+<div class="cell" data-execution_count="14">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Box plot showing geodesic distance for each tertiary center</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>median_order <span class="op">=</span> final_merged_df.groupby(<span class="st">'SJUKHUS'</span>)[<span class="st">'geodesic_distance'</span>].median().sort_values().index</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>))</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>sns.violinplot(x<span class="op">=</span><span class="st">'SJUKHUS'</span>, y<span class="op">=</span><span class="st">'geodesic_distance'</span>, data<span class="op">=</span>final_merged_df, order<span class="op">=</span>median_order)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Geodesic distance patients have travelled to a Tertiary ICU (km)'</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>plt.xticks(rotation<span class="op">=</span><span class="dv">90</span>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>plt.ylim(<span class="dv">0</span>, <span class="dv">720</span>) </span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="10-case-ascertainment-december-2023_files/figure-html/cell-15-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Let’s plot the ICUs on a map given the used coordinates just as a sanity check.</p>
+<div class="cell" data-execution_count="15">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> geopy.geocoders <span class="im">import</span> Nominatim</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Read the shapefile containing world data</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>world <span class="op">=</span> gpd.read_file(<span class="st">'map-data/ne_10m_admin_1_states_provinces.shp'</span>)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter the shapefile to only include Sweden</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>sweden <span class="op">=</span> world[world[<span class="st">'admin'</span>] <span class="op">==</span> <span class="st">'Sweden'</span>]</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert to GeoDataFrame</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>geometry <span class="op">=</span> gpd.points_from_xy(all_icu_df[<span class="st">'Longitude'</span>], all_icu_df[<span class="st">'Latitude'</span>])</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>icu_gdf <span class="op">=</span> gpd.GeoDataFrame(all_icu_df, geometry<span class="op">=</span>geometry, crs<span class="op">=</span><span class="st">'EPSG:4326'</span>)</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot on the Map</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">20</span>, <span class="dv">20</span>))</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot Sweden</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>sweden.plot(ax<span class="op">=</span>ax, color<span class="op">=</span><span class="st">'lightgray'</span>)</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot ICU locations</span></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>icu_gdf.plot(ax<span class="op">=</span>ax, color<span class="op">=</span><span class="st">'red'</span>, marker<span class="op">=</span><span class="st">'o'</span>, label<span class="op">=</span><span class="st">'ICU Locations'</span>)</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Add city names as annotations to the markers</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> idx, row <span class="kw">in</span> icu_gdf.iterrows():</span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>    plt.annotate(row[<span class="st">'ICU'</span>], xy<span class="op">=</span>(row[<span class="st">'Longitude'</span>], row[<span class="st">'Latitude'</span>]), xytext<span class="op">=</span>(<span class="dv">3</span>, <span class="dv">3</span>), textcoords<span class="op">=</span><span class="st">'offset points'</span>)</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Add legend</span></span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'ICU Locations in Sweden'</span>)</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="10-case-ascertainment-december-2023_files/figure-html/cell-16-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now, for some places geodesic distances will not capture the true distance. It is probably doable to use the Google maps API to calculate distance on road. I should look something like the code below. Mind you, the api_key is removed so that I don’t get in trouble…</p>
+<div class="cell" data-execution_count="16">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_distance(origin, destination):</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    api_key <span class="op">=</span> <span class="st">''</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    url <span class="op">=</span> <span class="ss">f'https://maps.googleapis.com/maps/api/distancematrix/json?origins=</span><span class="sc">{</span>origin<span class="sc">}</span><span class="ss">&amp;destinations=</span><span class="sc">{</span>destination<span class="sc">}</span><span class="ss">&amp;mode=driving&amp;key=</span><span class="sc">{</span>api_key<span class="sc">}</span><span class="ss">'</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    response <span class="op">=</span> requests.get(url)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    data <span class="op">=</span> response.json()</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Parsing the response to get the distance</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> data[<span class="st">'status'</span>] <span class="op">==</span> <span class="st">'OK'</span>:</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>        distance_in_meters <span class="op">=</span> data[<span class="st">'rows'</span>][<span class="dv">0</span>][<span class="st">'elements'</span>][<span class="dv">0</span>][<span class="st">'distance'</span>][<span class="st">'value'</span>]</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>        distance_in_km <span class="op">=</span> distance_in_meters <span class="op">/</span> <span class="dv">1000</span>  <span class="co"># Convert meters to kilometers</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> distance_in_km</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="plotting-connections" class="level4">
+<h4 class="anchored" data-anchor-id="plotting-connections">Plotting “connections”</h4>
+<p>Finally, a meaningless fun plot mapping the connections between hospitals. Thicker lines = more transfers.</p>
+<div class="cell" data-execution_count="17">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shapely.geometry <span class="im">import</span> Point, LineString</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Read the shapefile containing world data</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>world <span class="op">=</span> gpd.read_file(<span class="st">'map-data/ne_10m_admin_1_states_provinces.shp'</span>)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter the shapefile to only include Sweden</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>sweden <span class="op">=</span> world[world[<span class="st">'admin'</span>] <span class="op">==</span> <span class="st">'Sweden'</span>]</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract unique ICU coordinates from both 'pricu' and 'nsicu' columns</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>pricu_coords <span class="op">=</span> final_merged_df[[<span class="st">'pricu-Latitude'</span>, <span class="st">'pricu-Longitude'</span>]].rename(columns<span class="op">=</span>{<span class="st">'pricu-Latitude'</span>: <span class="st">'Latitude'</span>, <span class="st">'pricu-Longitude'</span>: <span class="st">'Longitude'</span>})</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>nsicu_coords <span class="op">=</span> final_merged_df[[<span class="st">'nsicu-Latitude'</span>, <span class="st">'nsicu-Longitude'</span>]].rename(columns<span class="op">=</span>{<span class="st">'nsicu-Latitude'</span>: <span class="st">'Latitude'</span>, <span class="st">'nsicu-Longitude'</span>: <span class="st">'Longitude'</span>})</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Concatenate and get unique coordinates</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>unique_icu_coords <span class="op">=</span> pd.concat([pricu_coords, nsicu_coords]).drop_duplicates().reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Create separate GeoDataFrames for 'pricus' and 'nsicus'</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>pricus_gdf <span class="op">=</span> gpd.GeoDataFrame(</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    pricu_coords,</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    geometry<span class="op">=</span>gpd.points_from_xy(pricu_coords[<span class="st">'Longitude'</span>], pricu_coords[<span class="st">'Latitude'</span>]),</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>    crs<span class="op">=</span><span class="st">'EPSG:4326'</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>nsicus_gdf <span class="op">=</span> gpd.GeoDataFrame(</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>    nsicu_coords,</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>    geometry<span class="op">=</span>gpd.points_from_xy(nsicu_coords[<span class="st">'Longitude'</span>], nsicu_coords[<span class="st">'Latitude'</span>]),</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>    crs<span class="op">=</span><span class="st">'EPSG:4326'</span></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Create LineString geometries for connections between 'pricus' and 'nsicus'</span></span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>lines <span class="op">=</span> []</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _, row <span class="kw">in</span> final_merged_df.iterrows():</span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>    source_coords <span class="op">=</span> Point(row[<span class="st">'pricu-Longitude'</span>], row[<span class="st">'pricu-Latitude'</span>])</span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>    target_coords <span class="op">=</span> Point(row[<span class="st">'nsicu-Longitude'</span>], row[<span class="st">'nsicu-Latitude'</span>])</span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>    line <span class="op">=</span> LineString([source_coords, target_coords])</span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>    lines.append(line)</span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a GeoDataFrame for connections</span></span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>connections_gdf <span class="op">=</span> gpd.GeoDataFrame(geometry<span class="op">=</span>lines, crs<span class="op">=</span><span class="st">'EPSG:4326'</span>)</span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot on the Map</span></span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">12</span>))</span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot Sweden</span></span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>sweden.plot(ax<span class="op">=</span>ax, color<span class="op">=</span><span class="st">'lightgray'</span>)</span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot 'pricus' and 'nsicus' locations with different colors</span></span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a>pricus_gdf.plot(ax<span class="op">=</span>ax, color<span class="op">=</span><span class="st">'darkgreen'</span>, marker<span class="op">=</span><span class="st">'o'</span>, label<span class="op">=</span><span class="st">'Primary ICU Locations'</span>)</span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a>nsicus_gdf.plot(ax<span class="op">=</span>ax, color<span class="op">=</span><span class="st">'maroon'</span>, marker<span class="op">=</span><span class="st">'o'</span>, label<span class="op">=</span><span class="st">'NSICU Locations'</span>)</span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot connections</span></span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a>connections_gdf.plot(ax<span class="op">=</span>ax, color<span class="op">=</span><span class="st">'navy'</span>, linewidth<span class="op">=</span><span class="fl">0.3</span>, alpha<span class="op">=</span><span class="fl">0.2</span>, label<span class="op">=</span><span class="st">'Connections'</span>)</span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a><span class="co"># Add legend</span></span>
+<span id="cb21-57"><a href="#cb21-57" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb21-58"><a href="#cb21-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-59"><a href="#cb21-59" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'ICU Locations and Connections in Sweden'</span>)</span>
+<span id="cb21-60"><a href="#cb21-60" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="10-case-ascertainment-december-2023_files/figure-html/cell-18-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+<section id="ideas-for-future-work" class="level4">
+<h4 class="anchored" data-anchor-id="ideas-for-future-work">Ideas for future work</h4>
+<ul>
+<li>Cross-check ascertainment by looking for aSAH patients in SIR only, both in sending and retriving hospitals that are reporting to SIR. I.e. look at NIVA Linköping: how many more transfers are there presumably?</li>
+<li>Test ascertainment strategies based on PAR if the dataset can be supplemented.</li>
+</ul>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
