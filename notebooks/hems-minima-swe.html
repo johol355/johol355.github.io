@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.306">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2024-03-24">
+
+<title>Om väder, METAR, intensivvårdstransporter</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="hems-minima-swe_files/libs/clipboard/clipboard.min.js"></script>
+<script src="hems-minima-swe_files/libs/quarto-html/quarto.js"></script>
+<script src="hems-minima-swe_files/libs/quarto-html/popper.min.js"></script>
+<script src="hems-minima-swe_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="hems-minima-swe_files/libs/quarto-html/anchor.min.js"></script>
+<link href="hems-minima-swe_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="hems-minima-swe_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="hems-minima-swe_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="hems-minima-swe_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="hems-minima-swe_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#bakgrund" id="toc-bakgrund" class="nav-link active" data-scroll-target="#bakgrund"><span class="header-section-number">1</span> Bakgrund</a>
+  <ul class="collapse">
+  <li><a href="#frågeställningar-problem-och-möjligheter" id="toc-frågeställningar-problem-och-möjligheter" class="nav-link" data-scroll-target="#frågeställningar-problem-och-möjligheter"><span class="header-section-number">1.1</span> Frågeställningar, problem och möjligheter</a></li>
+  <li><a href="#analys-av-flygväder-i-sverige" id="toc-analys-av-flygväder-i-sverige" class="nav-link" data-scroll-target="#analys-av-flygväder-i-sverige"><span class="header-section-number">1.2</span> Analys av flygväder i Sverige</a></li>
+  <li><a href="#patientdata" id="toc-patientdata" class="nav-link" data-scroll-target="#patientdata"><span class="header-section-number">1.3</span> Patientdata</a></li>
+  </ul></li>
+  <li><a href="#sammanställning-av-väderdata" id="toc-sammanställning-av-väderdata" class="nav-link" data-scroll-target="#sammanställning-av-väderdata"><span class="header-section-number">2</span> Sammanställning av väderdata</a>
+  <ul class="collapse">
+  <li><a href="#hems-operating-minima-per-flygplats-2010-2022" id="toc-hems-operating-minima-per-flygplats-2010-2022" class="nav-link" data-scroll-target="#hems-operating-minima-per-flygplats-2010-2022"><span class="header-section-number">2.1</span> HEMS operating minima per flygplats 2010-2022</a></li>
+  </ul></li>
+  <li><a href="#bedömning-om-väderdata-vid-tid-för-patientflytt" id="toc-bedömning-om-väderdata-vid-tid-för-patientflytt" class="nav-link" data-scroll-target="#bedömning-om-väderdata-vid-tid-för-patientflytt"><span class="header-section-number">3</span> Bedömning om väderdata vid tid för patientflytt</a></li>
+  <li><a href="#matchning-av-väderdata-och-patienttransporter" id="toc-matchning-av-väderdata-och-patienttransporter" class="nav-link" data-scroll-target="#matchning-av-väderdata-och-patienttransporter"><span class="header-section-number">4</span> Matchning av väderdata och patienttransporter</a>
+  <ul class="collapse">
+  <li><a href="#medgav-vädret-hems-vid-dessa-patientfall" id="toc-medgav-vädret-hems-vid-dessa-patientfall" class="nav-link" data-scroll-target="#medgav-vädret-hems-vid-dessa-patientfall"><span class="header-section-number">4.1</span> Medgav vädret HEMS vid dessa patientfall?</a></li>
+  <li><a href="#andel-patienttransporter-där-hems-operating-minima-var-uppfyllda-2010-2022" id="toc-andel-patienttransporter-där-hems-operating-minima-var-uppfyllda-2010-2022" class="nav-link" data-scroll-target="#andel-patienttransporter-där-hems-operating-minima-var-uppfyllda-2010-2022"><span class="header-section-number">4.2</span> Andel patienttransporter där HEMS operating minima var uppfyllda (2010-2022)</a></li>
+  </ul></li>
+  <li><a href="#att-fundera-på" id="toc-att-fundera-på" class="nav-link" data-scroll-target="#att-fundera-på"><span class="header-section-number">5</span> Att fundera på…</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Om väder, METAR, intensivvårdstransporter</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Johan Olsson </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 24, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="bakgrund" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="bakgrund"><span class="header-section-number">1</span> Bakgrund</h2>
+<p>Som en del av mitt doktorandprojekt kommer jag att utforska intensivvårdstransporter. Mitt mål är att förstå effekten av tidskritiska transporter från mindre sjukhus till universitetssjukhus.</p>
+<p>Årligen transporteras tusentals intensivvårdspatienter i Sverige för att erbjuda erbjudas en högre vårdnivå på ett universitetssjukhus. Många intensivvårdspatienter som vårdas på universitetssjukhus har transporterats från ett mindre sjukhus.</p>
+<p>Idag sker transporterna utan vare sig nationell standard eller samordning. Där finns stora variationer i transportprocessen. Väntetider, transporttider, utbildning av transporterande personal och organisationernas förmågor varierar stort. Faktorer såsom geografi, ekonomiska incitament, prioriteringsbeslut och lokala traditioner bidrar till variationen.</p>
+<section id="frågeställningar-problem-och-möjligheter" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="frågeställningar-problem-och-möjligheter"><span class="header-section-number">1.1</span> Frågeställningar, problem och möjligheter</h3>
+<p>Ytterst vill jag besvara frågor som: Vem ska åka med patienten? Hur ska man åka? Hur bygger man ett säkert, effektivt och robust transportsystem?</p>
+<p>Tyvärr saknas ett nationellt transportregister. Det är således svårt att beskriva IVA-transporter i Sverige, både gällande medicinskt omhändertagande och logistik. Dock, tror jag, det går att lära sig något med befintliga patientdata i kombination med andra datakällor.</p>
+</section>
+<section id="analys-av-flygväder-i-sverige" class="level3" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="analys-av-flygväder-i-sverige"><span class="header-section-number">1.2</span> Analys av flygväder i Sverige</h3>
+<p>Tanken är att hitta de fall där intensivvårdskrävande patienter brådskande transporterats mellan sjukhus och där <strong>det verkar osannolikt att man kunnat flyga med HEMS</strong> baserat på METAR. Möjligen kan man då beräkna hur stor andel av transporterna som med sannolikt inte kunnat utföras med HEMS.</p>
+<p>Statistiken kan ge ledning om hur transporter ska organiseras, t.ex. gällande tillgången till alternativa transportmetoder (fixed-wing eller vägambulans). Många avsändande sjukhus saknar beredskap att flytta patienter med vägambulans. Istället löses problemet <em>ad-hoc</em>. Svenskt ambulansflyg genomför huvudsakligen planerade transporter och kan ha svårt att ställa om till urakuta transporter. Att beskriva hur ofta alternativ till HEMS behövs kan ge insikter om hur transporter ska organiseras och prioriteras. En sådan beskrivning kan också ge argument för att utveckla PinS-procedurer.</p>
+<p>En jämförelse av patienter som flyttats vid väder förenligt med HEMS, med dem som flyttats vid väder oförenligt med HEMS, är intressant. <em>Om</em> där skulle ses en skillnad i utfall mellan grupperna, skulle det tyda på att transporter spelar stor roll. Ett sådant fynd skulle vara ett incitament för att bygga upp bättre patientregister för att möjliggöra noggrannare studier.</p>
+</section>
+<section id="patientdata" class="level3" data-number="1.3">
+<h3 data-number="1.3" class="anchored" data-anchor-id="patientdata"><span class="header-section-number">1.3</span> Patientdata</h3>
+<p>Genom att kombinera två patientregister (Socialstyrelsens Patientregister och Svenskt Intensivvårdsregister) kan man identifiera intensivvårdspatienter som flyttas från mindre sjukhus till universitetssjukhus. Datauttaget är begränsat till vuxna patienter som behöver neurointensivvård på grund av akuta åkommor i hjärnan, såsom skallskador eller hjärnblödningar. Neurointensivvård kan bara ges på universitetssjukhus. Tidsperioden är 2010-2022. Det går att hitta drygt 6000 sådana patienter (ca. 500 patienter/år) som transporterats inom ett dygn.</p>
+</section>
+</section>
+<section id="sammanställning-av-väderdata" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="sammanställning-av-väderdata"><span class="header-section-number">2</span> Sammanställning av väderdata</h2>
+<p>Stegvis har väderdata förädlats på följande sätt:</p>
+<ol type="1">
+<li>METAR för flygplatser hämtas från Luftfartsverkets sammanställningar (från ogimet.com).</li>
+<li>METAR analyseras med ett skript som tar varje rapport och extraherar:
+<ul>
+<li>Sikt (km)</li>
+<li>Cloud ceiling (fot), dvs. det lägsta värdet av BKN, OVC, VV</li>
+<li>Cloud base (fot), dvs. det lägsta värdet av FEW, SCT, BKN, OVC, VV</li>
+<li>Om CAVOK anges antas både sikt och cloud ceiling/base vara obegränsade. Om NCD/NSC bedöms cloud ceiling/base vara obegränsade.</li>
+</ul></li>
+<li>Baserat på tiden (UTC) för varje METAR och den givna flygplatsens koordinater (hämtat från ArcGIS) beräknas (med hjälp av <code>PyEphem</code>) om dagsljus eller borgerlig skymning (“civil twillight”) förelåg. Dvs. om solen stod -6° eller högre relativt horisonten.</li>
+<li>Varje mätpunkt (METAR/ljusförhållanden) körs i ett skript som testar om “HEMS operating minima” var uppfyllt enligt “Commission Implementing Regulation (EU) 2023/1020 of 24 May 2023 amending Regulation (EU) No 965/2012 as regards helicopter emergency medical service operations”. Under antagandet två piloter och performance class 1-2 ger skriptet <code>true</code> om:</li>
+</ol>
+<ul>
+<li>Vid dagsljus/borgerlig skymning:
+<ul>
+<li>Cloud ceiling 300-399 ft + sikt &gt;= 2000 m</li>
+<li>Cloud ceiling 400-499 ft + sikt &gt;= 1000 m</li>
+<li>Cloud ceiling &gt;= 500 ft + sikt &gt;= 800 m (en förenkling, då det väl varierar med luftrumsklass?)</li>
+</ul></li>
+<li>Nattetid:
+<ul>
+<li>Cloud base &gt;= 1200 ft + sikt &gt;= 2500 m</li>
+</ul></li>
+</ul>
+<section id="hems-operating-minima-per-flygplats-2010-2022" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="hems-operating-minima-per-flygplats-2010-2022"><span class="header-section-number">2.1</span> HEMS operating minima per flygplats 2010-2022</h3>
+<p>I graferna ser man andelen METAR som i snitt, per månad under 2010-2022, är förenliga eller icke-förenliga med “HEMS operating minima” enligt ovan. Andelen “missing data” (t.ex. <code>METAR ESDF 072220Z NIL=</code>) redovisas. Nationellt snittvärde syns i varje graf.</p>
+<div class="cell" data-execution_count="2">
+<div class="cell-output cell-output-display">
+<p><img src="hems-minima-swe_files/figure-html/cell-3-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="bedömning-om-väderdata-vid-tid-för-patientflytt" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="bedömning-om-väderdata-vid-tid-för-patientflytt"><span class="header-section-number">3</span> Bedömning om väderdata vid tid för patientflytt</h2>
+<p>För varje patient finns uppgifter om avsändande IVA, mottagande sjukhus och tid för inskrivning på avsändande IVA. Genom en tabell matchas avsändande och mottagande sjukhus med närmaste flygplats. T.ex. kommer en patient som flyttas från Skövde till Karolinska att matchas till “närmsta avsändande flygplats” ESIB (Såtenäs) och “närmsta mottagande flygplats” ESSB (Bromma). METAR hämtas sedan för dessa flygplatser och tidpunkter. Dessa METAR utgör mått för hur vädret var på avsändande och mottagande sjukhus. Detta är matchningstabellen:</p>
+<div class="cell" data-execution_count="3">
+<div class="cell-output cell-output-display" data-execution_count="3">
+<style type="text/css">
+</style>
+
+<table id="T_43671" data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th id="T_43671_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">formatted_icu_name</th>
+<th id="T_43671_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">icao</th>
+<th id="T_43671_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">airport_name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td id="T_43671_row0_col0" class="data row0 col0">Bollnäs IVA</td>
+<td id="T_43671_row0_col1" class="data row0 col1">ESSD</td>
+<td id="T_43671_row0_col2" class="data row0 col2">Dala Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row1_col0" class="data row1 col0">Borås IVA</td>
+<td id="T_43671_row1_col1" class="data row1 col1">ESGG</td>
+<td id="T_43671_row1_col2" class="data row1 col2">Göteborg Landvetter Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row2_col0" class="data row2 col0">Eksjö IVA</td>
+<td id="T_43671_row2_col1" class="data row2 col1">ESGJ</td>
+<td id="T_43671_row2_col2" class="data row2 col2">Jönköping Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row3_col0" class="data row3 col0">Eskilstuna IVA</td>
+<td id="T_43671_row3_col1" class="data row3 col1">ESOW</td>
+<td id="T_43671_row3_col2" class="data row3 col2">Stockholm Västerås Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row4_col0" class="data row4 col0">Gällivare IVA</td>
+<td id="T_43671_row4_col1" class="data row4 col1">ESNG</td>
+<td id="T_43671_row4_col2" class="data row4 col2">Gällivare Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row5_col0" class="data row5 col0">Gävle IVA</td>
+<td id="T_43671_row5_col1" class="data row5 col1">ESSD</td>
+<td id="T_43671_row5_col2" class="data row5 col2">Dala Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row6_col0" class="data row6 col0">Helsingborg IVA</td>
+<td id="T_43671_row6_col1" class="data row6 col1">ESTA</td>
+<td id="T_43671_row6_col2" class="data row6 col2">Ängelholm Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row7_col0" class="data row7 col0">Falun IVA</td>
+<td id="T_43671_row7_col1" class="data row7 col1">ESSD</td>
+<td id="T_43671_row7_col2" class="data row7 col2">Dala Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row8_col0" class="data row8 col0">Hudiksvall IVA</td>
+<td id="T_43671_row8_col1" class="data row8 col1">ESNN</td>
+<td id="T_43671_row8_col2" class="data row8 col2">Sundsvall-Härnösand Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row9_col0" class="data row9 col0">Kristianstad IVA</td>
+<td id="T_43671_row9_col1" class="data row9 col1">ESMK</td>
+<td id="T_43671_row9_col2" class="data row9 col2">Kristianstad Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row10_col0" class="data row10 col0">Halmstad IVA</td>
+<td id="T_43671_row10_col1" class="data row10 col1">ESMT</td>
+<td id="T_43671_row10_col2" class="data row10 col2">Halmstad Air Base</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row11_col0" class="data row11 col0">Mora IVA</td>
+<td id="T_43671_row11_col1" class="data row11 col1">ESSD</td>
+<td id="T_43671_row11_col2" class="data row11 col2">Dala Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row12_col0" class="data row12 col0">Västervik IVA</td>
+<td id="T_43671_row12_col1" class="data row12 col1">ESSW</td>
+<td id="T_43671_row12_col2" class="data row12 col2">Västervik Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row13_col0" class="data row13 col0">Karlskoga IVA</td>
+<td id="T_43671_row13_col1" class="data row13 col1">ESOE</td>
+<td id="T_43671_row13_col2" class="data row13 col2">Örebro Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row14_col0" class="data row14 col0">Lindesberg IVA</td>
+<td id="T_43671_row14_col1" class="data row14 col1">ESOE</td>
+<td id="T_43671_row14_col2" class="data row14 col2">Örebro Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row15_col0" class="data row15 col0">Örebro IVA</td>
+<td id="T_43671_row15_col1" class="data row15 col1">ESOE</td>
+<td id="T_43671_row15_col2" class="data row15 col2">Örebro Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row16_col0" class="data row16 col0">Jönköping IVA</td>
+<td id="T_43671_row16_col1" class="data row16 col1">ESGJ</td>
+<td id="T_43671_row16_col2" class="data row16 col2">Jönköping Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row17_col0" class="data row17 col0">Kalix IVA</td>
+<td id="T_43671_row17_col1" class="data row17 col1">ESPA</td>
+<td id="T_43671_row17_col2" class="data row17 col2">Luleå Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row18_col0" class="data row18 col0">Kalmar IVA</td>
+<td id="T_43671_row18_col1" class="data row18 col1">ESMQ</td>
+<td id="T_43671_row18_col2" class="data row18 col2">Kalmar Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row19_col0" class="data row19 col0">Karlskrona IVA</td>
+<td id="T_43671_row19_col1" class="data row19 col1">ESDF</td>
+<td id="T_43671_row19_col2" class="data row19 col2">Ronneby Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row20_col0" class="data row20 col0">Karlskrona TIVA</td>
+<td id="T_43671_row20_col1" class="data row20 col1">ESDF</td>
+<td id="T_43671_row20_col2" class="data row20 col2">Ronneby Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row21_col0" class="data row21 col0">Karlstad IVA</td>
+<td id="T_43671_row21_col1" class="data row21 col1">ESOK</td>
+<td id="T_43671_row21_col2" class="data row21 col2">Karlstad Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row22_col0" class="data row22 col0">Torsby IVA</td>
+<td id="T_43671_row22_col1" class="data row22 col1">ESOK</td>
+<td id="T_43671_row22_col2" class="data row22 col2">Karlstad Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row23_col0" class="data row23 col0">Arvika IVA</td>
+<td id="T_43671_row23_col1" class="data row23 col1">ESOK</td>
+<td id="T_43671_row23_col2" class="data row23 col2">Karlstad Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row24_col0" class="data row24 col0">Ljungby IVA</td>
+<td id="T_43671_row24_col1" class="data row24 col1">ESMX</td>
+<td id="T_43671_row24_col2" class="data row24 col2">Växjö Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row25_col0" class="data row25 col0">Lycksele IVA</td>
+<td id="T_43671_row25_col1" class="data row25 col1">ESNL</td>
+<td id="T_43671_row25_col2" class="data row25 col2">Lycksele Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row26_col0" class="data row26 col0">Trollhättan IVA</td>
+<td id="T_43671_row26_col1" class="data row26 col1">ESIB</td>
+<td id="T_43671_row26_col2" class="data row26 col2">Såtenäs Airbase</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row27_col0" class="data row27 col0">Norrköping IVA</td>
+<td id="T_43671_row27_col1" class="data row27 col1">ESSP</td>
+<td id="T_43671_row27_col2" class="data row27 col2">Norrköping Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row28_col0" class="data row28 col0">Norrtälje IVA</td>
+<td id="T_43671_row28_col1" class="data row28 col1">ESSA</td>
+<td id="T_43671_row28_col2" class="data row28 col2">Stockholm-Arlanda Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row29_col0" class="data row29 col0">Nyköping IVA</td>
+<td id="T_43671_row29_col1" class="data row29 col1">ESKN</td>
+<td id="T_43671_row29_col2" class="data row29 col2">Stockholm Skavsta Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row30_col0" class="data row30 col0">Piteå IVA</td>
+<td id="T_43671_row30_col1" class="data row30 col1">ESPA</td>
+<td id="T_43671_row30_col2" class="data row30 col2">Luleå Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row31_col0" class="data row31 col0">Karolinska CIVA</td>
+<td id="T_43671_row31_col1" class="data row31 col1">ESSB</td>
+<td id="T_43671_row31_col2" class="data row31 col2">Stockholm-Bromma Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row32_col0" class="data row32 col0">Karolinska NIVA</td>
+<td id="T_43671_row32_col1" class="data row32 col1">ESSB</td>
+<td id="T_43671_row32_col2" class="data row32 col2">Stockholm-Bromma Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row33_col0" class="data row33 col0">St Göran IVA</td>
+<td id="T_43671_row33_col1" class="data row33 col1">ESSB</td>
+<td id="T_43671_row33_col2" class="data row33 col2">Stockholm-Bromma Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row34_col0" class="data row34 col0">Skövde IVA</td>
+<td id="T_43671_row34_col1" class="data row34 col1">ESIB</td>
+<td id="T_43671_row34_col2" class="data row34 col2">Såtenäs Airbase</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row35_col0" class="data row35 col0">Lidköping IVA</td>
+<td id="T_43671_row35_col1" class="data row35 col1">ESIB</td>
+<td id="T_43671_row35_col2" class="data row35 col2">Såtenäs Airbase</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row36_col0" class="data row36 col0">Skellefteå IVA</td>
+<td id="T_43671_row36_col1" class="data row36 col1">ESNS</td>
+<td id="T_43671_row36_col2" class="data row36 col2">Skellefteå Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row37_col0" class="data row37 col0">Sollefteå IVA</td>
+<td id="T_43671_row37_col1" class="data row37 col1">ESNK</td>
+<td id="T_43671_row37_col2" class="data row37 col2">Kramfors-Sollefteå Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row38_col0" class="data row38 col0">Sunderby IVA</td>
+<td id="T_43671_row38_col1" class="data row38 col1">ESPA</td>
+<td id="T_43671_row38_col2" class="data row38 col2">Luleå Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row39_col0" class="data row39 col0">Sundsvall IVA</td>
+<td id="T_43671_row39_col1" class="data row39 col1">ESNN</td>
+<td id="T_43671_row39_col2" class="data row39 col2">Sundsvall-Härnösand Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row40_col0" class="data row40 col0">SÖS Med IVA</td>
+<td id="T_43671_row40_col1" class="data row40 col1">ESSB</td>
+<td id="T_43671_row40_col2" class="data row40 col2">Stockholm-Bromma Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row41_col0" class="data row41 col0">SÖS IVA</td>
+<td id="T_43671_row41_col1" class="data row41 col1">ESSB</td>
+<td id="T_43671_row41_col2" class="data row41 col2">Stockholm-Bromma Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row42_col0" class="data row42 col0">Södertälje IVA</td>
+<td id="T_43671_row42_col1" class="data row42 col1">ESSB</td>
+<td id="T_43671_row42_col2" class="data row42 col2">Stockholm-Bromma Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row43_col0" class="data row43 col0">Varberg IVA</td>
+<td id="T_43671_row43_col1" class="data row43 col1">ESMT</td>
+<td id="T_43671_row43_col2" class="data row43 col2">Halmstad Air Base</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row44_col0" class="data row44 col0">Visby IVA</td>
+<td id="T_43671_row44_col1" class="data row44 col1">ESSV</td>
+<td id="T_43671_row44_col2" class="data row44 col2">Visby Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row45_col0" class="data row45 col0">Värnamo IVA</td>
+<td id="T_43671_row45_col1" class="data row45 col1">ESMX</td>
+<td id="T_43671_row45_col2" class="data row45 col2">Växjö Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row46_col0" class="data row46 col0">Västerås IVA</td>
+<td id="T_43671_row46_col1" class="data row46 col1">ESOW</td>
+<td id="T_43671_row46_col2" class="data row46 col2">Stockholm Västerås Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row47_col0" class="data row47 col0">Växjö IVA</td>
+<td id="T_43671_row47_col1" class="data row47 col1">ESMX</td>
+<td id="T_43671_row47_col2" class="data row47 col2">Växjö Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row48_col0" class="data row48 col0">Ystad IVA</td>
+<td id="T_43671_row48_col1" class="data row48 col1">ESMS</td>
+<td id="T_43671_row48_col2" class="data row48 col2">Malmö Sturup Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row49_col0" class="data row49 col0">Örnsköldsvik IVA</td>
+<td id="T_43671_row49_col1" class="data row49 col1">ESNO</td>
+<td id="T_43671_row49_col2" class="data row49 col2">Örnsköldsvik Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row50_col0" class="data row50 col0">Östersund IVA</td>
+<td id="T_43671_row50_col1" class="data row50 col1">ESNZ</td>
+<td id="T_43671_row50_col2" class="data row50 col2">Åre-Östersund Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row51_col0" class="data row51 col0">Drottning Silvias Barnsjukhus BIVA</td>
+<td id="T_43671_row51_col1" class="data row51 col1">ESGG</td>
+<td id="T_43671_row51_col2" class="data row51 col2">Göteborg Landvetter Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row52_col0" class="data row52 col0">Karolinska universitetssjukhuset, Solna</td>
+<td id="T_43671_row52_col1" class="data row52 col1">ESSB</td>
+<td id="T_43671_row52_col2" class="data row52 col2">Stockholm-Bromma Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row53_col0" class="data row53 col0">Sahlgrenska universitetssjukhuset</td>
+<td id="T_43671_row53_col1" class="data row53 col1">ESGG</td>
+<td id="T_43671_row53_col2" class="data row53 col2">Göteborg Landvetter Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row54_col0" class="data row54 col0">Akademiska sjukhuset</td>
+<td id="T_43671_row54_col1" class="data row54 col1">ESSA</td>
+<td id="T_43671_row54_col2" class="data row54 col2">Stockholm-Arlanda Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row55_col0" class="data row55 col0">Universitetssjukhuset i Linköping</td>
+<td id="T_43671_row55_col1" class="data row55 col1">ESSL</td>
+<td id="T_43671_row55_col2" class="data row55 col2">Linköping/Saab Airport</td>
+</tr>
+<tr class="odd">
+<td id="T_43671_row56_col0" class="data row56 col0">Norrlands universitetssjukhus</td>
+<td id="T_43671_row56_col1" class="data row56 col1">ESNU</td>
+<td id="T_43671_row56_col2" class="data row56 col2">Umeå Airport</td>
+</tr>
+<tr class="even">
+<td id="T_43671_row57_col0" class="data row57 col0">Universitetssjukhuset i Lund</td>
+<td id="T_43671_row57_col1" class="data row57 col1">ESMS</td>
+<td id="T_43671_row57_col2" class="data row57 col2">Malmö Sturup Airport</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Det finns flera begränsningar:</p>
+<ul>
+<li>Det är långt från vissa sjukhus till “matchad flygplats” (Hudiksvalls sjukhus - Sundsvalls flygplats, Gävle sjukhus - Borlänge flygplats osv.)</li>
+<li>Jag får inte tag i METAR från Ärna och Mora.</li>
+<li>METAR från ESGP (Säve) och ESGT (Trollhättan) har mycket “missing data”. Vädret på Sahlgrenska och Trollhättan behöver således härledas av METAR från Landvetter respektive Såtenäs.</li>
+</ul>
+</section>
+<section id="matchning-av-väderdata-och-patienttransporter" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="matchning-av-väderdata-och-patienttransporter"><span class="header-section-number">4</span> Matchning av väderdata och patienttransporter</h2>
+<p>Härefter matchas transporterade patienter mot METAR på närmsta flygplatser för avsändande och mottagande sjukhus vid tidpunkten för inläggning på IVA (+/- 30 minuter). Skriptet beräknar om dagsljus rådde hos avsändare/mottagare och därefter om HEMS operating minima var uppfyllda på avsändande sjukhus och mottagande sjukhus.</p>
+<p>Nedan följer några rader från tabellen. Kolumner med patientdata är borttagna. Det går att “scrolla” i tabellen.</p>
+<div class="cell" data-execution_count="4">
+<div class="cell-output cell-output-display" data-execution_count="4">
+<style type="text/css">
+</style>
+
+<table id="T_89140" data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th id="T_89140_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">avs_iva</th>
+<th id="T_89140_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">mott_sjukhus</th>
+<th id="T_89140_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">intid_iva_utc</th>
+<th id="T_89140_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">flygplats_avs</th>
+<th id="T_89140_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">flygplats_mott</th>
+<th id="T_89140_level0_col5" class="col_heading level0 col5" data-quarto-table-cell-role="th">avs_metar</th>
+<th id="T_89140_level0_col6" class="col_heading level0 col6" data-quarto-table-cell-role="th">avs_dag</th>
+<th id="T_89140_level0_col7" class="col_heading level0 col7" data-quarto-table-cell-role="th">avs_hems_min</th>
+<th id="T_89140_level0_col8" class="col_heading level0 col8" data-quarto-table-cell-role="th">mott_metar</th>
+<th id="T_89140_level0_col9" class="col_heading level0 col9" data-quarto-table-cell-role="th">mott_dag</th>
+<th id="T_89140_level0_col10" class="col_heading level0 col10" data-quarto-table-cell-role="th">mott_hems_min</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td id="T_89140_row0_col0" class="data row0 col0">Sunderby IVA</td>
+<td id="T_89140_row0_col1" class="data row0 col1">Norrlands universitetssjukhus</td>
+<td id="T_89140_row0_col2" class="data row0 col2">2016-01-09 19:00:00+00:00</td>
+<td id="T_89140_row0_col3" class="data row0 col3">Luleå Airport</td>
+<td id="T_89140_row0_col4" class="data row0 col4">Umeå Airport</td>
+<td id="T_89140_row0_col5" class="data row0 col5">METAR ESPA 091850Z 29001KT CAVOK M15/M17 Q1011=</td>
+<td id="T_89140_row0_col6" class="data row0 col6">False</td>
+<td id="T_89140_row0_col7" class="data row0 col7">True</td>
+<td id="T_89140_row0_col8" class="data row0 col8">METAR ESNU 091850Z 32002KT CAVOK M24/M27 Q1014 R14/72//40=</td>
+<td id="T_89140_row0_col9" class="data row0 col9">False</td>
+<td id="T_89140_row0_col10" class="data row0 col10">True</td>
+</tr>
+<tr class="even">
+<td id="T_89140_row1_col0" class="data row1 col0">Bollnäs IVA</td>
+<td id="T_89140_row1_col1" class="data row1 col1">Akademiska sjukhuset</td>
+<td id="T_89140_row1_col2" class="data row1 col2">2016-01-11 18:40:00+00:00</td>
+<td id="T_89140_row1_col3" class="data row1 col3">Dala Airport</td>
+<td id="T_89140_row1_col4" class="data row1 col4">Stockholm-Arlanda Airport</td>
+<td id="T_89140_row1_col5" class="data row1 col5">METAR ESSD 111850Z 30002KT 2400 -SN VV005 M02/M02 Q0993 RESHSN REDZ=</td>
+<td id="T_89140_row1_col6" class="data row1 col6">False</td>
+<td id="T_89140_row1_col7" class="data row1 col7">False</td>
+<td id="T_89140_row1_col8" class="data row1 col8">METAR ESSA 111850Z 13008KT 4000 -DZRA BR OVC003 01/01 Q0994 R01L/510275 R08/510279 R01R/SNOCLO TEMPO 3000 BKN005=</td>
+<td id="T_89140_row1_col9" class="data row1 col9">False</td>
+<td id="T_89140_row1_col10" class="data row1 col10">False</td>
+</tr>
+<tr class="odd">
+<td id="T_89140_row2_col0" class="data row2 col0">Karlskoga IVA</td>
+<td id="T_89140_row2_col1" class="data row2 col1">Akademiska sjukhuset</td>
+<td id="T_89140_row2_col2" class="data row2 col2">2016-01-12 07:46:00+00:00</td>
+<td id="T_89140_row2_col3" class="data row2 col3">Örebro Airport</td>
+<td id="T_89140_row2_col4" class="data row2 col4">Stockholm-Arlanda Airport</td>
+<td id="T_89140_row2_col5" class="data row2 col5">METAR ESOE 120750Z 07008KT 3900 -SN FEW005 BKN008 00/00 Q0994=</td>
+<td id="T_89140_row2_col6" class="data row2 col6">True</td>
+<td id="T_89140_row2_col7" class="data row2 col7">True</td>
+<td id="T_89140_row2_col8" class="data row2 col8">METAR ESSA 120750Z 01009KT 9999 -FZDZ FEW014 M04/M06 Q0995 R01L/520267 R08/520266 R01R/SNOCLO TEMPO 4000 BKN015=</td>
+<td id="T_89140_row2_col9" class="data row2 col9">True</td>
+<td id="T_89140_row2_col10" class="data row2 col10">True</td>
+</tr>
+<tr class="even">
+<td id="T_89140_row3_col0" class="data row3 col0">Falun IVA</td>
+<td id="T_89140_row3_col1" class="data row3 col1">Akademiska sjukhuset</td>
+<td id="T_89140_row3_col2" class="data row3 col2">2016-01-13 18:20:00+00:00</td>
+<td id="T_89140_row3_col3" class="data row3 col3">Dala Airport</td>
+<td id="T_89140_row3_col4" class="data row3 col4">Stockholm-Arlanda Airport</td>
+<td id="T_89140_row3_col5" class="data row3 col5">METAR ESSD 131820Z 31009KT CAVOK M13/M17 Q1007=</td>
+<td id="T_89140_row3_col6" class="data row3 col6">False</td>
+<td id="T_89140_row3_col7" class="data row3 col7">True</td>
+<td id="T_89140_row3_col8" class="data row3 col8">METAR ESSA 131820Z 32019KT 9999 -SN FEW011 BKN016 M10/M12 Q1002 R01L/550256 R08/420236 R01R/SNOCLO TEMPO 3000 -SN VV010=</td>
+<td id="T_89140_row3_col9" class="data row3 col9">False</td>
+<td id="T_89140_row3_col10" class="data row3 col10">False</td>
+</tr>
+<tr class="odd">
+<td id="T_89140_row4_col0" class="data row4 col0">Visby IVA</td>
+<td id="T_89140_row4_col1" class="data row4 col1">Karolinska universitetssjukhuset, Solna</td>
+<td id="T_89140_row4_col2" class="data row4 col2">2016-01-13 20:35:00+00:00</td>
+<td id="T_89140_row4_col3" class="data row4 col3">Visby Airport</td>
+<td id="T_89140_row4_col4" class="data row4 col4">Stockholm-Bromma Airport</td>
+<td id="T_89140_row4_col5" class="data row4 col5">METAR ESSV 132020Z 33022KT 9999 BKN016 M04/M07 Q1002 R03/72//80=</td>
+<td id="T_89140_row4_col6" class="data row4 col6">False</td>
+<td id="T_89140_row4_col7" class="data row4 col7">True</td>
+<td id="T_89140_row4_col8" class="data row4 col8">METAR ESSB 132020Z 31015KT 9999 FEW011 BKN015 M09/M13 Q1004 R30/45//65=</td>
+<td id="T_89140_row4_col9" class="data row4 col9">False</td>
+<td id="T_89140_row4_col10" class="data row4 col10">False</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<section id="medgav-vädret-hems-vid-dessa-patientfall" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="medgav-vädret-hems-vid-dessa-patientfall"><span class="header-section-number">4.1</span> Medgav vädret HEMS vid dessa patientfall?</h3>
+<p>Det går att gissa om HEMS var möjligt på flera sätt, de två jag testat är:</p>
+<ul>
+<li>Metod 1: Om METAR/ljusförhållanden vid tidpunkten för inläggning på IVA var förenlig med HEMS hos <em>både</em> avsändare och mottagare.</li>
+<li>Metod 2: Alla METAR, i ett fönster 0-4 timmar från inläggning, används enligt:
+<ul>
+<li>Om <em>alla</em> METAR/ljusförhållande under tidsfönstret hos avsändare och/eller mottagare var <em>oförenliga</em> med HEMS operating minima, tolkar algoritmen det som att transport med HEMS mycket sannolikt var <em>omöjlig</em>.</li>
+<li>Om <em>minst en</em> METAR/ljusförhållanden under tidsfönstret hos <em>både</em> avsändare eller mottagare är <em>förenlig</em> med HEMS operating minima, tolkar algoritmen det som att transport med HEMS sannolikt var <em>möjlig</em>.</li>
+</ul></li>
+</ul>
+<p>Genom att processa METAR med denna logik ser tabellen nu ut som:</p>
+<div class="cell" data-execution_count="5">
+<div class="cell-output cell-output-display" data-execution_count="5">
+<style type="text/css">
+</style>
+
+<table id="T_76aa8" data-quarto-postprocess="true" class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th id="T_76aa8_level0_col0" class="col_heading level0 col0" data-quarto-table-cell-role="th">avs_iva</th>
+<th id="T_76aa8_level0_col1" class="col_heading level0 col1" data-quarto-table-cell-role="th">mott_sjukhus</th>
+<th id="T_76aa8_level0_col2" class="col_heading level0 col2" data-quarto-table-cell-role="th">intid_iva_utc</th>
+<th id="T_76aa8_level0_col3" class="col_heading level0 col3" data-quarto-table-cell-role="th">flygplats_avs</th>
+<th id="T_76aa8_level0_col4" class="col_heading level0 col4" data-quarto-table-cell-role="th">flygplats_mott</th>
+<th id="T_76aa8_level0_col5" class="col_heading level0 col5" data-quarto-table-cell-role="th">avs_metar</th>
+<th id="T_76aa8_level0_col6" class="col_heading level0 col6" data-quarto-table-cell-role="th">avs_dag</th>
+<th id="T_76aa8_level0_col7" class="col_heading level0 col7" data-quarto-table-cell-role="th">avs_hems_min</th>
+<th id="T_76aa8_level0_col8" class="col_heading level0 col8" data-quarto-table-cell-role="th">avs_hems_min_4h</th>
+<th id="T_76aa8_level0_col9" class="col_heading level0 col9" data-quarto-table-cell-role="th">mott_metar</th>
+<th id="T_76aa8_level0_col10" class="col_heading level0 col10" data-quarto-table-cell-role="th">mott_dag</th>
+<th id="T_76aa8_level0_col11" class="col_heading level0 col11" data-quarto-table-cell-role="th">mott_hems_min</th>
+<th id="T_76aa8_level0_col12" class="col_heading level0 col12" data-quarto-table-cell-role="th">mott_hems_min_4h</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td id="T_76aa8_row0_col0" class="data row0 col0">Sunderby IVA</td>
+<td id="T_76aa8_row0_col1" class="data row0 col1">Norrlands universitetssjukhus</td>
+<td id="T_76aa8_row0_col2" class="data row0 col2">2016-01-09 19:00:00+00:00</td>
+<td id="T_76aa8_row0_col3" class="data row0 col3">Luleå Airport</td>
+<td id="T_76aa8_row0_col4" class="data row0 col4">Umeå Airport</td>
+<td id="T_76aa8_row0_col5" class="data row0 col5">METAR ESPA 091850Z 29001KT CAVOK M15/M17 Q1011=</td>
+<td id="T_76aa8_row0_col6" class="data row0 col6">False</td>
+<td id="T_76aa8_row0_col7" class="data row0 col7">True</td>
+<td id="T_76aa8_row0_col8" class="data row0 col8">True</td>
+<td id="T_76aa8_row0_col9" class="data row0 col9">METAR ESNU 091850Z 32002KT CAVOK M24/M27 Q1014 R14/72//40=</td>
+<td id="T_76aa8_row0_col10" class="data row0 col10">False</td>
+<td id="T_76aa8_row0_col11" class="data row0 col11">True</td>
+<td id="T_76aa8_row0_col12" class="data row0 col12">True</td>
+</tr>
+<tr class="even">
+<td id="T_76aa8_row1_col0" class="data row1 col0">Bollnäs IVA</td>
+<td id="T_76aa8_row1_col1" class="data row1 col1">Akademiska sjukhuset</td>
+<td id="T_76aa8_row1_col2" class="data row1 col2">2016-01-11 18:40:00+00:00</td>
+<td id="T_76aa8_row1_col3" class="data row1 col3">Dala Airport</td>
+<td id="T_76aa8_row1_col4" class="data row1 col4">Stockholm-Arlanda Airport</td>
+<td id="T_76aa8_row1_col5" class="data row1 col5">METAR ESSD 111850Z 30002KT 2400 -SN VV005 M02/M02 Q0993 RESHSN REDZ=</td>
+<td id="T_76aa8_row1_col6" class="data row1 col6">False</td>
+<td id="T_76aa8_row1_col7" class="data row1 col7">False</td>
+<td id="T_76aa8_row1_col8" class="data row1 col8">True</td>
+<td id="T_76aa8_row1_col9" class="data row1 col9">METAR ESSA 111850Z 13008KT 4000 -DZRA BR OVC003 01/01 Q0994 R01L/510275 R08/510279 R01R/SNOCLO TEMPO 3000 BKN005=</td>
+<td id="T_76aa8_row1_col10" class="data row1 col10">False</td>
+<td id="T_76aa8_row1_col11" class="data row1 col11">False</td>
+<td id="T_76aa8_row1_col12" class="data row1 col12">False</td>
+</tr>
+<tr class="odd">
+<td id="T_76aa8_row2_col0" class="data row2 col0">Karlskoga IVA</td>
+<td id="T_76aa8_row2_col1" class="data row2 col1">Akademiska sjukhuset</td>
+<td id="T_76aa8_row2_col2" class="data row2 col2">2016-01-12 07:46:00+00:00</td>
+<td id="T_76aa8_row2_col3" class="data row2 col3">Örebro Airport</td>
+<td id="T_76aa8_row2_col4" class="data row2 col4">Stockholm-Arlanda Airport</td>
+<td id="T_76aa8_row2_col5" class="data row2 col5">METAR ESOE 120750Z 07008KT 3900 -SN FEW005 BKN008 00/00 Q0994=</td>
+<td id="T_76aa8_row2_col6" class="data row2 col6">True</td>
+<td id="T_76aa8_row2_col7" class="data row2 col7">True</td>
+<td id="T_76aa8_row2_col8" class="data row2 col8">True</td>
+<td id="T_76aa8_row2_col9" class="data row2 col9">METAR ESSA 120750Z 01009KT 9999 -FZDZ FEW014 M04/M06 Q0995 R01L/520267 R08/520266 R01R/SNOCLO TEMPO 4000 BKN015=</td>
+<td id="T_76aa8_row2_col10" class="data row2 col10">True</td>
+<td id="T_76aa8_row2_col11" class="data row2 col11">True</td>
+<td id="T_76aa8_row2_col12" class="data row2 col12">True</td>
+</tr>
+<tr class="even">
+<td id="T_76aa8_row3_col0" class="data row3 col0">Falun IVA</td>
+<td id="T_76aa8_row3_col1" class="data row3 col1">Akademiska sjukhuset</td>
+<td id="T_76aa8_row3_col2" class="data row3 col2">2016-01-13 18:20:00+00:00</td>
+<td id="T_76aa8_row3_col3" class="data row3 col3">Dala Airport</td>
+<td id="T_76aa8_row3_col4" class="data row3 col4">Stockholm-Arlanda Airport</td>
+<td id="T_76aa8_row3_col5" class="data row3 col5">METAR ESSD 131820Z 31009KT CAVOK M13/M17 Q1007=</td>
+<td id="T_76aa8_row3_col6" class="data row3 col6">False</td>
+<td id="T_76aa8_row3_col7" class="data row3 col7">True</td>
+<td id="T_76aa8_row3_col8" class="data row3 col8">True</td>
+<td id="T_76aa8_row3_col9" class="data row3 col9">METAR ESSA 131820Z 32019KT 9999 -SN FEW011 BKN016 M10/M12 Q1002 R01L/550256 R08/420236 R01R/SNOCLO TEMPO 3000 -SN VV010=</td>
+<td id="T_76aa8_row3_col10" class="data row3 col10">False</td>
+<td id="T_76aa8_row3_col11" class="data row3 col11">False</td>
+<td id="T_76aa8_row3_col12" class="data row3 col12">True</td>
+</tr>
+<tr class="odd">
+<td id="T_76aa8_row4_col0" class="data row4 col0">Visby IVA</td>
+<td id="T_76aa8_row4_col1" class="data row4 col1">Karolinska universitetssjukhuset, Solna</td>
+<td id="T_76aa8_row4_col2" class="data row4 col2">2016-01-13 20:35:00+00:00</td>
+<td id="T_76aa8_row4_col3" class="data row4 col3">Visby Airport</td>
+<td id="T_76aa8_row4_col4" class="data row4 col4">Stockholm-Bromma Airport</td>
+<td id="T_76aa8_row4_col5" class="data row4 col5">METAR ESSV 132020Z 33022KT 9999 BKN016 M04/M07 Q1002 R03/72//80=</td>
+<td id="T_76aa8_row4_col6" class="data row4 col6">False</td>
+<td id="T_76aa8_row4_col7" class="data row4 col7">True</td>
+<td id="T_76aa8_row4_col8" class="data row4 col8">True</td>
+<td id="T_76aa8_row4_col9" class="data row4 col9">METAR ESSB 132020Z 31015KT 9999 FEW011 BKN015 M09/M13 Q1004 R30/45//65=</td>
+<td id="T_76aa8_row4_col10" class="data row4 col10">False</td>
+<td id="T_76aa8_row4_col11" class="data row4 col11">False</td>
+<td id="T_76aa8_row4_col12" class="data row4 col12">True</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="andel-patienttransporter-där-hems-operating-minima-var-uppfyllda-2010-2022" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="andel-patienttransporter-där-hems-operating-minima-var-uppfyllda-2010-2022"><span class="header-section-number">4.2</span> Andel patienttransporter där HEMS operating minima var uppfyllda (2010-2022)</h3>
+<p>Denna analys är begränsad till transporter från sjukhus som relativt ofta använder HEMS, nämligen: Arvika, Bollnäs, Eskilstuna, Falun, Gällivare, Gävle, Hudiksvall, Karlskoga, Karlstad, Lidköping, Lindesberg, Lycksele, Mora, Skövde, Sollefteå, Sunderby, Torsby, Trollhättan, Nyköping, Visby, Västerås, Örebro och Östersund.</p>
+<p>T.ex. är Norrköping uteslutet, då de sällan använder HEMS för transport till Linköping.</p>
+<div class="cell" data-execution_count="6">
+<div class="cell-output cell-output-display">
+<p><img src="hems-minima-swe_files/figure-html/cell-7-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p><strong>T.v.</strong> Metod 1: Andel patienttransporter där HEMS operating minima var uppfyllda <em>både</em> hos avsändare och mottagare vid inskrivning på IVA, snitt per kalendermånad (2010-2022)</p>
+<p><strong>T.h.</strong> Metod 2: Andel patienttransporter där HEMS operating minima var uppfyllda minst en gång hos <em>både</em> avsändare och mottagare, under tidsfönstret 0-4 timmar från inskrivning på IVA, snitt per kalendermånad (2010-2022)</p>
+<section id="begränsningar-och-alternativ" class="level4" data-number="4.2.1">
+<h4 data-number="4.2.1" class="anchored" data-anchor-id="begränsningar-och-alternativ"><span class="header-section-number">4.2.1</span> Begränsningar och alternativ</h4>
+<ul>
+<li>Det är lätt att tänka sig situationer då denna skattning baserat på tidsfönster fallerar. T.ex. ok väder/ljus i början av fönstret, dåligt eller mörkt i slutet. Denna simpla algoritm (metod 2) tolkar då HEMS som möjligt, även om man i verkligheten inte hade tagit sig hem.</li>
+<li>Ett alternativ (metod 3) är att korta ner tidsfönstret till 0-2 timme, detta enligt logiken att man annars kommer tvingas välja alternativa färdmedel om man inte snabbt kan komma iväg med HEMS.</li>
+<li>Ett annat alternativ (metod 4) är att kategorisera i tre grupper:
+<ul>
+<li>Om <em>alla</em> METAR under tidsfönstret hos <em>antingen</em> avsändare eller mottagare är <em>oförenliga</em> med HEMS operating minima, tolkar algoritmen et som att transport med HEMS <em>mycket sannolikt var omöjlig</em>.</li>
+<li>Om <em>minst en</em> METAR under tidsfönstret hos <em>både</em> avsändare eller mottagare är <em>förenlig</em> med HEMS operating minima, tolkar algoritmen det som att transport med HEMS <em>kanske var möjlig</em>.</li>
+<li>Om <em>alla</em> METAR under tidsfönstret hos <em>både</em> avsändare eller mottagare är <em>förenliga</em> med HEMS operating minima, tolkar algoritmen det som att transport med HEMS <em>mycket sannolikt var möjlig</em>.</li>
+</ul></li>
+</ul>
+<p>Såhär skulle fördelningen av transporter förenliga med HEMS se ut om fönstret är 0-2 timmar (metod 3)</p>
+<div class="cell" data-execution_count="8">
+<div class="cell-output cell-output-display">
+<p><img src="hems-minima-swe_files/figure-html/cell-8-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Med denna metod blir det såklart fler tillfällen där HEMS ter sig omöjligt, omkring 20-25% vintertid och kring 10% utslaget på hela året. I Läkartidningen rapporterade Avincis baschef i Göteborg att de ställer in cirka 25% uppdrag vintertid och 14% på hela året (https://lakartidningen.se/opinion/debatt/2024/03/gps-baserad-inflygning-okar-tillgangligheten-for-luftambulans/).</p>
+</section>
+</section>
+</section>
+<section id="att-fundera-på" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="att-fundera-på"><span class="header-section-number">5</span> Att fundera på…</h2>
+<ul>
+<li>Verkar jag ha fattat väderminima?</li>
+<li>Går det att sätta en siffra kraven på sikt vid cloud ceiling &gt;500 ft dagtid? Som det är nu har jag satt 800 m.</li>
+<li>Har reglerna för HEMS-minima ändrats på något <em>betydande</em> sätt 2010-2022?</li>
+<li>Använder du och dina kollegor METAR för att bedöma risk för nedisning? Vad jag förstått kan “ICG” och liknande förekomma i METAR. Är i sådana fall dessa uppgifter i METAR så pass tillförlitliga att det är värt för mig att försöka plocka ut uppgifterna?</li>
+<li>Går det att säga hur stor skillnad PinS hade gjort vid en given METAR där HEMS operating minima inte var uppfyllda?</li>
+<li>Slutligen, givet vad jag har, dvs. METAR… ser du något annat bättre sätt att lista ut om HEMS hade varit möjligt?</li>
+</ul>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
