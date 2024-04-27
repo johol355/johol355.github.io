@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.306">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="dcterms.date" content="2024-04-26">
+
+<title>Linear and non-linear predictors in causal inference modeling</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="43-bernoulli-models_files/libs/clipboard/clipboard.min.js"></script>
+<script src="43-bernoulli-models_files/libs/quarto-html/quarto.js"></script>
+<script src="43-bernoulli-models_files/libs/quarto-html/popper.min.js"></script>
+<script src="43-bernoulli-models_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="43-bernoulli-models_files/libs/quarto-html/anchor.min.js"></script>
+<link href="43-bernoulli-models_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="43-bernoulli-models_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="43-bernoulli-models_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="43-bernoulli-models_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="43-bernoulli-models_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css">
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#outline" id="toc-outline" class="nav-link active" data-scroll-target="#outline"><span class="header-section-number">1</span> Outline</a></li>
+  <li><a href="#define-a-data-generating-process" id="toc-define-a-data-generating-process" class="nav-link" data-scroll-target="#define-a-data-generating-process"><span class="header-section-number">2</span> Define a data-generating process</a></li>
+  <li><a href="#draw-samples" id="toc-draw-samples" class="nav-link" data-scroll-target="#draw-samples"><span class="header-section-number">3</span> Draw samples</a>
+  <ul class="collapse">
+  <li><a href="#a-quick-look-at-the-data" id="toc-a-quick-look-at-the-data" class="nav-link" data-scroll-target="#a-quick-look-at-the-data"><span class="header-section-number">3.1</span> A quick look at the data</a></li>
+  </ul></li>
+  <li><a href="#model-comparison" id="toc-model-comparison" class="nav-link" data-scroll-target="#model-comparison"><span class="header-section-number">4</span> Model comparison</a>
+  <ul class="collapse">
+  <li><a href="#naive-model-definition" id="toc-naive-model-definition" class="nav-link" data-scroll-target="#naive-model-definition"><span class="header-section-number">4.1</span> Naive model, definition</a></li>
+  <li><a href="#logistic-regression-definition" id="toc-logistic-regression-definition" class="nav-link" data-scroll-target="#logistic-regression-definition"><span class="header-section-number">4.2</span> Logistic regression, definition</a></li>
+  <li><a href="#full-luxury-bayes-inference-ii-gp-model-definition" id="toc-full-luxury-bayes-inference-ii-gp-model-definition" class="nav-link" data-scroll-target="#full-luxury-bayes-inference-ii-gp-model-definition"><span class="header-section-number">4.3</span> Full Luxury Bayes Inference II: GP model, definition</a></li>
+  <li><a href="#causal-inference-of-treatment-effects" id="toc-causal-inference-of-treatment-effects" class="nav-link" data-scroll-target="#causal-inference-of-treatment-effects"><span class="header-section-number">4.4</span> Causal inference of treatment effects</a></li>
+  </ul></li>
+  <li><a href="#model-comparison-in-the-setting-of-a-weaker-non-linear-confounding-effect" id="toc-model-comparison-in-the-setting-of-a-weaker-non-linear-confounding-effect" class="nav-link" data-scroll-target="#model-comparison-in-the-setting-of-a-weaker-non-linear-confounding-effect"><span class="header-section-number">5</span> Model comparison in the setting of a weaker non-linear confounding effect</a></li>
+  <li><a href="#moving-forward" id="toc-moving-forward" class="nav-link" data-scroll-target="#moving-forward"><span class="header-section-number">6</span> Moving forward</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Linear and non-linear predictors in causal inference modeling</h1>
+<p class="subtitle lead">Testing out modeling ideas for the inferential part of the study</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Johan Olsson </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 26, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="cell" data-execution_count="213">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> arviz <span class="im">as</span> az</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pymc <span class="im">as</span> pm</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pymc <span class="im">import</span> do, observe</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.special <span class="im">import</span> expit</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">"ignore"</span>, category<span class="op">=</span><span class="pp">UserWarning</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> numpy.random <span class="im">import</span> default_rng</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>SEED <span class="op">=</span> <span class="dv">3737</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> default_rng(SEED)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="outline" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="outline"><span class="header-section-number">1</span> Outline</h2>
+<ol type="1">
+<li>Define a data-generating process (DGP)</li>
+<li>Define a function for the DGP</li>
+<li>Draw samples from the function, the causal effect of treatment will be known</li>
+<li>Try to infer the causal of effect of treatment with different types of models</li>
+</ol>
+</section>
+<section id="define-a-data-generating-process" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="define-a-data-generating-process"><span class="header-section-number">2</span> Define a data-generating process</h2>
+<p>See the DAG below for a quick overview of the DGP. The idea is that our binary treatment, <span class="math inline">X</span>, has a causal effect on the binary outcome <span class="math inline">Y</span>. There is a set of confounders, <span class="math inline">C_{i}</span>. <span class="math inline">C_{1}</span> is binary and has a linear effect (on the log-odds scale) on <span class="math inline">Y</span>. <span class="math inline">C_{2}</span> is categorical (1-365), as is <span class="math inline">C_{3}</span> (1-24). <span class="math inline">C_{2}</span> and <span class="math inline">C_{3}</span> both affect the probability of treatment and outcome in a non-linear fashion (by way of cosine functions). See the code (function <code>dataset</code>) for details. The function allows for differences between subgroups of individuals (eg. belonging to different centers) w.r.t. baseline risk, treatment effect and mechanism of confounding.</p>
+<div class="cell" data-execution_count="214">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> graphviz</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>dot <span class="op">=</span> <span class="st">'''</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="st">digraph simple_dag {</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="st">    subgraph cluster_hierarchy {</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="st">        label = "Center</span><span class="sc">{i}</span><span class="st">";  // Label for the subgraph</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="st">        "C1" -&gt; "X";</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="st">        "C1" -&gt; "Y";</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="st">        "C2" -&gt; "X";</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="st">        "C2" -&gt; "Y";</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="st">        "C3" -&gt; "X";</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="st">        "C3" -&gt; "Y";</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="st">    }</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="st">    </span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="st">    "X" -&gt; "Y";</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="st">}</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="st">'''</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>graph <span class="op">=</span> graphviz.Source(dot)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>graph</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display" data-execution_count="214">
+<p><img src="43-bernoulli-models_files/figure-html/cell-3-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="215">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> dgp(n_samples, treatment_effect <span class="op">=</span> <span class="fl">0.5</span>, non_linear_effect <span class="op">=</span> <span class="dv">1</span>):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    c1 <span class="op">=</span> rng.choice(a<span class="op">=</span><span class="dv">2</span>, size<span class="op">=</span>n_samples)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    c2 <span class="op">=</span> rng.choice(a<span class="op">=</span><span class="dv">365</span>, size<span class="op">=</span>n_samples)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    c3 <span class="op">=</span> rng.choice(a<span class="op">=</span><span class="dv">24</span>, size<span class="op">=</span>n_samples)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    center <span class="op">=</span> rng.choice(a<span class="op">=</span>[<span class="st">'a'</span>, <span class="st">'b'</span>, <span class="st">'c'</span>], size<span class="op">=</span>n_samples)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    center_baseline_outcome_risk <span class="op">=</span> {</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">'a'</span>: <span class="op">-</span><span class="fl">1.5</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">'b'</span>: <span class="op">-</span><span class="fl">1.0</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">'c'</span>: <span class="op">-</span><span class="fl">2.0</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    center_treatment_modifier <span class="op">=</span> {</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">'a'</span>: <span class="fl">1.0</span>,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">'b'</span>: <span class="dv">0</span>,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">'c'</span>: <span class="fl">2.0</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> f_x(c2, c3):</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> non_linear_effect <span class="op">*</span> (np.cos(np.pi<span class="op">/</span>(<span class="dv">365</span><span class="op">/</span><span class="dv">2</span>)<span class="op">*</span>c2) <span class="op">+</span> np.cos(np.pi<span class="op">/</span>(<span class="dv">24</span><span class="op">/</span><span class="dv">2</span>)<span class="op">*</span>c3))</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> f_y(c2, c3):</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> non_linear_effect <span class="op">*</span> (np.cos(np.pi<span class="op">/</span>(<span class="dv">365</span><span class="op">/</span><span class="dv">2</span>)<span class="op">*</span>c2) <span class="op">+</span> np.cos(np.pi<span class="op">/</span>(<span class="dv">24</span><span class="op">/</span><span class="dv">2</span>)<span class="op">*</span>c3))</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    p_x <span class="op">=</span> expit(<span class="dv">0</span> <span class="op">+</span> <span class="fl">1.5</span> <span class="op">*</span> c1 <span class="op">+</span> <span class="dv">2</span> <span class="op">*</span> f_x(c2, c3))</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> [rng.choice(a<span class="op">=</span><span class="dv">2</span>, p<span class="op">=</span>[<span class="dv">1</span><span class="op">-</span>p, p]) <span class="cf">for</span> p <span class="kw">in</span> p_x]</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    p_y <span class="op">=</span> expit([center_baseline_outcome_risk[c] <span class="cf">for</span> c <span class="kw">in</span> center] <span class="op">+</span> c1 <span class="op">+</span> f_y(c2, c3) <span class="op">+</span> np.array([center_treatment_modifier[c] <span class="cf">for</span> c <span class="kw">in</span> center]) <span class="op">*</span> treatment_effect <span class="op">*</span> np.array(x))</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    p_y0 <span class="op">=</span> expit([center_baseline_outcome_risk[c] <span class="cf">for</span> c <span class="kw">in</span> center] <span class="op">+</span> c1 <span class="op">+</span> f_y(c2, c3) <span class="op">+</span> np.array([center_treatment_modifier[c] <span class="cf">for</span> c <span class="kw">in</span> center]) <span class="op">*</span> treatment_effect <span class="op">*</span> np.zeros(n_samples))</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    p_y1 <span class="op">=</span> expit([center_baseline_outcome_risk[c] <span class="cf">for</span> c <span class="kw">in</span> center] <span class="op">+</span> c1 <span class="op">+</span> f_y(c2, c3) <span class="op">+</span> np.array([center_treatment_modifier[c] <span class="cf">for</span> c <span class="kw">in</span> center]) <span class="op">*</span> treatment_effect <span class="op">*</span> np.ones(n_samples))</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    ITE <span class="op">=</span> p_y1 <span class="op">-</span> p_y0</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> [rng.choice(a<span class="op">=</span><span class="dv">2</span>, p<span class="op">=</span>[<span class="dv">1</span><span class="op">-</span>p, p]) <span class="cf">for</span> p <span class="kw">in</span> p_y]</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>    d <span class="op">=</span> {<span class="st">'C1'</span>: c1,</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>         <span class="st">'C2'</span>: c2,</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>         <span class="st">'C3'</span>: c3,</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>         <span class="st">'CENTER'</span>: center,</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>         <span class="st">'X'</span>: x,</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>         <span class="st">'Y'</span>: y,</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>         <span class="st">'ITE'</span>: ITE}</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.DataFrame(d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="draw-samples" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="draw-samples"><span class="header-section-number">3</span> Draw samples</h2>
+<div class="cell" data-execution_count="216">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>n_samples<span class="op">=</span><span class="dv">1400</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> dgp(n_samples<span class="op">=</span>n_samples)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="a-quick-look-at-the-data" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="a-quick-look-at-the-data"><span class="header-section-number">3.1</span> A quick look at the data</h3>
+<div class="cell" data-execution_count="217">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'The avg. causal effect (absolute difference in expected outcome) of treatment is:'</span>, np.<span class="bu">round</span>(df.ITE.mean(), <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>The avg. causal effect (absolute difference in expected outcome) of treatment is: 0.088</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="218">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'The avg. causal effect at different centers:'</span>, df.groupby(<span class="st">'CENTER'</span>).ITE.mean())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>The avg. causal effect at different centers: CENTER
+a    0.089200
+b    0.000000
+c    0.173005
+Name: ITE, dtype: float64</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="model-comparison" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="model-comparison"><span class="header-section-number">4</span> Model comparison</h2>
+<p>Four models will be compared: * A naive (unadjusted model) * Logistic regression with <span class="math inline">X, C_{1}, C_{2}</span> and <span class="math inline">C_{3}</span> as predictors * Full Luxury Bayesian Inference I: A Bayesian Network with linear dependencies between parameters (i.e.&nbsp;an elitist logistic regression) * Full Luxury Bayesian Inference II: A Bayesian Network with Gaussian processes (Hilbert Space approximations)</p>
+<section id="naive-model-definition" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="naive-model-definition"><span class="header-section-number">4.1</span> Naive model, definition</h3>
+<p><span class="math inline">y_{i} \sim Bernoulli(p_{i})</span></p>
+<p><span class="math inline">p_{i} = invlogit(\alpha + \beta_{XY[idx_{X}]})</span></p>
+<p><span class="math inline">\alpha \sim N(0, 1)</span></p>
+<p><span class="math inline">\left( \begin{array}{c} \beta_{XY[idx_{X=0}]} \sim N(0, 1) \\ \beta_{XY[idx_{X=1}]} \sim N(0, 1) \end{array} \right)</span></p>
+<p><span class="math inline">x \in \{0, 1\}</span></p>
+<div class="cell" data-execution_count="219">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>COORDS <span class="op">=</span> {<span class="st">'sample'</span>: np.arange(<span class="dv">0</span>, n_samples), <span class="st">'confound'</span>: [<span class="dv">0</span>,<span class="dv">1</span>], <span class="st">'treatment'</span>: [<span class="dv">0</span>,<span class="dv">1</span>], <span class="st">'outcome'</span>: [<span class="dv">0</span>,<span class="dv">1</span>], <span class="st">'day'</span>: np.arange(<span class="dv">365</span>), <span class="st">'hour'</span>: np.arange(<span class="dv">24</span>)}</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pm.Model(coords<span class="op">=</span>COORDS) <span class="im">as</span> naive_m:</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    C1 <span class="op">=</span> pm.Bernoulli(<span class="st">'C1'</span>, p<span class="op">=</span><span class="fl">.5</span>, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    C2 <span class="op">=</span> pm.Categorical(<span class="st">'C2'</span>, p<span class="op">=</span>np.ones(<span class="dv">365</span>)<span class="op">/</span><span class="dv">365</span>, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    C3 <span class="op">=</span> pm.Categorical(<span class="st">'C3'</span>, p<span class="op">=</span>np.ones(<span class="dv">24</span>)<span class="op">/</span><span class="dv">24</span>, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> pm.Bernoulli(<span class="st">'X'</span>, p<span class="op">=</span><span class="fl">.5</span>, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># outcome model</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    alpha_Y <span class="op">=</span> pm.Normal(<span class="st">'alpha_Y'</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    beta_XY <span class="op">=</span> pm.Normal(<span class="st">'beta_XY'</span>, <span class="dv">0</span>, <span class="dv">1</span>, dims<span class="op">=</span><span class="st">'treatment'</span>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    p_Y <span class="op">=</span> pm.Deterministic(<span class="st">'p_Y'</span>, pm.math.invlogit(alpha_Y <span class="op">+</span> beta_XY[X]), dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    Y <span class="op">=</span> pm.Bernoulli(<span class="st">'Y'</span>, p_Y, dims<span class="op">=</span><span class="st">'sample'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="logistic-regression-definition" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="logistic-regression-definition"><span class="header-section-number">4.2</span> Logistic regression, definition</h3>
+<p><span class="math inline">y_{i} \sim Bernoulli(p_{i})</span></p>
+<p><span class="math inline">p_{i} = invlogit(\alpha + \beta_{XY[idx_{X=x}]} + \beta_{C_{1}Y[idx_{C_{1}}=c_{1}]} + \beta_{C_{2}Y[idx_{C_{2}}=c_{2}]} + \beta_{C_{3}Y[idx_{C_{3}}=c_{3}]})</span></p>
+<p><span class="math inline">\alpha \sim N(0, 1)</span></p>
+<p><span class="math inline">\left( \begin{array}{c} \beta_{XY[idx_{X=0}]} \sim N(0, 2) \\ \beta_{XY[idx_{X=1}]} \sim N(0, 2) \end{array} \right)</span></p>
+<p><span class="math inline">\left( \begin{array}{c} \beta_{C_{1}Y[idx_{C_{1}=0}]} \sim N(0, 2) \\ \beta_{C_{1}Y[idx_{C_{1}=1}]} \sim N(0, 2) \end{array} \right)</span></p>
+<p><span class="math inline">\left( \begin{array}{c} \beta_{C_{2}Y[idx_{C_{2}=1}]} \sim N(0, 2) \\ \vdots \\ \beta_{C_{2}Y[idx_{C_{2}=365}]} \sim N(0, 2) \end{array} \right)</span></p>
+<p><span class="math inline">\left( \begin{array}{c} \beta_{C_{3}Y[idx_{C_{3}=1}]} \sim N(0, 2) \\ \vdots \\ \beta_{C_{3}Y[idx_{C_{3}=24}]} \sim N(0, 2) \end{array} \right)</span></p>
+<p><span class="math inline">x \in \{0, 1\}</span></p>
+<p><span class="math inline">c_{1} \in \{0, 1\}</span></p>
+<p><span class="math inline">c_{2} \in \{1, 2, \ldots, 365\}</span></p>
+<p><span class="math inline">c_{3} \in \{1, 2, \ldots, 24\}</span></p>
+<div class="cell" data-execution_count="220">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>COORDS <span class="op">=</span> {<span class="st">'sample'</span>: np.arange(<span class="dv">0</span>, n_samples), <span class="st">'confound'</span>: [<span class="dv">0</span>,<span class="dv">1</span>], <span class="st">'treatment'</span>: [<span class="dv">0</span>,<span class="dv">1</span>], <span class="st">'outcome'</span>: [<span class="dv">0</span>,<span class="dv">1</span>], <span class="st">'day'</span>: np.arange(<span class="dv">365</span>), <span class="st">'hour'</span>: np.arange(<span class="dv">24</span>)}</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pm.Model(coords<span class="op">=</span>COORDS) <span class="im">as</span> linear_m:</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    C1 <span class="op">=</span> pm.Bernoulli(<span class="st">'C1'</span>, p<span class="op">=</span><span class="fl">.5</span>, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    C2 <span class="op">=</span> pm.Categorical(<span class="st">'C2'</span>, p<span class="op">=</span>np.ones(<span class="dv">365</span>)<span class="op">/</span><span class="dv">365</span>, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    C3 <span class="op">=</span> pm.Categorical(<span class="st">'C3'</span>, p<span class="op">=</span>np.ones(<span class="dv">24</span>)<span class="op">/</span><span class="dv">24</span>, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> pm.Bernoulli(<span class="st">'X'</span>, p<span class="op">=</span><span class="fl">.5</span>, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># outcome model</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    alpha_Y <span class="op">=</span> pm.Normal(<span class="st">'alpha_Y'</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    beta_XY <span class="op">=</span> pm.Normal(<span class="st">'beta_XY'</span>, <span class="dv">0</span>, <span class="dv">2</span>, dims<span class="op">=</span><span class="st">'treatment'</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    beta_C1Y <span class="op">=</span> pm.Normal(<span class="st">'beta_C1Y'</span>, <span class="dv">0</span>, <span class="dv">2</span>, dims<span class="op">=</span><span class="st">'treatment'</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    beta_C2Y <span class="op">=</span> pm.Normal(<span class="st">'beta_C2Y'</span>, <span class="dv">0</span>, <span class="dv">2</span>, dims<span class="op">=</span><span class="st">'day'</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    beta_C3Y <span class="op">=</span> pm.Normal(<span class="st">'beta_C3Y'</span>, <span class="dv">0</span>, <span class="dv">2</span>, dims<span class="op">=</span><span class="st">'hour'</span>)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    p_Y <span class="op">=</span> pm.Deterministic(<span class="st">'p_Y'</span>, pm.math.invlogit(alpha_Y <span class="op">+</span> beta_XY[X] <span class="op">+</span> beta_C1Y[C1] <span class="op">+</span> beta_C2Y[C2] <span class="op">+</span> beta_C3Y[C3]), dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    Y <span class="op">=</span> pm.Bernoulli(<span class="st">'Y'</span>, p_Y, dims<span class="op">=</span><span class="st">'sample'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="full-luxury-bayes-inference-i-linear-model-definition" class="level4" data-number="4.2.1">
+<h4 data-number="4.2.1" class="anchored" data-anchor-id="full-luxury-bayes-inference-i-linear-model-definition"><span class="header-section-number">4.2.1</span> Full Luxury Bayes Inference I: Linear model, definition</h4>
+<section id="outcome-part" class="level5" data-number="4.2.1.1">
+<h5 data-number="4.2.1.1" class="anchored" data-anchor-id="outcome-part"><span class="header-section-number">4.2.1.1</span> Outcome part</h5>
+<p><span class="math inline">y_{i} \sim Bernoulli(p_{yi})</span></p>
+<p><span class="math inline">p_{yi} = invlogit(\alpha_{y} + \beta_{XY[idx_{X=x}]} + \beta_{C_{1}Y[idx_{C_{1}}=c_{1}]} + \beta_{C_{2}Y[idx_{C_{2}}=c_{2}]} + \beta_{C_{3}Y[idx_{C_{3}}=c_{3}]})</span></p>
+<p><span class="math inline">\alpha_{y} \sim N(0, 2)</span></p>
+<p><span class="math inline">\left( \begin{array}{c} \beta_{XY[idx_{X=0}]} \sim N(0, 2) \\ \beta_{XY[idx_{X=1}]} \sim N(0, 2) \end{array} \right)</span></p>
+<p><span class="math inline">\left( \begin{array}{c} \beta_{C_{1}Y[idx_{C_{1}=0}]} \sim N(0, 2) \\ \beta_{C_{1}Y[idx_{C_{1}=1}]} \sim N(0, 2) \end{array} \right)</span></p>
+<p><span class="math inline">\left( \begin{array}{c} \beta_{C_{2}Y[idx_{C_{2}=1}]} \sim N(0, 2) \\ \vdots \\ \beta_{C_{2}Y[idx_{C_{2}=365}]} \sim N(0, 2) \end{array} \right)</span></p>
+<p><span class="math inline">\left( \begin{array}{c} \beta_{C_{3}Y[idx_{C_{3}=1}]} \sim N(0, 2) \\ \vdots \\ \beta_{C_{3}Y[idx_{C_{3}=24}]} \sim N(0, 2) \end{array} \right)</span></p>
+</section>
+<section id="treatment-assignment-part" class="level5" data-number="4.2.1.2">
+<h5 data-number="4.2.1.2" class="anchored" data-anchor-id="treatment-assignment-part"><span class="header-section-number">4.2.1.2</span> Treatment assignment part</h5>
+<p><span class="math inline">x \sim Bernoulli(p_{xi})</span></p>
+<p><span class="math inline">p_{xi} = invlogit(\alpha_{x} + \beta_{C_{1}X[idx_{C_{1}}=c_{1}]} + \beta_{C_{2}X[idx_{C_{2}}=c_{2}]} + \beta_{C_{3}X[idx_{C_{3}}=c_{3}]})</span></p>
+<p><span class="math inline">\alpha_{x} \sim N(-1, 2)</span></p>
+<p><span class="math inline">\left( \begin{array}{c} \beta_{C_{1}X[idx_{C_{1}=0}]} \sim N(0, 2) \\ \beta_{C_{1}X[idx_{C_{1}=1}]} \sim N(0, 2) \end{array} \right)</span></p>
+<p><span class="math inline">\left( \begin{array}{c} \beta_{C_{2}X[idx_{C_{2}=1}]} \sim N(0, 2) \\ \vdots \\ \beta_{C_{2}X[idx_{C_{2}=365}]} \sim N(0, 2) \end{array} \right)</span></p>
+<p><span class="math inline">\left( \begin{array}{c} \beta_{C_{3}X[idx_{C_{3}=1}]} \sim N(0, 2) \\ \vdots \\ \beta_{C_{3}X[idx_{C_{3}=24}]} \sim N(0, 2) \end{array} \right)</span></p>
+<p><span class="math inline">c_{1} \in \{0, 1\}</span></p>
+<p><span class="math inline">c_{2} \in \{1, 2, \ldots, 365\}</span></p>
+<p><span class="math inline">c_{3} \in \{1, 2, \ldots, 24\}</span></p>
+<div class="cell" data-execution_count="221">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>COORDS <span class="op">=</span> {<span class="st">'sample'</span>: np.arange(<span class="dv">0</span>, n_samples), <span class="st">'confound'</span>: [<span class="dv">0</span>,<span class="dv">1</span>], <span class="st">'treatment'</span>: [<span class="dv">0</span>,<span class="dv">1</span>], <span class="st">'outcome'</span>: [<span class="dv">0</span>,<span class="dv">1</span>], <span class="st">'day'</span>: np.arange(<span class="dv">365</span>), <span class="st">'hour'</span>: np.arange(<span class="dv">24</span>)}</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pm.Model(coords<span class="op">=</span>COORDS) <span class="im">as</span> flbi_m:</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    C1 <span class="op">=</span> pm.Bernoulli(<span class="st">'C1'</span>, p<span class="op">=</span><span class="fl">.5</span>, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    C2 <span class="op">=</span> pm.Categorical(<span class="st">'C2'</span>, p<span class="op">=</span>np.ones(<span class="dv">365</span>)<span class="op">/</span><span class="dv">365</span>, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    C3 <span class="op">=</span> pm.Categorical(<span class="st">'C3'</span>, p<span class="op">=</span>np.ones(<span class="dv">24</span>)<span class="op">/</span><span class="dv">24</span>, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># trt model</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    alpha_X <span class="op">=</span> pm.Normal(<span class="st">'alpha_X'</span>, <span class="dv">0</span>, <span class="dv">2</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    beta_C1X <span class="op">=</span> pm.Normal(<span class="st">'beta_C1X'</span>, <span class="dv">0</span>, <span class="dv">2</span>, dims<span class="op">=</span><span class="st">'confound'</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    beta_C2X <span class="op">=</span> pm.Normal(<span class="st">'beta_C2X'</span>, <span class="dv">0</span>, <span class="dv">2</span>, dims<span class="op">=</span><span class="st">'day'</span>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    beta_C3X <span class="op">=</span> pm.Normal(<span class="st">'beta_C3X'</span>, <span class="dv">0</span>, <span class="dv">2</span>, dims<span class="op">=</span><span class="st">'hour'</span>)</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    p_X <span class="op">=</span> pm.Deterministic(<span class="st">'p_X'</span>, pm.math.invlogit(alpha_X <span class="op">+</span> beta_C1X[C1] <span class="op">+</span> beta_C2X[C2] <span class="op">+</span> beta_C3X[C3]), dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> pm.Bernoulli(<span class="st">'X'</span>, p<span class="op">=</span>p_X, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># outcome model</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    alpha_Y <span class="op">=</span> pm.Normal(<span class="st">'alpha_Y'</span>, <span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    beta_C1Y <span class="op">=</span> pm.Normal(<span class="st">'beta_C1Y'</span>, <span class="dv">0</span>, <span class="dv">2</span>, dims<span class="op">=</span><span class="st">'confound'</span>)</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    beta_C2Y <span class="op">=</span> pm.Normal(<span class="st">'beta_C2Y'</span>, <span class="dv">0</span>, <span class="dv">2</span>, dims<span class="op">=</span><span class="st">'day'</span>)</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    beta_C3Y <span class="op">=</span> pm.Normal(<span class="st">'beta_C3Y'</span>, <span class="dv">0</span>, <span class="dv">2</span>, dims<span class="op">=</span><span class="st">'hour'</span>)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    beta_XY <span class="op">=</span> pm.Normal(<span class="st">'beta_XY'</span>, <span class="dv">0</span>, <span class="dv">2</span>, dims<span class="op">=</span><span class="st">'treatment'</span>)</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    p_Y <span class="op">=</span> pm.Deterministic(<span class="st">'p_Y'</span>, pm.math.invlogit(alpha_Y <span class="op">+</span> beta_C1Y[C1] <span class="op">+</span> beta_C2Y[C2] <span class="op">+</span> beta_C3Y[C3] <span class="op">+</span> beta_XY[X]), dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    Y <span class="op">=</span> pm.Bernoulli(<span class="st">'Y'</span>, p_Y, dims<span class="op">=</span><span class="st">'sample'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+</section>
+<section id="full-luxury-bayes-inference-ii-gp-model-definition" class="level3" data-number="4.3">
+<h3 data-number="4.3" class="anchored" data-anchor-id="full-luxury-bayes-inference-ii-gp-model-definition"><span class="header-section-number">4.3</span> Full Luxury Bayes Inference II: GP model, definition</h3>
+<section id="outcome-part-1" class="level5" data-number="4.3.0.1">
+<h5 data-number="4.3.0.1" class="anchored" data-anchor-id="outcome-part-1"><span class="header-section-number">4.3.0.1</span> Outcome part</h5>
+<p><span class="math inline">y_{i} \sim Bernoulli(p_{yi})</span></p>
+<p><span class="math inline">p_{yi} = invlogit(\alpha_{y} + \beta_{XY[idx_{X=x}]} + \beta_{C_{1}Y[idx_{C_{1}}=c_{1}]} + f_{C_{2}Y}(c_{2}) + f_{C_{3}Y}(c_{3}))</span></p>
+<p><span class="math inline">\alpha_{y} \sim N(0, 2)</span></p>
+<p><span class="math inline">\left( \begin{array}{c} \beta_{XY[idx_{X=0}]} \sim N(0, 2) \\ \beta_{XY[idx_{X=1}]} \sim N(0, 2) \end{array} \right)</span></p>
+<p><span class="math inline">\left( \begin{array}{c} \beta_{C_{1}Y[idx_{C_{1}=0}]} \sim N(0, 2) \\ \beta_{C_{1}Y[idx_{C_{1}=1}]} \sim N(0, 2) \end{array} \right)</span></p>
+<p><span class="math inline">f_{C_{2}Y}(c_{2}) = \mathcal{G}\mathcal{P} (0, k_{\theta_{cy_{2}}}(c_{2}-c´_{2}))</span></p>
+<p><span class="math inline">\theta_{cy_{2}} = \ell_1, \text{period}_{1}</span></p>
+<p><span class="math inline">\ell_1 \sim InvGamma(4, 0.25)</span></p>
+<p><span class="math inline">\text{period}_{1} = 365</span></p>
+<p><span class="math inline">f_{C_{3}Y}(c_{3}) = \mathcal{G}\mathcal{P} (0, k_{\theta_{cy_{3}}}(c_{3}-c´_{3}))</span></p>
+<p><span class="math inline">\theta_{cy_{3}} = \ell_2, \text{period}_{2}</span></p>
+<p><span class="math inline">\ell_2 \sim InvGamma(2, 1)</span></p>
+<p><span class="math inline">\text{period}_{2} = 24</span></p>
+</section>
+<section id="treatment-assigment-part" class="level5" data-number="4.3.0.2">
+<h5 data-number="4.3.0.2" class="anchored" data-anchor-id="treatment-assigment-part"><span class="header-section-number">4.3.0.2</span> Treatment assigment part</h5>
+<p><span class="math inline">x \sim Bernoulli(p_{xi})</span></p>
+<p><span class="math inline">p_{xi} = invlogit(\alpha_{x} + \beta_{C_{1}X[idx_{C_{1}}=c_{1}]} + f_{C_{2}X}(c_{2}) + f_{C_{3}X}(c_{3}))</span></p>
+<p><span class="math inline">\alpha_{x} \sim N(-1, 2)</span></p>
+<p><span class="math inline">\left( \begin{array}{c} \beta_{C_{1}X[idx_{C_{1}=0}]} \sim N(0, 2) \\ \beta_{C_{1}X[idx_{C_{1}=1}]} \sim N(0, 2) \end{array} \right)</span></p>
+<p><span class="math inline">f_{C_{2}X}(c_{2}) = \mathcal{G}\mathcal{P} (0, k_{\theta_{cx_{2}}}(c_{2}-c´_{2}))</span></p>
+<p><span class="math inline">\theta_{cx_{2}} = \ell_3, \text{period}_{3}</span></p>
+<p><span class="math inline">\ell_3 \sim InvGamma(4, 0.25)</span></p>
+<p><span class="math inline">\text{period}_{3} = 365</span></p>
+<p><span class="math inline">f_{C_{3}X}(c_{3}) = \mathcal{G}\mathcal{P} (0, k_{\theta_{cx_{3}}}(c_{3}-c´_{3}))</span></p>
+<p><span class="math inline">\theta_{cx_{3}} = \ell_4, \text{period}_{4}</span></p>
+<p><span class="math inline">\ell_4 \sim InvGamma(2, 1)</span></p>
+<p><span class="math inline">\text{period}_{4} = 24</span></p>
+<p><span class="math inline">c_{1} \in \{0, 1\}</span></p>
+<p><span class="math inline">c_{2} \in \{1, 2, \ldots, 365\}</span></p>
+<p><span class="math inline">c_{3} \in \{1, 2, \ldots, 24\}</span></p>
+<div class="cell" data-execution_count="222">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>COORDS <span class="op">=</span> {<span class="st">'sample'</span>: np.arange(<span class="dv">0</span>, n_samples), <span class="st">'confound'</span>: [<span class="dv">0</span>,<span class="dv">1</span>], <span class="st">'treatment'</span>: [<span class="dv">0</span>,<span class="dv">1</span>], <span class="st">'outcome'</span>: [<span class="dv">0</span>,<span class="dv">1</span>], <span class="st">'day'</span>: np.arange(<span class="dv">365</span>), <span class="st">'hour'</span>: np.arange(<span class="dv">24</span>)}</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pm.Model(coords<span class="op">=</span>COORDS) <span class="im">as</span> flbi_hsgp:</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    C1 <span class="op">=</span> pm.Bernoulli(<span class="st">'C1'</span>, p<span class="op">=</span><span class="fl">.5</span>, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    C2 <span class="op">=</span> pm.Categorical(<span class="st">'C2'</span>, p<span class="op">=</span>np.ones(<span class="dv">365</span>)<span class="op">/</span><span class="dv">365</span>, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    C3 <span class="op">=</span> pm.Categorical(<span class="st">'C3'</span>, p<span class="op">=</span>np.ones(<span class="dv">24</span>)<span class="op">/</span><span class="dv">24</span>, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># trt model</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    alpha_X <span class="op">=</span> pm.Normal(<span class="st">'alpha_X'</span>, <span class="dv">0</span>, <span class="dv">2</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    beta_CX <span class="op">=</span> pm.Normal(<span class="st">'beta_CX'</span>, <span class="dv">0</span>, <span class="dv">2</span>, dims<span class="op">=</span><span class="st">'confound'</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    ls_trt_C2 <span class="op">=</span> pm.Gamma(<span class="st">'ls_trt_C2'</span>, <span class="dv">4</span>, <span class="fl">.25</span>)</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    eta_trt_C2 <span class="op">=</span> pm.HalfNormal(<span class="st">'eta_trt_C2'</span>, <span class="dv">1</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    cov_trt_C2 <span class="op">=</span> pm.gp.cov.Periodic(<span class="dv">1</span>, ls<span class="op">=</span>ls_trt_C2, period<span class="op">=</span><span class="dv">365</span>)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    gp_trt_C2 <span class="op">=</span> pm.gp.HSGPPeriodic(m<span class="op">=</span><span class="dv">20</span>, cov_func<span class="op">=</span>cov_trt_C2, scale<span class="op">=</span>eta_trt_C2<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    f_trt_C2 <span class="op">=</span> gp_trt_C2.prior(<span class="st">'f_trt_C2'</span>, X<span class="op">=</span>C2[:,<span class="va">None</span>])</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    ls_trt_C3 <span class="op">=</span> pm.Gamma(<span class="st">'ls_trt_C3'</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    eta_trt_C3 <span class="op">=</span> pm.HalfNormal(<span class="st">'eta_trt_C3'</span>, <span class="dv">1</span>)</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    cov_trt_C3 <span class="op">=</span> pm.gp.cov.Periodic(<span class="dv">1</span>, ls<span class="op">=</span>ls_trt_C3, period<span class="op">=</span><span class="dv">24</span>)</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    gp_trt_C3 <span class="op">=</span> pm.gp.HSGPPeriodic(m<span class="op">=</span><span class="dv">20</span>, cov_func<span class="op">=</span>cov_trt_C3, scale<span class="op">=</span>eta_trt_C3<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    f_trt_C3 <span class="op">=</span> gp_trt_C3.prior(<span class="st">'f_trt_C3'</span>, X<span class="op">=</span>C3[:,<span class="va">None</span>])</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    p_X <span class="op">=</span> pm.Deterministic(<span class="st">'p_X'</span>, pm.math.invlogit(alpha_X <span class="op">+</span> f_trt_C2 <span class="op">+</span> f_trt_C3), dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    X <span class="op">=</span> pm.Bernoulli(<span class="st">'X'</span>, p<span class="op">=</span>p_X, dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># outcome model</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    alpha_Y <span class="op">=</span> pm.Normal(<span class="st">'alpha_Y'</span>, <span class="op">-</span><span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    beta_CY <span class="op">=</span> pm.Normal(<span class="st">'beta_CY'</span>, <span class="dv">0</span>, <span class="dv">2</span>, dims<span class="op">=</span><span class="st">'confound'</span>)</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    beta_XY <span class="op">=</span> pm.Normal(<span class="st">'beta_XY'</span>, <span class="dv">0</span>, <span class="dv">2</span>, dims<span class="op">=</span><span class="st">'treatment'</span>)</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>    ls_out_C2 <span class="op">=</span> pm.Gamma(<span class="st">'ls_out_C2'</span>, <span class="dv">4</span>, <span class="fl">.25</span>)</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>    eta_out_C2 <span class="op">=</span> pm.HalfNormal(<span class="st">'eta_out_C2'</span>, <span class="dv">1</span>)</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>    cov_out_C2 <span class="op">=</span> pm.gp.cov.Periodic(<span class="dv">1</span>, ls<span class="op">=</span>ls_out_C2, period<span class="op">=</span><span class="dv">365</span>)</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>    gp_out_C2 <span class="op">=</span> pm.gp.HSGPPeriodic(m<span class="op">=</span><span class="dv">20</span>, cov_func<span class="op">=</span>cov_out_C2, scale<span class="op">=</span>eta_out_C2<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>    f_out_C2 <span class="op">=</span> gp_out_C2.prior(<span class="st">'f_out_C2'</span>, X<span class="op">=</span>C2[:,<span class="va">None</span>])</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>    ls_out_C3 <span class="op">=</span> pm.Gamma(<span class="st">'ls_out_C3'</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>    eta_out_C3 <span class="op">=</span> pm.HalfNormal(<span class="st">'eta_out_C3'</span>, <span class="dv">1</span>)</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>    cov_out_C3 <span class="op">=</span> pm.gp.cov.Periodic(<span class="dv">1</span>, ls<span class="op">=</span>ls_out_C3, period<span class="op">=</span><span class="dv">25</span>)</span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>    gp_out_C3 <span class="op">=</span> pm.gp.HSGPPeriodic(m<span class="op">=</span><span class="dv">20</span>, cov_func<span class="op">=</span>cov_out_C3, scale<span class="op">=</span>eta_out_C3<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>    f_out_C3 <span class="op">=</span> gp_out_C3.prior(<span class="st">'f_out_C3'</span>, X<span class="op">=</span>C3[:,<span class="va">None</span>])</span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>    p_Y <span class="op">=</span> pm.Deterministic(<span class="st">'p_Y'</span>, pm.math.invlogit(alpha_Y <span class="op">+</span> beta_CY[C1] <span class="op">+</span> beta_XY[X] <span class="op">+</span> f_out_C2 <span class="op">+</span> f_out_C3), dims<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>    Y <span class="op">=</span> pm.Bernoulli(<span class="st">'Y'</span>, p_Y, dims<span class="op">=</span><span class="st">'sample'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="causal-inference-of-treatment-effects" class="level3" data-number="4.4">
+<h3 data-number="4.4" class="anchored" data-anchor-id="causal-inference-of-treatment-effects"><span class="header-section-number">4.4</span> Causal inference of treatment effects</h3>
+<p>Causal inference will be carried out using the <code>do</code>operator in <code>pymc</code>.</p>
+<div class="cell" data-execution_count="223">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> {<span class="st">'Naive Model (unadjusted)'</span>: naive_m,</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>          <span class="st">'Logistic model'</span>: linear_m,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>          <span class="st">'FLBI: Linear Bayesian Network'</span>: flbi_m,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>          <span class="st">'FLBI: Bayesian Network w/ HSGP'</span>: flbi_hsgp}   </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> df</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_model(model, observations<span class="op">=</span>{<span class="st">'X'</span>: dataset.X, <span class="st">'Y'</span>: dataset.Y, <span class="st">'C1'</span>: dataset.C1, <span class="st">'C2'</span>: dataset.C2, <span class="st">'C3'</span>: dataset.C3}):</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    model_trained <span class="op">=</span> observe(model, observations)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> model_trained:</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>      <span class="co">#  advi = pm.fit(method='ADVI', callbacks=[CheckParametersConvergence()])</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>      <span class="co">#  model_trained_idata = advi.sample(5000)</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>        model_trained_idata <span class="op">=</span> pm.sample()</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model_trained, model_trained_idata</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_counterfactual_models(model, observations<span class="op">=</span>{<span class="st">'C1'</span>: dataset.C1, <span class="st">'C2'</span>: dataset.C2, <span class="st">'C3'</span>: dataset.C3}):</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        model_counterfactual <span class="op">=</span> do(model, observations)</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        model_hems0 <span class="op">=</span> do(model_counterfactual, {<span class="st">'X'</span>: np.zeros(n_samples, dtype<span class="op">=</span><span class="st">'int32'</span>)})</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        model_hems1 <span class="op">=</span> do(model_counterfactual, {<span class="st">'X'</span>: np.ones(n_samples, dtype<span class="op">=</span><span class="st">'int32'</span>)})</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> model_hems0, model_hems1</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sample_counterfactual_model(model_do_0, model_do_1, training_idata, SEED<span class="op">=</span><span class="dv">19</span>):</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    model_hems0_idata <span class="op">=</span> pm.sample_posterior_predictive(</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>        training_idata,</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>        model_do_0,</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>        var_names<span class="op">=</span>[<span class="st">'p_Y'</span>, <span class="st">'Y'</span>],</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>        predictions<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>        random_seed<span class="op">=</span>SEED,</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    model_hems1_idata <span class="op">=</span> pm.sample_posterior_predictive(</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>        training_idata,</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>        model_do_1,</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>        var_names<span class="op">=</span>[<span class="st">'p_Y'</span>, <span class="st">'Y'</span>],</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>        predictions<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>        random_seed<span class="op">=</span>SEED)</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model_hems0_idata, model_hems1_idata</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> calculate_ate_contrast(do0_idata, do1_idata):</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>    ate <span class="op">=</span> (do1_idata.predictions.p_Y <span class="op">-</span> do0_idata.predictions.p_Y).mean(dim<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ate</span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_counterfactuals(models):</span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>    model_names <span class="op">=</span> []</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>    model_ates <span class="op">=</span> []</span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>    model_idata_dict <span class="op">=</span> {}</span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> key <span class="kw">in</span> models.keys():</span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>        model <span class="op">=</span> models[key]</span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>        model_trained, model_idata <span class="op">=</span> train_model(model)</span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>        model_idata_dict[key] <span class="op">=</span> model_idata</span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>        model_hems0, model_hems1 <span class="op">=</span> create_counterfactual_models(model_trained)</span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>        model_hems0_idata, model_hems1_idata <span class="op">=</span> sample_counterfactual_model(model_hems0, model_hems1, model_idata)</span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>        model_ate <span class="op">=</span> calculate_ate_contrast(model_hems0_idata, model_hems1_idata)</span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>        model_names.append(key)</span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>        model_ates.append(model_ate)</span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model_names, model_ates, model_idata_dict</span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>model_names, model_ates, model_idata <span class="op">=</span> run_counterfactuals(models)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [alpha_Y, beta_XY]
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 4 seconds.
+Sampling: [Y]
+Sampling: [Y]
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [alpha_Y, beta_XY, beta_C1Y, beta_C2Y, beta_C3Y]
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 22 seconds.
+Sampling: [Y]
+Sampling: [Y]
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [alpha_X, beta_C1X, beta_C2X, beta_C3X, alpha_Y, beta_C1Y, beta_C2Y, beta_C3Y, beta_XY]
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 48 seconds.
+Sampling: [Y]
+Sampling: [Y]
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [alpha_X, beta_CX, ls_trt_C2, eta_trt_C2, f_trt_C2_hsgp_coeffs_, ls_trt_C3, eta_trt_C3, f_trt_C3_hsgp_coeffs_, alpha_Y, beta_CY, beta_XY, ls_out_C2, eta_out_C2, f_out_C2_hsgp_coeffs_, ls_out_C3, eta_out_C3, f_out_C3_hsgp_coeffs_]
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 1272 seconds.
+There were 368 divergences after tuning. Increase `target_accept` or reparameterize.
+The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+Sampling: [Y]
+Sampling: [Y]</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="8000" class="" max="8000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [8000/8000 00:03&lt;00:00 Sampling 4 chains, 0 divergences]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="8000" class="" max="8000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [8000/8000 00:22&lt;00:00 Sampling 4 chains, 0 divergences]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="8000" class="" max="8000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [8000/8000 00:47&lt;00:00 Sampling 4 chains, 0 divergences]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="8000" class="" max="8000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [8000/8000 21:11&lt;00:00 Sampling 4 chains, 368 divergences]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+</div>
+<section id="plotting-posterior-estimates-of-the-average-treatment-effect-ate" class="level4" data-number="4.4.1">
+<h4 data-number="4.4.1" class="anchored" data-anchor-id="plotting-posterior-estimates-of-the-average-treatment-effect-ate"><span class="header-section-number">4.4.1</span> Plotting posterior estimates of the average treatment effect (ATE)</h4>
+<div class="cell" data-execution_count="224">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>az.plot_density(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>model_ates,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    hdi_prob<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    data_labels<span class="op">=</span>model_names,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    shade<span class="op">=</span><span class="fl">0.2</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    point_estimate<span class="op">=</span><span class="st">'mean'</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>plt.axvline(x<span class="op">=</span>df.ITE.mean(), color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'True effect'</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>plt.axvline(x<span class="op">=</span>df.query(<span class="st">"X == 1"</span>).Y.mean() <span class="op">-</span> df.query(<span class="st">"X == 0"</span>).Y.mean(), color<span class="op">=</span><span class="st">'red'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Unadjusted effect'</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Posterior distributions of estimated ATE'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="43-bernoulli-models_files/figure-html/cell-13-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>When running the experiment with increasing sample sizes, the difference between the linear models tend and the GP decreases. In the limit the differnce should approach 0.</p>
+</section>
+</section>
+</section>
+<section id="model-comparison-in-the-setting-of-a-weaker-non-linear-confounding-effect" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="model-comparison-in-the-setting-of-a-weaker-non-linear-confounding-effect"><span class="header-section-number">5</span> Model comparison in the setting of a weaker non-linear confounding effect</h2>
+<p>Let’s draw a new set of samples, but this time with a much weaker non-linear effect.</p>
+<div class="cell" data-execution_count="225">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>df2 <span class="op">=</span> dgp(n_samples<span class="op">=</span>n_samples, non_linear_effect<span class="op">=</span><span class="fl">0.05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell" data-execution_count="226">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> {<span class="st">'Naive Model (unadjusted)'</span>: naive_m,</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>          <span class="st">'Logistic model'</span>: linear_m,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>          <span class="st">'FLBI: Linear Bayesian Network'</span>: flbi_m,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>          <span class="st">'FLBI: Bayesian Network w/ HSGP'</span>: flbi_hsgp}   </span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> df2</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_model(model, observations<span class="op">=</span>{<span class="st">'X'</span>: dataset.X, <span class="st">'Y'</span>: dataset.Y, <span class="st">'C1'</span>: dataset.C1, <span class="st">'C2'</span>: dataset.C2, <span class="st">'C3'</span>: dataset.C3}):</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    model_trained <span class="op">=</span> observe(model, observations)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> model_trained:</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>      <span class="co">#  advi = pm.fit(method='ADVI', callbacks=[CheckParametersConvergence()])</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>      <span class="co">#  model_trained_idata = advi.sample(5000)</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>        model_trained_idata <span class="op">=</span> pm.sample()</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model_trained, model_trained_idata</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> create_counterfactual_models(model, observations<span class="op">=</span>{<span class="st">'C1'</span>: dataset.C1, <span class="st">'C2'</span>: dataset.C2, <span class="st">'C3'</span>: dataset.C3}):</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>        model_counterfactual <span class="op">=</span> do(model, observations)</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>        model_hems0 <span class="op">=</span> do(model_counterfactual, {<span class="st">'X'</span>: np.zeros(n_samples, dtype<span class="op">=</span><span class="st">'int32'</span>)})</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>        model_hems1 <span class="op">=</span> do(model_counterfactual, {<span class="st">'X'</span>: np.ones(n_samples, dtype<span class="op">=</span><span class="st">'int32'</span>)})</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> model_hems0, model_hems1</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sample_counterfactual_model(model_do_0, model_do_1, training_idata, SEED<span class="op">=</span><span class="dv">19</span>):</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    model_hems0_idata <span class="op">=</span> pm.sample_posterior_predictive(</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>        training_idata,</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>        model_do_0,</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>        var_names<span class="op">=</span>[<span class="st">'p_Y'</span>, <span class="st">'Y'</span>],</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>        predictions<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>        random_seed<span class="op">=</span>SEED,</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>    model_hems1_idata <span class="op">=</span> pm.sample_posterior_predictive(</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>        training_idata,</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>        model_do_1,</span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>        var_names<span class="op">=</span>[<span class="st">'p_Y'</span>, <span class="st">'Y'</span>],</span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>        predictions<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>        random_seed<span class="op">=</span>SEED)</span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model_hems0_idata, model_hems1_idata</span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> calculate_ate_contrast(do0_idata, do1_idata):</span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>    ate <span class="op">=</span> (do1_idata.predictions.p_Y <span class="op">-</span> do0_idata.predictions.p_Y).mean(dim<span class="op">=</span><span class="st">'sample'</span>)</span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ate</span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_counterfactuals(models):</span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a>    model_names <span class="op">=</span> []</span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>    model_ates <span class="op">=</span> []</span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a>    model_idata_dict <span class="op">=</span> {}</span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> key <span class="kw">in</span> models.keys():</span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a>        model <span class="op">=</span> models[key]</span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a>        model_trained, model_idata <span class="op">=</span> train_model(model)</span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a>        model_idata_dict[key] <span class="op">=</span> model_idata</span>
+<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a>        model_hems0, model_hems1 <span class="op">=</span> create_counterfactual_models(model_trained)</span>
+<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a>        model_hems0_idata, model_hems1_idata <span class="op">=</span> sample_counterfactual_model(model_hems0, model_hems1, model_idata)</span>
+<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a>        model_ate <span class="op">=</span> calculate_ate_contrast(model_hems0_idata, model_hems1_idata)</span>
+<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-56"><a href="#cb17-56" aria-hidden="true" tabindex="-1"></a>        model_names.append(key)</span>
+<span id="cb17-57"><a href="#cb17-57" aria-hidden="true" tabindex="-1"></a>        model_ates.append(model_ate)</span>
+<span id="cb17-58"><a href="#cb17-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> model_names, model_ates, model_idata_dict</span>
+<span id="cb17-59"><a href="#cb17-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-60"><a href="#cb17-60" aria-hidden="true" tabindex="-1"></a>model_names, model_ates, model_idata <span class="op">=</span> run_counterfactuals(models)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [alpha_Y, beta_XY]
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 4 seconds.
+Sampling: [Y]
+Sampling: [Y]
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [alpha_Y, beta_XY, beta_C1Y, beta_C2Y, beta_C3Y]
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 29 seconds.
+The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+Sampling: [Y]
+Sampling: [Y]
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [alpha_X, beta_C1X, beta_C2X, beta_C3X, alpha_Y, beta_C1Y, beta_C2Y, beta_C3Y, beta_XY]
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 81 seconds.
+The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+The effective sample size per chain is smaller than 100 for some parameters.  A higher number is needed for reliable rhat and ess computation. See https://arxiv.org/abs/1903.08008 for details
+Sampling: [Y]
+Sampling: [Y]
+Auto-assigning NUTS sampler...
+Initializing NUTS using jitter+adapt_diag...
+Multiprocess sampling (4 chains in 4 jobs)
+NUTS: [alpha_X, beta_CX, ls_trt_C2, eta_trt_C2, f_trt_C2_hsgp_coeffs_, ls_trt_C3, eta_trt_C3, f_trt_C3_hsgp_coeffs_, alpha_Y, beta_CY, beta_XY, ls_out_C2, eta_out_C2, f_out_C2_hsgp_coeffs_, ls_out_C3, eta_out_C3, f_out_C3_hsgp_coeffs_]
+Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 1168 seconds.
+There were 485 divergences after tuning. Increase `target_accept` or reparameterize.
+The rhat statistic is larger than 1.01 for some parameters. This indicates problems during sampling. See https://arxiv.org/abs/1903.08008 for details
+Sampling: [Y]
+Sampling: [Y]</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="8000" class="" max="8000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [8000/8000 00:04&lt;00:00 Sampling 4 chains, 0 divergences]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="8000" class="" max="8000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [8000/8000 00:28&lt;00:00 Sampling 4 chains, 0 divergences]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="8000" class="" max="8000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [8000/8000 01:20&lt;00:00 Sampling 4 chains, 0 divergences]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="8000" class="" max="8000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [8000/8000 19:27&lt;00:00 Sampling 4 chains, 485 divergences]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="4000" class="" max="4000" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [4000/4000 00:00&lt;00:00]
+    </div>
+    
+</div>
+</div>
+<div class="cell" data-execution_count="227">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>az.plot_density(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>model_ates,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    hdi_prob<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    data_labels<span class="op">=</span>model_names,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    shade<span class="op">=</span><span class="fl">0.2</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    point_estimate<span class="op">=</span><span class="st">'mean'</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>plt.axvline(x<span class="op">=</span>df2.ITE.mean(), color<span class="op">=</span><span class="st">'black'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'True effect'</span>)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>plt.axvline(x<span class="op">=</span>df2.query(<span class="st">"X == 1"</span>).Y.mean() <span class="op">-</span> df2.query(<span class="st">"X == 0"</span>).Y.mean(), color<span class="op">=</span><span class="st">'red'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, label<span class="op">=</span><span class="st">'Unadjusted effect'</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Posterior distributions of estimated ATE'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-display">
+<p><img src="43-bernoulli-models_files/figure-html/cell-16-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>The linear models fare much better here, as expected!</p>
+</section>
+<section id="moving-forward" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="moving-forward"><span class="header-section-number">6</span> Moving forward</h2>
+<p>Next: make the models hierarchical!</p>
+<div class="cell" data-execution_count="228">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>load_ext watermark</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>watermark <span class="op">-</span>n <span class="op">-</span>u <span class="op">-</span>v <span class="op">-</span>iv <span class="op">-</span>w <span class="op">-</span>p pytensor,xarray</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>The watermark extension is already loaded. To reload it, use:
+  %reload_ext watermark
+Last updated: Fri Apr 26 2024
+
+Python implementation: CPython
+Python version       : 3.11.9
+IPython version      : 8.22.2
+
+pytensor: 2.19.0
+xarray  : 2024.3.0
+
+pymc      : 5.12.0
+seaborn   : 0.13.0
+numpy     : 1.24.4
+matplotlib: 3.8.0
+arviz     : 0.18.0
+pandas    : 2.2.2
+graphviz  : 0.20.3
+
+Watermark: 2.4.3
+</code></pre>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
