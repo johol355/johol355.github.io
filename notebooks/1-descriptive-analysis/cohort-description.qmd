@@ -1,0 +1,562 @@
+---
+title: "Descriptive analysis of the cohort of transferred ICU patients"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    html-math-method: katex
+    number-sections: true
+author: Johan Olsson
+date: 2024-04-28
+code-fold: true
+code-line-numbers: true
+warning: false
+comments:
+  hypothesis: true
+---
+```{r}
+#Load dependencies
+library(tidyverse)
+library(geodist)
+library(gtsummary)
+library(DBI)
+library(RSQLite)
+library(geosphere)
+library(osrm)
+library(rnaturalearth)
+library(sf)
+library(Gmisc)
+library(glue)
+library(htmlTable)
+library(grid)
+```
+
+## Introduction
+This markdown contains a summary of the transferred cohort prior to further analysis.
+
+## Patient selection
+First, we'll select all admissions (from the SIR database) to an ICU within hospitals lacking comprehensive neurosurgical and neurointensivist services (i.e. all but the six tertiary centers).
+
+Next, we'll pinpoint transfers by examining admissions (from the PAR dataset) to tertiary centers within a ±1 day window of the primary ICU discharge. The reason for allowing admission to a tertiary center on the day before primary ICU discharge, is to capture patients with measurement error in discharge times. (It can however be argued that 0-1 days is a better timeframe.) We'll focus exclusively on transfers occurring within 24 hours of the primary ICU admission, as these are presumed to be urgent. In cases of multiple primary ICU admissions (eg. readmissions) or tertiary center admissions (eg. admissions to different departments at the tertiary center) within the timeframe, we'll retain only the last primary ICU admission and the first tertiary center admission. If a patient has multiple transfers, only the first will be considered.
+
+Third, the diagnosis will be inferred from the discharge ICD-10 codes at the tertiary center. A set of NSICU-relevant diagnosis will be probed for. Patients not fulfilling criteria for such a diagnosis will be discarded.
+
+Finally, the cohort is reduced to transfers between hospitals that are \> 49 km apart *by road*. Travelling \> 49 km by road will likely mean that at least 60 minutes is spent in transfers outside of ICUs, meaning that the exposure to transfer complications is larger. These longer transfers are more likely to be conducted by HEMS, where weather conditions become a critical factor."
+
+A subgroup of patients transferred from hospitals frequently using HEMS for transfers to tertiary centers is defined for some further analysis. The exact set of hospitals defining this cohort is subject to change. I'm mainly uncertain if Örebro, Lindesberg, Karlskoga and Nyköping should be included. Adding these hospitals would add another 400 patients.
+
+```{r}
+### SELECT * FROM PRICU_ADMISSIONS
+pricu <- boxGrob(glue("Admissions to a primary ICU in dataset",
+                           "n = {pop}",
+                           pop = txtInt(55804),
+                           .sep = "\n"))
+### SELECT * FROM TRANSFERS
+transfer <- boxGrob(glue("Admissions with urgent transfer to tertiary center (within 24 h)",
+                          "n = {pop}",
+                           pop = txtInt(8199),
+                           .sep = "\n"))
+### SELECT * FROM DESCRIPTIVE
+transfer_nsicu <- boxGrob(glue("Transfers with NSICU-relevant diagnosis",
+                         "n = {incl}",
+                         incl = txtInt(7219),
+                         .sep = "\n"))
+### Filter on road distance > 49 km
+included_long <- boxGrob(glue("Transfers with distance >49 km",
+                         "n = {incl}",
+                         incl = txtInt(6254),
+                         .sep = "\n"))
+
+### Filter on 
+included_long_ex_small <- boxGrob(glue("Transfers from centers with >4 transfers",
+                         "n = {incl}",
+                         incl = txtInt(6241),
+                         .sep = "\n"))
+
+### 
+included_long_ex_small_ff <- boxGrob(glue("Transfers from centers frequently using HEMS",
+                         "n = {incl}",
+                         incl = txtInt(2919),
+                         .sep = "\n"))
+
+grid.newpage()
+boxes <- spreadVertical(pricu,
+                       transfer = transfer,
+                       transfer_nsicu = transfer_nsicu,
+                       included_long = included_long,
+                       included_long_ex_small = included_long_ex_small,
+                       included_long_ex_small_ff = included_long_ex_small_ff)
+
+for (i in 1:(length(boxes) - 1)) {
+  connectGrob(boxes[[i]], boxes[[i + 1]], type = "vert") %>%
+    print
+}
+boxes
+```
+
+## Data preparation
+The SIR and PAR tables are queried using a 800+ line SQLite query. The dataframe is merged with data on coordinates for hospitals and distances between hospitals. The geographical data is stored in separate csv files in the data folder.
+
+```{r}
+## Query the data
+# Define paths to the database and SQL query
+db_path <- "/Users/JO/PhD/neurocritical-transfers/data/db.sqlite"
+query_sql_path <- "/Users/JO/PhD/neurocritical-transfers/notes/final-analysis/0-database-query/primary-based-transfer-query.sql"
+sql_query <- paste(readLines(query_sql_path), collapse = "\n")
+
+# Connect, query and close connection to the SQLite database
+con <- dbConnect(SQLite(), dbname = db_path)
+q <- dbGetQuery(con, sql_query)
+dbDisconnect(con)
+
+## Next a few steps of data cleaning/transformation
+
+# Make tertiary_center_id a double, else all goes to shit
+q$tertiary_center_id <- as.double(q$tertiary_center_id)
+
+# Remap hospital code for receiving hospital to proper names and add coordinates
+tertiary_center_name_map <- read_delim("/Users/JO/PhD/neurocritical-transfers/data/tertiary-names-with-coordinates.csv", delim=";", col_select= c("tertiary_center_id", "tertiary_center_name", "Latitude", "Longitude"), show_col_types = FALSE)
+d_with_tertiary_names <- left_join(x=q, y=tertiary_center_name_map, by = "tertiary_center_id")
+
+# Rename end coordinates columns properly
+d_with_tertiary_names <- d_with_tertiary_names %>% rename("end_latitude" = "Latitude", "end_longitude" = "Longitude")
+
+
+# Get properly formatted pricu names and add coordinates
+icu_mapping_with_coordinates <- read_delim("/Users/JO/PhD/neurocritical-transfers/data/icu-mapping-with-coordinates.csv", delim=";", col_select= c("sir_icu_name", "formatted_icu_name", "Latitude", "Longitude"), show_col_types = FALSE)
+d_with_all_names <- left_join(x=d_with_tertiary_names, y=icu_mapping_with_coordinates, by="sir_icu_name")
+
+# Rename start coordinates colmns properly
+d_with_all_names <- d_with_all_names %>% rename("start_latitude" = "Latitude", "start_longitude" = "Longitude")
+
+## Assign geodesic and road distance for each transfer
+# Load matrices of distances
+g <- read_delim("/Users/JO/PhD/neurocritical-transfers/data/geodesic_distance.csv", show_col_types = FALSE)
+r <- read_delim("/Users/JO/PhD/neurocritical-transfers/data/road_distance.csv", show_col_types = FALSE)
+
+# Populate the dataframe
+distances_geodesic <- numeric(nrow(d_with_all_names))
+distances_road <- numeric(nrow(d_with_all_names))
+
+# Loop through each row of the dataframe
+for (i in 1:nrow(d_with_all_names)) {
+  # Get the tertiary_center_name and formatted_icu_name for the current row
+  tertiary_center <- d_with_all_names$tertiary_center_name[i]
+  sending_icu <- d_with_all_names$formatted_icu_name[i]
+  
+  # Find the corresponding row and column index in the geo_distance matrix
+  reciever <- which(colnames(g) == tertiary_center)
+  
+  # Get the distance from the geo_distance matrix
+  distance_g <- g %>%
+                    filter(formatted_icu_name == sending_icu) %>%
+                    pull(tertiary_center)
+  distance_r <- r %>%
+                    filter(formatted_icu_name == sending_icu) %>%
+                    pull(tertiary_center)
+    # Assign the distance to the distances vector
+  distances_geodesic[i] <- as.double(distance_g)
+  distances_road[i] <- distance_r
+}
+
+d_with_all_names$distance_geodesic <- unlist(distances_geodesic)
+d_with_all_names$distance_road <- unlist(distances_road)
+
+# Done
+d <- d_with_all_names
+
+d_filtered <- d %>% filter(distance_road > 49) %>%
+  group_by(sir_icu_name) %>%
+  filter(n() >= 5) %>%
+  ungroup()
+
+d <- d_filtered
+
+tertiary_centers <- c("Karolinska universitetssjukhuset, Solna", "Sahlgrenska universitetssjukhuset", "Akademiska sjukhuset", "Universitetssjukhuset i Linköping", "Norrlands universitetssjukhus", "Universitetssjukhuset i Lund")
+
+alla_iva <- c("Arvika IVA", "Bollnäs IVA", "Borås IVA", "Eskilstuna IVA", "Falun IVA", "Gällivare IVA", "Gävle IVA", "Hudiksvall IVA", "Jönköping IVA", "Kalix IVA", "Kalmar IVA", "Karlskoga IVA", "Karlskrona IVA", "Karlstad IVA", "Kristianstad IVA", "Lindesberg IVA", "Lycksele IVA", "Mora IVA", "Norrtälje IVA", "Örebro IVA", "Örnsköldsvik IVA", "Östersund IVA", "Piteå IVA", "Skellefteå IVA", "Skövde IVA", "Sollefteå IVA", "Sunderby IVA", "Sundsvall IVA", "Torsby IVA", "Trollhättan IVA",  "Varberg IVA", "Värnamo IVA", "Västerås IVA", "Västervik IVA", "Växjö IVA", "Visby IVA", "Ystad IVA")
+
+helipad <- c("Arvika IVA", "Bollnäs IVA", "Borås IVA", "Eskilstuna IVA", "Falun IVA", "Gällivare IVA", "Gävle IVA", "Hudiksvall IVA", "Jönköping IVA", "Karlskrona IVA", "Karlstad IVA", "Kristianstad IVA", "Mora IVA", "Norrtälje IVA", "Örebro IVA", "Skellefteå IVA", "Skövde IVA", "Sunderby IVA", "Sundsvall IVA", "Torsby IVA", "Trollhättan IVA", "Varberg IVA", "Värnamo IVA", "Västerås IVA", "Visby IVA")
+
+frequent_flyer <- c("Arvika IVA", "Bollnäs IVA", "Eskilstuna IVA", "Falun IVA", "Gällivare IVA", "Gävle IVA", "Hudiksvall IVA", "Karlstad IVA", "Lycksele IVA", "Mora IVA",  "Östersund IVA", "Skövde IVA", "Torsby IVA", "Trollhättan IVA", "Västerås IVA", "Visby IVA")
+
+d_frequent_flyer <- d %>% filter(formatted_icu_name %in% frequent_flyer)
+```
+
+
+## Summary statistics
+Two summary tables will follow, the first is an unredacted version. The second table is pruned, and likely closer to what is meaningful to show to the public. In summary, the cohort is quite "average". The median age is 61 years, slightly above the meadian age in general patients entered into SIR. The avg. 30-day mortality is 15%, about the same as the average patient in SIR.
+
+Some diagnosis codes need extra explanation.
+TBI = These are patients admitted to a tertiary center with a primary ICD10 dx (at discharge) of TBI or with a primary diagnosis of skull/base-of-skull frx/cervical spine frx AND a secondary TBI dx. However, patients with a primary diagnosis of trauma to other parts of the body and a secondary diagnosis of TBI are not included.
+SDH = These are patients with a primary dx of non-traumatic SDH (I62) and no secondary diagnosis of TBI (S06). Many of these patients turn out to have a KVÅ-code AAD05 (evacuation of acute SDH) or AAD10 (evacuation of chronic SDH).
+CFX = Isolated cervical spine fracture. These are patients with a primary dx indicative of a C-spine fracture and without an associated secondary dx of a TBI. If there is an associated TBI, the patient will be categorized as a TBI patient instead.
+CVT = Cerebral venous thrombosis
+AIS = Acute ischemic stroke
+TUM = Intracranial tumour
+SEP = Status epilepticus or epilepsy, not otherwise specified
+HC = Hydrocephalus, not otherwise specified
+
+```{r}
+theme_gtsummary_compact()
+
+d %>%
+  tbl_summary(include=c(age,
+                        sex_female,
+                        admission_weight,
+                        BMI,
+                        DNR,
+                        DX,
+                        tertiary_center_name,
+                        formatted_icu_name,
+                        sir_hospital_type,
+                        icu_admission_year,
+                        distance_geodesic,
+                        distance_road,
+                        sir_total_time,
+                        icu_admission_afterhours,
+                        sir_consciousness_level,
+                        SAPS_GCS,
+                        SAPS_RLS85,
+                        SAPS_obtunded,
+                        SAPS_unconcious,
+                        overall_worst_GCS,
+                        overall_worst_RLS85,
+                        overall_obtunded,
+                        overall_unconcious,
+                        SAPS_AMV,
+                        any_AMV,
+                        SAPS_PFI,
+                        SAPS_hypoxia,
+                        ARDS,
+                        respiratory_instability_markers,
+                        SAPS_min_SBP,
+                        SAPS_hypotension,
+                        SAPS_max_HR,
+                        SOFA_high_norepi_dose,
+                        SAPS_hypothermia,
+                        SAPS_acidosis,
+                        hemodynamic_instability_markers,
+                        d7,
+                        d30,
+                        d365),
+              label = list(age ~ "Age, years",
+                           sex_female ~ "Female",
+                           admission_weight ~ "Weight, kg",
+                           BMI ~ "BMI, kg/m²",
+                           DNR ~ "DNR order",
+                           DX ~ "Inferred diagnosis",
+                           tertiary_center_name ~ "Receiving hospital",
+                           formatted_icu_name ~ "Sending ICU",
+                           sir_hospital_type ~ "Sending hospital type",
+                           icu_admission_year ~ "Admission Year",
+                           distance_road ~ "Road distance, km",
+                           distance_geodesic ~ "Geodesic distance, km",
+                           sir_total_time ~ "Time in primary ICU, minutes",
+                           icu_admission_afterhours ~ "After-hours admission (After 3 p.m., before 7 a.m OR Sat/Sun)",
+                           sir_consciousness_level ~ "SIR SAPS consciousness level",
+                           SAPS_GCS ~ "SAPS GCS",
+                           SAPS_RLS85 ~ "SAPS RLS85",
+                           SAPS_obtunded ~ "SAPS obtunded (not fully alert)",
+                           SAPS_unconcious ~ "SAPS unconscious",
+                           overall_worst_GCS ~ "Worst pre-transfer GCS",
+                           overall_worst_RLS85 ~ "Worst pre-transfer RLS85",
+                           overall_obtunded ~ "Pre-transfer obtunded (not fully alert)",
+                           overall_unconcious ~ "Pre-transfer unconscious (GCS <9)",
+                           SAPS_AMV ~ "SAPS Mechanical Ventilation",
+                           any_AMV ~ "Pre-transfer Mechanical Ventilation",
+                           SAPS_PFI ~ "SAPS PFI, kPa",
+                           SAPS_hypoxia ~ "SAPS Hypoxemia (PAO2<8 kPa)",
+                           ARDS ~ "SAPS PFI <26.6 kPa",
+                           respiratory_instability_markers ~ "Markers of respiratory    instability",
+                           SAPS_min_SBP ~ "SAPS min SBP, mmHg",
+                           SAPS_hypotension ~ "SAPS hypotension <90 mmHg",
+                           SAPS_max_HR ~ "SAPS max HR, bpm",
+                           SOFA_high_norepi_dose ~ "SOFA norepinephrine >0.1 µg/kg/min",
+                           hemodynamic_instability_markers ~ "Markers of hemodynamic instability",
+                           SAPS_hypothermia ~ "SAPS hypothermia (<35°C)",
+                           SAPS_acidosis ~ "SAPS acidosis (pH <7.25)",
+                           d7 ~ "7-day mortality",
+                           d30 ~ "30-day mortality",
+                           d365 ~ "90-day mortality"
+                           ),
+              missing="always",
+              missing_text="Missing"
+                        ) %>%
+  add_n()
+```
+
+
+### A curated descriptive summary
+
+Here is the abbreviated version.
+
+```{r}
+# 
+theme_gtsummary_compact()
+
+d %>%
+  tbl_summary(include=c(age,
+                        sex_female,
+                        admission_weight,
+                        BMI,
+                        DNR,
+                        DX,
+                        tertiary_center_name,
+                        formatted_icu_name,
+                        sir_hospital_type,
+                        icu_admission_year,
+                        distance_road,
+                        sir_total_time,
+                        icu_admission_afterhours,
+                        sir_consciousness_level,
+                        SAPS_GCS,
+                        SAPS_RLS85,
+                        overall_obtunded,
+                        overall_unconcious,
+                        SAPS_AMV,
+                        SAPS_hypoxia,
+                        SAPS_hypotension,
+                        SAPS_hypothermia,
+                        SAPS_acidosis,
+                        d7,
+                        d30,
+                        d365),
+              label = list(age ~ "Age, years",
+                           sex_female ~ "Female",
+                           admission_weight ~ "Weight, kg",
+                           BMI ~ "BMI, kg/m²",
+                           DNR ~ "DNR order",
+                           DX ~ "Inferred diagnosis",
+                           tertiary_center_name ~ "Receiving hospital",
+                           formatted_icu_name ~ "Sending ICU",
+                           sir_hospital_type ~ "Sending hospital type",
+                           icu_admission_year ~ "Admission Year",
+                           distance_road ~ "Road distance, km",
+                           sir_total_time ~ "Time in primary ICU, minutes",
+                           icu_admission_afterhours ~ "After-hours admission (After 3 p.m., before 7 a.m OR Sat/Sun)",
+                           sir_consciousness_level ~ "SIR SAPS consciousness level",
+                           SAPS_GCS ~ "SAPS GCS",
+                           SAPS_RLS85 ~ "SAPS RLS85",
+                           overall_obtunded ~ "Pre-transfer obtunded (not fully alert)",
+                           overall_unconcious ~ "Pre-transfer unconscious (GCS <9)",
+                           SAPS_AMV ~ "SAPS Mechanical Ventilation",
+                           SAPS_hypoxia ~ "SAPS Hypoxemia (PAO2<8 kPa)",
+                           SAPS_hypotension ~ "SAPS hypotension <90 mmHg",
+                           SAPS_hypothermia ~ "SAPS hypothermia (<35°C)",
+                           SAPS_acidosis ~ "SAPS acidosis (pH <7.25)",
+                           d7 ~ "7-day mortality",
+                           d30 ~ "30-day mortality",
+                           d365 ~ "90-day mortality"
+                           ),
+              missing="always",
+              missing_text="Missing"
+                        ) %>%
+  add_n()
+```
+
+### Summary by diagnosis
+Finally, let's limit the summary to patients within the seven most common diagnosis.
+
+```{r}
+d %>%
+  filter(DX %in% c('TBI', 'ASAH', 'ICH', 'AIS', 'SDH', 'ABM', 'CFX')) %>%
+  select(DX, age, sex_female, icu_admission_afterhours, sir_total_time, sir_consciousness_level, overall_unconcious, overall_obtunded, SAPS_hypoxia, SAPS_hypotension, SAPS_hypothermia, SAPS_acidosis, d30) %>%
+  tbl_summary(by='DX', label = list(age ~ "Age, years",
+                                    sex_female ~ "Female",
+                                    icu_admission_afterhours ~ "After-hours admission (After 3 p.m., before 7 a.m OR Sat/Sun)",
+                                    sir_total_time ~ "Time in primary ICU, minutes",
+                                    sir_consciousness_level ~ "SIR SAPS consciousness level",
+                                    overall_obtunded ~ "Pre-transfer obtunded (not fully alert)",
+                                    overall_unconcious ~ "Pre-transfer unconscious (GCS <9)",
+                                    SAPS_hypoxia ~ "SAPS Hypoxemia (PAO2<8 kPa)",
+                                    SAPS_hypotension ~ "SAPS hypotension <90 mmHg",
+                                    SAPS_hypothermia ~ "SAPS hypothermia (<35°C)",
+                                    SAPS_acidosis ~ "SAPS acidosis (pH <7.25)",
+                                    d30 ~ "30-day mortality"
+                           ),
+              missing_text="Missing"
+                        ) %>%
+  add_n()
+```
+
+
+### Plotting distribution of transfer distances (geodesic distance) per receiving center
+```{r}
+ggplot(data = d, aes(x = factor(tertiary_center_name), y = distance_geodesic)) +
+  geom_boxplot() + 
+  labs(
+    x = "Receiving tertiary center",
+    y = "Geodesic distance (km)",
+    title = "Distribution of transfer distance across receiving tertiary centers"
+  ) +
+  ylim(0,700) +
+  theme_minimal() + 
+  theme(
+    axis.text.x = element_text(
+      angle = 45,
+      hjust = 1,
+      size = 8
+    ))
+```
+### Plotting distribution of time spent in primary ICU across sending centers
+
+```{r}
+ggplot(data = d, aes(x = factor(formatted_icu_name), y = sir_total_time)) +
+  geom_boxplot() + 
+  labs(
+    x = "Sending center",
+    y = "Time spent in primary ICU (minutes)",
+    title = "Distribution of time spent in primary ICU across sending centers"
+  ) +
+  ylim(0,720) +
+    theme_minimal() + 
+  theme(
+    axis.text.x = element_text(
+      angle = 90,
+      size = 8,
+      
+    ))
+```
+
+### A mapping of transfers
+Here a map of all the transfers in the cohort with transfer distance >49 km. Big maroon dots = receiving centers. Black dots = sending centers. Black dots with maroon circle = sending centers that are frequent users of HEMS.
+
+The plotting builds on the work of Jesse Sadlers blog post (https://www.jessesadler.com/post/great-circles-sp-sf/).
+
+```{r}
+# Create a dataframe of routes in the dataset and the frequencies
+routes <- d %>%
+  group_by(formatted_icu_name, tertiary_center_name) %>%
+  count() %>%
+  ungroup() %>%
+  arrange(n)
+
+# Create a tibble of longitude and latitude values of sources
+sources_tbl <- d %>% 
+  select(start_longitude, start_latitude)
+# Create a tibble of longitude and latitude values of destinations
+destinations_tbl <- d %>%
+  select(end_longitude, end_latitude)
+
+# Calculate great circles
+sl_routes <- gcIntermediate(sources_tbl, destinations_tbl, 
+                            n = 50, addStartEnd = TRUE, 
+                            sp = TRUE)
+
+# Get mapdata for Sweden from Naturalearth
+swe <- ne_countries(scale = "medium", country="Sweden", type="countries", returnclass="sf")
+
+routes_id <- rowid_to_column(routes, var = "id")
+routes_long <- routes_id %>% 
+  gather(key = "type", value = "place", formatted_icu_name, tertiary_center_name)
+
+end <- tertiary_center_name_map %>% select(tertiary_center_name, Latitude, Longitude) %>% rename("place" = "tertiary_center_name")
+start <- icu_mapping_with_coordinates %>% select(formatted_icu_name, Latitude, Longitude) %>% rename("place" = "formatted_icu_name")
+locations <- bind_rows(end, start) %>% distinct()
+routes_long_geo <- left_join(routes_long, locations, by = "place")
+
+routes_long_sf <- st_as_sf(routes_long_geo,
+                           coords = c("Longitude", "Latitude"),
+                           crs = 4326)
+
+routes_lines <- routes_long_sf %>% 
+  group_by(id) %>% 
+  summarise(do_union = FALSE) %>% 
+  st_cast("LINESTRING")
+
+routes_lines <- left_join(routes_lines, routes_id, by = "id")
+
+routes_sf_tidy <- routes_lines %>% 
+  st_segmentize(units::set_units(20, km))
+
+library(lwgeom)
+routes_sf_tidy <- routes_lines %>% 
+  st_segmentize(units::set_units(20, km))
+```
+
+
+```{r graph_connections, fig.width=10, fig.height=8, fig.popup=TRUE}
+library(ggspatial)
+#| label: fig-swedem
+#| 
+#| fig-cap: "Transfers of ICU patients in the cohort. The opacity of the line denotes the relative frequency of transfers."
+
+ggplot() +
+  geom_sf(data = swe, fill = gray(0.95), color = gray(0.3)) +
+  geom_sf(data = routes_sf_tidy, aes(alpha = routes_sf_tidy$n), show.legend = FALSE) +
+  scale_alpha_continuous(range = c(0.1, 1), breaks = pretty(range(routes_sf_tidy$n), n = 4)) +
+  geom_sf(data = routes_long_sf) +
+  geom_point(data = filter(locations, place %in% tertiary_centers), aes(x = Longitude, y = Latitude), color = "maroon", size = 2) +
+  geom_point(shape=21, data = filter(locations, place %in% frequent_flyer), aes(x = Longitude, y = Latitude), color = "maroon", size = 3) +
+
+  ggtitle("ICU transfers (>49 km) in the Cohort") + 
+  theme_minimal() + 
+  ggspatial::annotation_scale(style="ticks", location="br")
+```
+## A description of the "frequent flyer" subgroup of sending center cohort
+
+```{r}
+# 
+theme_gtsummary_compact()
+
+d_frequent_flyer %>%
+  tbl_summary(include=c(age,
+                        sex_female,
+                        admission_weight,
+                        BMI,
+                        DNR,
+                        DX,
+                        tertiary_center_name,
+                        formatted_icu_name,
+                        sir_hospital_type,
+                        icu_admission_year,
+                        distance_road,
+                        sir_total_time,
+                        icu_admission_afterhours,
+                        sir_consciousness_level,
+                        SAPS_GCS,
+                        SAPS_RLS85,
+                        overall_obtunded,
+                        overall_unconcious,
+                        SAPS_AMV,
+                        SAPS_hypoxia,
+                        SAPS_hypotension,
+                        SAPS_hypothermia,
+                        SAPS_acidosis,
+                        d7,
+                        d30,
+                        d365),
+              label = list(age ~ "Age, years",
+                           sex_female ~ "Female",
+                           admission_weight ~ "Weight, kg",
+                           BMI ~ "BMI, kg/m²",
+                           DNR ~ "DNR order",
+                           DX ~ "Inferred diagnosis",
+                           tertiary_center_name ~ "Receiving hospital",
+                           formatted_icu_name ~ "Sending ICU",
+                           sir_hospital_type ~ "Sending hospital type",
+                           icu_admission_year ~ "Admission Year",
+                           distance_road ~ "Road distance, km",
+                           sir_total_time ~ "Time in primary ICU, minutes",
+                           icu_admission_afterhours ~ "After-hours admission (After 3 p.m., before 7 a.m OR Sat/Sun)",
+                           sir_consciousness_level ~ "SIR SAPS consciousness level",
+                           SAPS_GCS ~ "SAPS GCS",
+                           SAPS_RLS85 ~ "SAPS RLS85",
+                           overall_obtunded ~ "Pre-transfer obtunded (not fully alert)",
+                           overall_unconcious ~ "Pre-transfer unconscious (GCS <9)",
+                           SAPS_AMV ~ "SAPS Mechanical Ventilation",
+                           SAPS_hypoxia ~ "SAPS Hypoxemia (PAO2<8 kPa)",
+                           SAPS_hypotension ~ "SAPS hypotension <90 mmHg",
+                           SAPS_hypothermia ~ "SAPS hypothermia (<35°C)",
+                           SAPS_acidosis ~ "SAPS acidosis (pH <7.25)",
+                           d7 ~ "7-day mortality",
+                           d30 ~ "30-day mortality",
+                           d365 ~ "90-day mortality"
+                           ),
+              missing="always",
+              missing_text="Missing"
+                        ) %>%
+  add_n()
+```
