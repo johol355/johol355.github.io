@@ -1,0 +1,412 @@
+---
+title: "Descriptive analysis of the cohort of transferred NSICU patients"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    html-math-method: katex
+    number-sections: true
+author: Johan Olsson
+date: 2024-06-23
+code-fold: true
+code-line-numbers: true
+warning: false
+comments:
+  hypothesis: true
+---
+
+```{r}
+#Load dependencies
+library(tidyverse)
+library(geodist)
+library(gtsummary)
+library(DBI)
+library(RSQLite)
+library(geosphere)
+library(osrm)
+library(rnaturalearth)
+library(sf)
+library(Gmisc)
+library(glue)
+library(htmlTable)
+library(grid)
+```
+
+## On data preprocessing
+This markdown contains a summary of the transferred cohort prior to further analysis. The data comes from SIR (clinical data), PAR (demographics and diagnosis), dödsorsaksregistret (date of death), FlightRadar24 (helicopter flight data), ogimet.com (weather data). A brief description of the preprocessing will follow. Admissions to a primary ICU (i.e. a non-university hospital general ICU) are matched with NSICU-relevant (per inferred diagnosis) PAR admissions at a tertiary center on on the same day or day after as the primary ICU discharge. Additionally, PAR admissions on the day before the ICU discharge are included if (and only if) the SIR discharge is between 00:00 and 03:59 hours. The primary ICU length of stay must be less than 24 hours.Only PAR admissions with a discharge diagnosis fulfilling specific diagnostic criteria are included. Each pair of primary ICU admission and tertiary admission is considered an interfacility transfer (IFT). Only the first such transfer for each patient is included.
+
+The flight data, containing all rotary wing movements recorded (from MLAT and ADS-B) in Swedish airspace between January 2017 and May 2024, is parsed to infer outgoing flights from primary hospitals to receiving tertiary hospitals. Each interfacility transfer (from the previous step) is matched with flights going in the same direction (within a +/- 3 hour window relative to primary ICU discharge). If there is a match, it is assumed that the patient was transferred by HEMS.
+
+Weather data (METAR) for the same period is parsed, and HEMS weather minima are inferred based on the reports. At the point of ICU discharge, the current METAR from the nearest reporting airport is used to infer if weather conditions permitted HEMS operations.
+
+Only patients/flights starting October 2019 are included, as flight data is patchy prior to this time making inference of transfer modality very uncertain. In the fall of 2019, the busiest transport organization (Luftburen intensivvård, Uppsala) started using a new helicopter with a much better transponder, making their activities traceable. Prior to this date, very few flights can be retrieved in this large part of the country.
+
+Finally, only interfacility transfers with a road distance greater than 49 km are included.
+
+### On matching flights with patient transfers
+In the cases where the script matches a flight with a patient (thus inferring a HEMS IFT), we can look at the time difference between the SIR discharge time and the time of leaving the hospital (technically: an area surrounding the hospital) in the flight data. Reassuringly, even if we allow for a time window of +/- 3 hours, almost all flights are leaving the primary hospital within 30 minutes of ICU discharge, which makes sense! Extending the 3 hour window obviously adds a few cases, but with increasing risk of false positives.
+
+```{r time_differences, fig.width=10, fig.height=8, fig.popup=TRUE, fig.cap="A histogram of time differences between the helicopter leaving the hospital zone vs. SIR discharge time"}
+d <- read_delim("/Users/JO/PhD/nsicu-transfers/data/pre-processed-data/patient-df-2024-06-23 12:50:07.576564.csv", show_col_types = FALSE)
+
+d <- d %>%
+  mutate(hems_ift = ifelse(hems_ift, "HEMS", "Other"))
+
+dsc_time <- ymd_hms(d$sir_dsc_time_UTC, tz="UTC")
+out_time <-  ymd_hms(d$UTC_out_sending_hems, tz="UTC")
+timediff_minutes <- data.frame((out_time - dsc_time) / 60)
+names(timediff_minutes) <- c("SIR_discharge_time_relative_helicopter_out_time")
+
+ggplot(timediff_minutes, aes(x = SIR_discharge_time_relative_helicopter_out_time)) +
+  geom_histogram(binwidth = 5, fill = "maroon", color = "black") +
+  labs(title = "Time Difference Between Helicopter Leaving Hospital vs. SIR Discharge Time",
+       x = "Minutes",
+       y = "Frequency") +
+  scale_x_continuous(breaks = c(-120, -90, -60, -45, -30, -15, 0, 15, 30, 45, 60, 90, 120)) +
+  theme_minimal()
+```
+
+## Cohort summary
+```{r}
+theme_gtsummary_compact()
+
+d %>%
+  tbl_summary(include=c(age,
+                        sex_female,
+                        DNR,
+                        BMI,
+                        DX_GROUP,
+                        sir_consciousness_level,
+                        overall_obtunded,
+                        SAPS_GCS,
+                        SAPS_RLS85,
+                        any_AMV,
+                        respiratory_instability_markers,
+                        SAPS_hypoxia,
+                        SAPS_hypotension,
+                        SAPS_hypertension,
+                        SAPS_bradycardia,
+                        SAPS_tachycardia,
+                        hemodynamic_instability_markers,
+                        SAPS_acidosis,
+                        SAPS_hypothermia,
+                        hospital_name_receiving,
+                        formatted_icu_name,
+                        sir_hospital_type,
+                        sir_total_time,
+                        icu_discharge_afterhours,
+                        icu_discharge_nighttime,
+                        road_distance,
+                        geodesic_distance,
+                        hems_minima,
+                        hems_ift,
+                        d7,
+                        d30,
+                        d365
+                ),
+              
+              label = list(age ~ "Age, years",
+                           sex_female ~ "Female",
+                           DNR ~ "DNR order",
+                           BMI ~ "BMI, kg/m2",
+                           DX_GROUP ~ "Inferred diagnosis",
+                           sir_consciousness_level ~ "SIR SAPS consciousness level",
+                           overall_obtunded ~ "Pre-transfer obtunded (not fully alert)",
+                           SAPS_GCS ~ "SAPS GCS",
+                           SAPS_RLS85 ~ "SAPS RLS85",
+                           any_AMV ~ "Pre-transfer Mechanical Ventilation",
+                           SAPS_hypoxia ~ "SAPS Hypoxemia (PAO2<8 kPa)",
+                           respiratory_instability_markers ~ "Markers of respiratory instability",
+                           SAPS_hypotension ~ "SAPS hypotension (<90 mmHg)",
+                           SAPS_hypertension ~ "SAPS hypertension (>180 mmHg)",
+                           SAPS_bradycardia ~ "SAPS bradycardia (<50 bpm)",
+                           SAPS_tachycardia ~ "SAPS tachycardia (>110 bpm) ",
+                           hemodynamic_instability_markers ~ "Markers of hemodynamic instability",
+                           SAPS_acidosis ~ "SAPS acidosis (pH <7.25)",
+                           SAPS_hypothermia ~ "SAPS hypothermia (<35°C)",
+                           hospital_name_receiving ~ "Receiving hospital",
+                           formatted_icu_name ~ "Sending ICU",
+                           sir_hospital_type ~ "Sending hospital type",
+                           sir_total_time ~ "Time in primary ICU, minutes",
+                           icu_discharge_afterhours ~ "Discharge outside of office hours (jourtid)",
+                           icu_discharge_nighttime ~ "Discharge between hours 22:00 - 07:00",
+                           road_distance ~ "Road distance, km",
+                           geodesic_distance ~ "Geodesic distance, km",
+                           hems_minima ~ "HEMS weather minima met at discharge",
+                           hems_ift ~ "Interfacility transfer modality",
+                           d7 ~ "7-day mortality",
+                           d30 ~ "30-day mortality",
+                           d365 ~ "90-day mortality"
+                           ),
+              missing="always",
+              missing_text="Missing"
+                        ) %>%
+  add_n()
+```
+
+
+
+
+### Cohort summary by diagnosis
+```{r}
+d %>%
+  filter(DX_GROUP %in% c('TBI', 'ASAH', 'ICH', 'AIS', 'SDH', 'ABM', 'CFX', 'AVM', 'CVT', 'TUM', 'HC')) %>%
+  select(DX_GROUP, age, sex_female, sir_total_time, hems_ift, sir_consciousness_level, overall_obtunded, overall_unconcious, any_AMV, SAPS_hypoxia, SAPS_hypotension, SAPS_hypertension, SAPS_bradycardia, SAPS_hypothermia, SAPS_acidosis, d30) %>%
+  tbl_summary(by='DX_GROUP', label = list(age ~ "Age, years",
+                                    sex_female ~ "Female",
+                                    sir_consciousness_level ~ "SIR SAPS consciousness level",
+                                    overall_obtunded ~ "Pre-transfer obtunded (not fully alert)",
+                                    overall_unconcious ~ "Pre-transfer unconscious (GCS <9)",
+                                    any_AMV ~ "Pre-transfer Mechanical Ventilation",
+                                    SAPS_hypoxia ~ "SAPS Hypoxemia (PAO2<8 kPa)",
+                                    SAPS_hypotension ~ "SAPS hypotension <90 mmHg",
+                                    SAPS_hypertension ~ "SAPS hypertension (>180 mmHg)",
+                                    SAPS_bradycardia ~ "SAPS bradycardia (<50 bpm)",
+                                    SAPS_hypothermia ~ "SAPS hypothermia (<35°C)",
+                                    SAPS_acidosis ~ "SAPS acidosis (pH <7.25)",
+                                    sir_total_time ~ "Time in primary ICU, minutes",
+                                    d30 ~ "30-day mortality",
+                                    hems_ift ~ "Interfacility transfer modality"
+                           ),
+              missing_text="Missing"
+                        ) %>%
+  add_n()
+```
+
+### Distribution of transfer distance (per receiving hospital)
+```{r distance_dist, fig.width=10, fig.height=8, fig.popup=TRUE, fig.cap="Distribution of travelled distance (geodesic distance) by receiving tertiary center"}
+ggplot(data = d, aes(x = factor(hospital_name_receiving), y = geodesic_distance)) +
+  geom_boxplot() + 
+  labs(
+    x = "Receiving tertiary center",
+    y = "Geodesic distance (km)",
+    title = "Distribution of transfer distance across receiving tertiary centers"
+  ) +
+  ylim(0,700) +
+  theme_minimal() + 
+  theme(
+    axis.text.x = element_text(
+      angle = 45,
+      hjust = 1,
+      size = 8
+    ))
+```
+
+### Distribution of primary ICU time (per sending hospital)
+```{r primary_time, fig.width=10, fig.height=8, fig.popup=TRUE, fig.cap="A plot of time spent in primary ICU prior to discharge per sending ICU"}
+ggplot(data = d, aes(x = factor(formatted_icu_name), y = sir_total_time)) +
+  geom_boxplot() + 
+  labs(
+    x = "Sending center",
+    y = "Time spent in primary ICU (minutes)",
+    title = "Distribution of time spent in primary ICU across sending centers"
+  ) +
+  ylim(0,720) +
+    theme_minimal() + 
+  theme(
+    axis.text.x = element_text(
+      angle = 90,
+      size = 8,
+      
+    ))
+```
+
+### A map of the interfacility transfers
+
+```{r}
+# Create a dataframe of routes in the dataset and the frequencies
+routes <- d %>%
+  group_by(formatted_icu_name, hospital_name_receiving) %>%
+  count() %>%
+  ungroup() %>%
+  arrange(n)
+
+# Create a tibble of longitude and latitude values of sources
+sources_tbl <- d %>% 
+  select(start_longitude, start_latitude)
+# Create a tibble of longitude and latitude values of destinations
+destinations_tbl <- d %>%
+  select(end_longitude, end_latitude)
+
+# Calculate great circles
+sl_routes <- gcIntermediate(sources_tbl, destinations_tbl, 
+                            n = 50, addStartEnd = TRUE, 
+                            sp = TRUE)
+
+# Get mapdata for Sweden from Naturalearth
+swe <- ne_countries(scale = "medium", country="Sweden", type="countries", returnclass="sf")
+
+routes_id <- rowid_to_column(routes, var = "id")
+routes_long <- routes_id %>% 
+  gather(key = "type", value = "place", formatted_icu_name, hospital_name_receiving)
+
+end <- d %>% select(hospital_name_receiving, end_latitude, end_longitude) %>% rename("place" = "hospital_name_receiving", "latitude" = "end_latitude", "longitude" = "end_longitude")
+start <- d %>% select(formatted_icu_name, start_latitude, start_longitude) %>% rename("place" = "formatted_icu_name", "latitude" = "start_latitude", "longitude" = "start_longitude")
+locations <- bind_rows(end, start) %>% distinct()
+routes_long_geo <- left_join(routes_long, locations, by = "place")
+
+routes_long_sf <- st_as_sf(routes_long_geo,
+                           coords = c("longitude", "latitude"),
+                           crs = 4326)
+
+routes_lines <- routes_long_sf %>% 
+  group_by(id) %>% 
+  summarise(do_union = FALSE) %>% 
+  st_cast("LINESTRING")
+
+routes_lines <- left_join(routes_lines, routes_id, by = "id")
+
+routes_sf_tidy <- routes_lines %>% 
+  st_segmentize(units::set_units(20, km))
+
+library(lwgeom)
+routes_sf_tidy <- routes_lines %>% 
+  st_segmentize(units::set_units(20, km))
+
+heavy_users <- unique(filter(d, hems_ift_proportion >= 0.2)$formatted_icu_name)
+```
+
+```{r graph_connections, fig.width=10, fig.height=8, fig.popup=TRUE, fig.cap="Transfers of ICU patients in the cohort. The opacity of the line denotes the relative frequency of transfers. Blue circles mark sending primary hospitals where the proportion of interfacility transfer utilizing HEMS is ≥ 20%"}
+library(ggspatial)
+library(ggspatial)
+#| label: fig-swedem
+#| 
+#| fig-cap: "Transfers of ICU patients in the cohort. The opacity of the line denotes the relative frequency of transfers."
+
+ggplot() +
+  geom_sf(data = swe, fill = gray(0.95), color = gray(0.3)) +
+  geom_sf(data = routes_sf_tidy, aes(alpha = routes_sf_tidy$n), show.legend = FALSE) +
+  scale_alpha_continuous(range = c(0.1, 1), breaks = pretty(range(routes_sf_tidy$n), n = 4)) +
+  geom_sf(data = routes_long_sf) +
+  geom_point(data = filter(locations, place %in% unique(d$hospital_name_receiving)), aes(x = longitude, y = latitude), color = "maroon", size = 2) +
+  geom_point(shape=21, data = filter(locations, place %in% c(heavy_users)), aes(x = longitude, y = latitude), color = "#004080", size = 3) +
+
+  ggtitle("ICU transfers (>49 km) in the Cohort (October 2019 - July 2022)") +
+  theme_minimal() + 
+  ggspatial::annotation_scale(style="ticks", location="br")
+```
+
+### Cohort summary by IFT status (HEMS vs other)
+
+```{r}
+d %>% filter(DX_GROUP %in% c("TBI", "ASAH", "ICH", "AIS", "CFX", "SDH", "ABM", "AVM", "HC", "CVT", "TUM", "SEP"), ) %>%
+  select(DX_GROUP, age, sex_female, sir_consciousness_level, overall_obtunded, overall_unconcious, any_AMV, SAPS_hypoxia, SAPS_hypotension, SAPS_hypertension, SAPS_bradycardia, SAPS_hypothermia, SAPS_acidosis, hems_ift, formatted_icu_name, icu_discharge_afterhours, icu_discharge_nighttime, sir_total_time, road_distance, geodesic_distance, hems_minima, d30) %>%
+  tbl_summary(by='hems_ift', label = list(age ~ "Age, years",
+                                    DX_GROUP ~ "Inferred diagnosis",
+                                    sex_female ~ "Female",
+                                    sir_consciousness_level ~ "SIR SAPS consciousness level",
+                                    overall_obtunded ~ "Pre-transfer obtunded (not fully alert)",
+                                    overall_unconcious ~ "Pre-transfer unconscious (GCS <9)",
+                                    any_AMV ~ "Pre-transfer Mechanical Ventilation",
+                                    SAPS_hypoxia ~ "SAPS Hypoxemia (PAO2<8 kPa)",
+                                    SAPS_hypotension ~ "SAPS hypotension <90 mmHg",
+                                    SAPS_hypertension ~ "SAPS hypertension (>180 mmHg)",
+                                    SAPS_bradycardia ~ "SAPS bradycardia (<50 bpm)",
+                                    SAPS_hypothermia ~ "SAPS hypothermia (<35°C)",
+                                    SAPS_acidosis ~ "SAPS acidosis (pH <7.25)",
+                                    sir_total_time ~ "Time in primary ICU, minutes",
+                                    icu_discharge_afterhours ~ "Discharge outside of office hours (jourtid)",
+                                    icu_discharge_nighttime ~ "Discharge between hours 22:00 - 07:00",
+                                    formatted_icu_name ~ "Sending ICU",
+                                    road_distance ~ "Road distance, km",
+                                    geodesic_distance ~ "Geodesic distance, km",
+                                    hems_minima ~ "HEMS weather minima met at discharge",
+                                    d30 ~ "30-day mortality"
+                           ),
+              missing_text="Missing"
+                        ) %>%
+  add_n()
+```
+
+#### Summary of a subset of the cohort based on diagnostic criteria
+Here the 5 most common intracranial diagnostic groups are kept. Note that this is bordering to a methodological fallacy... Why five? Of note, the mortality rate in the other groups is low. Which makes it less likely that a difference in 30 day mortality can be seen.
+
+```{r}
+d %>% filter(DX_GROUP %in% c("TBI", "ASAH", "ICH", "ABM", "AIS"), ) %>%
+  select(DX_GROUP, age, sex_female, sir_consciousness_level, overall_obtunded, overall_unconcious, any_AMV, SAPS_hypoxia, SAPS_hypotension, SAPS_hypertension, SAPS_bradycardia, SAPS_hypothermia, SAPS_acidosis, hems_ift, formatted_icu_name, icu_discharge_afterhours, icu_discharge_nighttime, sir_total_time, road_distance, geodesic_distance, hems_minima, d30) %>%
+  tbl_summary(by='hems_ift', label = list(age ~ "Age, years",
+                                    DX_GROUP ~ "Inferred diagnosis",
+                                    sex_female ~ "Female",
+                                    sir_consciousness_level ~ "SIR SAPS consciousness level",
+                                    overall_obtunded ~ "Pre-transfer obtunded (not fully alert)",
+                                    overall_unconcious ~ "Pre-transfer unconscious (GCS <9)",
+                                    any_AMV ~ "Pre-transfer Mechanical Ventilation",
+                                    SAPS_hypoxia ~ "SAPS Hypoxemia (PAO2<8 kPa)",
+                                    SAPS_hypotension ~ "SAPS hypotension <90 mmHg",
+                                    SAPS_hypertension ~ "SAPS hypertension (>180 mmHg)",
+                                    SAPS_bradycardia ~ "SAPS bradycardia (<50 bpm)",
+                                    SAPS_hypothermia ~ "SAPS hypothermia (<35°C)",
+                                    SAPS_acidosis ~ "SAPS acidosis (pH <7.25)",
+                                    sir_total_time ~ "Time in primary ICU, minutes",
+                                    icu_discharge_afterhours ~ "Discharge outside of office hours (jourtid)",
+                                    icu_discharge_nighttime ~ "Discharge between hours 22:00 - 07:00",
+                                    formatted_icu_name ~ "Sending ICU",
+                                    road_distance ~ "Road distance, km",
+                                    geodesic_distance ~ "Geodesic distance, km",
+                                    hems_minima ~ "HEMS weather minima met at discharge",
+                                    d30 ~ "30-day mortality"
+                           ),
+              missing_text="Missing"
+                        ) %>%
+  add_n()
+```
+
+## Moving forward
+Note that if we can supplement the clinical data up to at least May 2024, I expect that the final dataset will be closer to 2,000 patients.
+
+Ideas:
+
+* Descriptive analysis (as above essentially)
+
+* Modeling the propensity of being assigned HEMS transfer (this will probably show that weather matters...), i.e. answering "What predictors are associated (or causing) with transfer modality X in patients ICU with neurological- and neurosurgical emergencies that are undergoing transfer to a tertiary center?"
+
+* Modeling the impact of being assigned HEMS transfer, i.e. answering "What is the causal effect of HEMS transfers on patients with...". My idea of the causal structure can be seen in the DAG below.
+
+* Modeling risk factors for poor outcome in patients transferred by HEMS vs other modalities: are there differences that could be hypothesis generating (i.e. "are there patients at extra high risk of badness?")
+```{r}
+library(dagitty)
+
+dag <- dagitty('
+dag {
+bb="0,0,1,1"
+"Demographics (age)" [adjusted,pos="0.527,0.146"]
+"Hour of day" [adjusted,pos="0.412,0.722"]
+"ICU factors (ICU strain, staffing)" [latent,pos="0.729,0.506"]
+"Local transfer-team availability" [latent,pos="0.444,0.510"]
+"Month of year" [adjusted,pos="0.544,0.718"]
+"Outcome (30d mortality)" [outcome,pos="0.705,0.378"]
+"SOI (SAPS data)" [adjusted,pos="0.349,0.145"]
+"Transfer modality" [exposure,pos="0.337,0.383"]
+"Weather (HEMS minima)" [pos="0.197,0.510"]
+Diagnosis [adjusted,pos="0.715,0.152"]
+"Demographics (age)" -> "Outcome (30d mortality)"
+"Demographics (age)" -> "Transfer modality"
+"Hour of day" -> "ICU factors (ICU strain, staffing)"
+"Hour of day" -> "Local transfer-team availability"
+"Hour of day" -> "Weather (HEMS minima)"
+"ICU factors (ICU strain, staffing)" -> "Outcome (30d mortality)"
+"Local transfer-team availability" -> "Transfer modality"
+"Month of year" -> "ICU factors (ICU strain, staffing)"
+"Month of year" -> "Local transfer-team availability"
+"Month of year" -> "Weather (HEMS minima)"
+"SOI (SAPS data)" -> "Outcome (30d mortality)"
+"SOI (SAPS data)" -> "Transfer modality"
+"Transfer modality" -> "Outcome (30d mortality)"
+"Weather (HEMS minima)" -> "Transfer modality"
+Diagnosis -> "Outcome (30d mortality)"
+Diagnosis -> "Transfer modality"
+}
+')
+
+plot(dag)
+
+```
+### Issues to adress
+* Should all DX be included?
+
+* Should all hospitals be included? There are some sites that never use HEMS. Is it fair to include them? Is it more fair to exclude them?
+
+* Some hospitals will use fixed-wing transfers if HEMS is not available, and only rarely ground EMS. The level of care is similar/identical in fixed-wing transfers as it is in HEMS transfers. Should these hospitals be exluded.
+
+* The modelling should be hierarchical. What are reasonable levels? Sending hospital, receiving hospital or diagnostic group? Or all of them in a nested structure?
