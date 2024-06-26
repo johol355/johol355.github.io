@@ -8,7 +8,7 @@ format:
     html-math-method: katex
     number-sections: true
 author: Johan Olsson
-date: 2024-06-23
+date: 2024-06-26
 code-fold: true
 code-line-numbers: true
 warning: false
@@ -34,6 +34,7 @@ library(grid)
 ```
 
 ## On data preprocessing
+
 This markdown contains a summary of the transferred cohort prior to further analysis. The data comes from SIR (clinical data), PAR (demographics and diagnosis), dödsorsaksregistret (date of death), FlightRadar24 (helicopter flight data), ogimet.com (weather data). A brief description of the preprocessing will follow. Admissions to a primary ICU (i.e. a non-university hospital general ICU) are matched with NSICU-relevant (per inferred diagnosis) PAR admissions at a tertiary center on on the same day or day after as the primary ICU discharge. Additionally, PAR admissions on the day before the ICU discharge are included if (and only if) the SIR discharge is between 00:00 and 03:59 hours. The primary ICU length of stay must be less than 24 hours.Only PAR admissions with a discharge diagnosis fulfilling specific diagnostic criteria are included. Each pair of primary ICU admission and tertiary admission is considered an interfacility transfer (IFT). Only the first such transfer for each patient is included.
 
 The flight data, containing all rotary wing movements recorded (from MLAT and ADS-B) in Swedish airspace between January 2017 and May 2024, is parsed to infer outgoing flights from primary hospitals to receiving tertiary hospitals. Each interfacility transfer (from the previous step) is matched with flights going in the same direction (within a +/- 3 hour window relative to primary ICU discharge). If there is a match, it is assumed that the patient was transferred by HEMS.
@@ -45,6 +46,7 @@ Only patients/flights starting October 2019 are included, as flight data is patc
 Finally, only interfacility transfers with a road distance greater than 49 km are included.
 
 ### On matching flights with patient transfers
+
 In the cases where the script matches a flight with a patient (thus inferring a HEMS IFT), we can look at the time difference between the SIR discharge time and the time of leaving the hospital (technically: an area surrounding the hospital) in the flight data. Reassuringly, even if we allow for a time window of +/- 3 hours, almost all flights are leaving the primary hospital within 30 minutes of ICU discharge, which makes sense! Extending the 3 hour window obviously adds a few cases, but with increasing risk of false positives.
 
 ```{r time_differences, fig.width=10, fig.height=8, fig.popup=TRUE, fig.cap="A histogram of time differences between the helicopter leaving the hospital zone vs. SIR discharge time"}
@@ -68,6 +70,7 @@ ggplot(timediff_minutes, aes(x = SIR_discharge_time_relative_helicopter_out_time
 ```
 
 ## Cohort summary
+
 ```{r}
 theme_gtsummary_compact()
 
@@ -145,10 +148,8 @@ d %>%
   add_n()
 ```
 
-
-
-
 ### Cohort summary by diagnosis
+
 ```{r}
 d %>%
   filter(DX_GROUP %in% c('TBI', 'ASAH', 'ICH', 'AIS', 'SDH', 'ABM', 'CFX', 'AVM', 'CVT', 'TUM', 'HC')) %>%
@@ -174,7 +175,42 @@ d %>%
   add_n()
 ```
 
+### Cohort summary by 30-day mortality group
+
+```{r}
+d %>% filter(DX_GROUP %in% c("TBI", "ASAH", "ICH", "AIS", "CFX", "SDH", "ABM", "AVM", "HC", "CVT", "TUM", "SEP"), ) %>%
+  select(DX_GROUP, age, sex_female, sir_consciousness_level, overall_obtunded, overall_unconcious, any_AMV, SAPS_hypoxia, SAPS_hypotension, SAPS_hypertension, SAPS_bradycardia, SAPS_hypothermia, SAPS_acidosis, icu_discharge_afterhours, icu_discharge_nighttime, sir_total_time, road_distance, geodesic_distance, d30) %>%
+  tbl_summary(by='d30', label = list(age ~ "Age, years",
+                                    DX_GROUP ~ "Inferred diagnosis",
+                                    sex_female ~ "Female",
+                                    sir_consciousness_level ~ "SIR SAPS consciousness level",
+                                    overall_obtunded ~ "Pre-transfer obtunded (not fully alert)",
+                                    overall_unconcious ~ "Pre-transfer unconscious (GCS <9)",
+                                    any_AMV ~ "Pre-transfer Mechanical Ventilation",
+                                    SAPS_hypoxia ~ "SAPS Hypoxemia (PAO2<8 kPa)",
+                                    SAPS_hypotension ~ "SAPS hypotension <90 mmHg",
+                                    SAPS_hypertension ~ "SAPS hypertension (>180 mmHg)",
+                                    SAPS_bradycardia ~ "SAPS bradycardia (<50 bpm)",
+                                    SAPS_hypothermia ~ "SAPS hypothermia (<35°C)",
+                                    SAPS_acidosis ~ "SAPS acidosis (pH <7.25)",
+                                    sir_total_time ~ "Time in primary ICU, minutes",
+                                    icu_discharge_afterhours ~ "Discharge outside of office hours (jourtid)",
+                                    icu_discharge_nighttime ~ "Discharge between hours 22:00 - 07:00",
+                                    road_distance ~ "Road distance, km",
+                                    geodesic_distance ~ "Geodesic distance, km",
+                                    d30 ~ "30-day mortality"
+                           ),
+              missing_text="Missing"
+                        ) %>%
+  add_p(
+    test = list(all_continuous() ~ "t.test", all_categorical() ~ "fisher.test"),
+  ) %>%
+  add_n()
+
+```
+
 ### Distribution of transfer distance (per receiving hospital)
+
 ```{r distance_dist, fig.width=10, fig.height=8, fig.popup=TRUE, fig.cap="Distribution of travelled distance (geodesic distance) by receiving tertiary center"}
 ggplot(data = d, aes(x = factor(hospital_name_receiving), y = geodesic_distance)) +
   geom_boxplot() + 
@@ -194,6 +230,7 @@ ggplot(data = d, aes(x = factor(hospital_name_receiving), y = geodesic_distance)
 ```
 
 ### Distribution of primary ICU time (per sending hospital)
+
 ```{r primary_time, fig.width=10, fig.height=8, fig.popup=TRUE, fig.cap="A plot of time spent in primary ICU prior to discharge per sending ICU"}
 ggplot(data = d, aes(x = factor(formatted_icu_name), y = sir_total_time)) +
   geom_boxplot() + 
@@ -316,10 +353,15 @@ d %>% filter(DX_GROUP %in% c("TBI", "ASAH", "ICH", "AIS", "CFX", "SDH", "ABM", "
                            ),
               missing_text="Missing"
                         ) %>%
+  add_p(
+    test = list(all_continuous() ~ "t.test", all_categorical() ~ "fisher.test"),
+  ) %>%
   add_n()
+
 ```
 
 #### Summary of a subset of the cohort based on diagnostic criteria
+
 Here the 5 most common intracranial diagnostic groups are kept. Note that this is bordering to a methodological fallacy... Why five? Of note, the mortality rate in the other groups is low. Which makes it less likely that a difference in 30 day mortality can be seen.
 
 ```{r}
@@ -349,21 +391,38 @@ d %>% filter(DX_GROUP %in% c("TBI", "ASAH", "ICH", "ABM", "AIS"), ) %>%
                            ),
               missing_text="Missing"
                         ) %>%
-  add_n()
+  add_n()  %>%
+  add_p(
+    test = list(all_continuous() ~ "t.test", all_categorical() ~ "fisher.test"),
+  )
 ```
 
 ## Moving forward
+
 Note that if we can supplement the clinical data up to at least May 2024, I expect that the final dataset will be closer to 2,000 patients.
 
 Ideas:
 
-* Descriptive analysis (as above essentially)
+-   Descriptive analysis (as above essentially)
 
-* Modeling the propensity of being assigned HEMS transfer (this will probably show that weather matters...), i.e. answering "What predictors are associated (or causing) with transfer modality X in patients ICU with neurological- and neurosurgical emergencies that are undergoing transfer to a tertiary center?"
+-   Modeling the propensity of being assigned HEMS transfer (this will probably show that weather matters...), i.e. answering "What predictors are associated (or causing) with transfer modality X in patients ICU with neurological- and neurosurgical emergencies that are undergoing transfer to a tertiary center?"
 
-* Modeling the impact of being assigned HEMS transfer, i.e. answering "What is the causal effect of HEMS transfers on patients with...". My idea of the causal structure can be seen in the DAG below.
+-   Modeling the impact of being assigned HEMS transfer, i.e. answering "What is the causal effect of HEMS transfers on patients with...". My idea of the causal structure can be seen in the DAG below.
 
-* Modeling risk factors for poor outcome in patients transferred by HEMS vs other modalities: are there differences that could be hypothesis generating (i.e. "are there patients at extra high risk of badness?")
+-   Modeling risk factors for poor outcome in patients transferred by HEMS vs other modalities: are there differences that could be hypothesis generating (i.e. "are there patients at extra high risk of badness?")
+
+-   Cost-benefit: estimating costs? The problem is that there is a huge differnce between fixed-wing and ground EMS. Side-project (for resident, med-student): estimate/investigate costs (quite complex if you consider staffing, opportunity costs) and relate them to the demography being transferred. Estimate the needed impact to make certain transfer modalities "cost-effective", eg. how big must the outcome improvment be to motivate HEMS over GEMS?
+
+-   Adding transit time as a variable for descriptive analysis:
+
+    -   Is potentially in the dataset for the HEMS group (technical difficulties possible)
+
+    -   Expected transit times are easy to roughly calculate for HEMS vs. ground EMS:
+
+        -   Geodesic distance / 240 km/h + 10 minutes
+
+        -   Road distance / 110 km/h  + 5 minutes
+
 ```{r}
 library(dagitty)
 
@@ -402,11 +461,69 @@ Diagnosis -> "Transfer modality"
 plot(dag)
 
 ```
-### Issues to adress
-* Should all DX be included?
 
-* Should all hospitals be included? There are some sites that never use HEMS. Is it fair to include them? Is it more fair to exclude them?
+### Issues to address
 
-* Some hospitals will use fixed-wing transfers if HEMS is not available, and only rarely ground EMS. The level of care is similar/identical in fixed-wing transfers as it is in HEMS transfers. Should these hospitals be exluded.
+-   Should all DX be included? Exclude rare DX? Exclude CFX (extracranial disease)? Exlude DX with low expected mortality? Exlude ABM - most patients hang around for a long time in the ICU?
 
-* The modelling should be hierarchical. What are reasonable levels? Sending hospital, receiving hospital or diagnostic group? Or all of them in a nested structure?
+-   AIS might be a special case. This is the only DX where there is reasonably solid evidence that small time gains might (realtively often) have an impact on outcome. It is plausible that a "lower level of care" in transit with a significant time saving might have a net positive impact for the patient,
+
+-   Should all hospitals be included? There are some sites that never use HEMS. Is it fair to include them? Is it more fair to exclude them? I think they should be included.
+
+-   Some hospitals will use fixed-wing transfers if HEMS is not available OR ground EMS. The level of care is similar/identical in fixed-wing transfers as it is in HEMS transfers. Should these hospitals be exluded? Problem: not clear which hospitals should be excluded. Send a survey to all hospitals?
+
+-   As of now, patients are included from Oct. 2019 because of "Luftburen Intensivvård Uppsala". However, data from other regions could perhaps be salvaged from 2018-2019. Reasonable?
+
+### Model suggestions
+
+#### Multilevel GLM
+
+$\text{for patient i, hospital j, predictor k:}$
+
+$$
+y_{i} \sim Bernoulli(p_{i})
+$$
+
+$$
+\text{invlogit}(p_{i}) \sim \beta_{0, j} + \beta_{k, j} x_{i, k}
+$$
+
+$$
+\beta_{0, j} \sim N(\mu_{0,j}, 1)
+$$
+
+$$
+\mu_{0,j} \sim N(0, 1)
+$$
+
+$\text{for all } \beta_{0,1,.., k, j}$
+
+##### Pros:
+
+-   Relatively easy to explain
+
+-   Regularizing effect on estimates
+
+-   Allows for varying effects between sites
+
+-   Allows for some comparison between sites
+
+##### Cons:
+
+-   Unless multiple hierarchies are used or specified interaction terms, the effect size given the diagnosis will be the same
+
+#### Full luxury Bayesian inference
+
+Here $x_{i, HEMS}$ is treated as a R.V. with that is modeled as... $$\text{invlogit}(p_{i,HEMS}) \sim \beta...$$
+
+This will create a "treatment assignment model". However, I'm not sure that weather conditions could be added as a predictor here without opening "backdoor paths" in the DAG. (Statistical rethinking, p. 471)
+
+#### HEMS weather minima as a conditional instrumental variable?
+
+Conditional on month and time of day, the weather condition variable is an instrument since it:
+
+1.  Is independent of the other potential (unmeasured) confounders, eg. clouds to not make a given patients' stroke worse...
+2.  It is not independent of HEMS exposure
+3.  It cannot influence the outcome by any other way than HEMS exposure
+
+However, since $p_{i,HEMS} \approx 0$ when HEMS minima are met, there might be problems with the positivity assumption...
