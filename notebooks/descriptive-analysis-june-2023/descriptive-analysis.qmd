@@ -421,7 +421,7 @@ Ideas:
 
         -   Geodesic distance / 240 km/h + 10 minutes
 
-        -   Road distance / 110 km/h  + 5 minutes
+        -   Road distance / 110 km/h + 5 minutes
 
 ```{r}
 library(dagitty)
@@ -512,6 +512,12 @@ $\text{for all } \beta_{0,1,.., k, j}$
 
 -   Unless multiple hierarchies are used or specified interaction terms, the effect size given the diagnosis will be the same
 
+#### Nested Multilevel GLM 
+
+Sending hospital is a cluster.
+
+Diagnosis is a cluster.
+
 #### Full luxury Bayesian inference
 
 Here $x_{i, HEMS}$ is treated as a R.V. with that is modeled as... $$\text{invlogit}(p_{i,HEMS}) \sim \beta...$$
@@ -522,8 +528,29 @@ This will create a "treatment assignment model". However, I'm not sure that weat
 
 Conditional on month and time of day, the weather condition variable is an instrument since it:
 
-1.  Is independent of the other potential (unmeasured) confounders, eg. clouds to not make a given patients' stroke worse...
+1.  Is independent of the other potential (unmeasured) confounders, eg. clouds do not make a stroke worse...
 2.  It is not independent of HEMS exposure
 3.  It cannot influence the outcome by any other way than HEMS exposure
 
-However, since $p_{i,HEMS} \approx 0$ when HEMS minima are met, there might be problems with the positivity assumption...
+However, since $p_{i,HEMS} \approx 0$ when HEMS minima are met, there might be problems with the positivity assumption... Anyways, the model could roughly look like:
+
+$$
+\text{Invlogit}
+\begin{pmatrix}
+\begin{pmatrix}
+P_{i,HEMS} \\
+P_{i,d30}
+\end{pmatrix}
+\end{pmatrix}
+\sim
+\text{MVNormal}
+\begin{pmatrix}
+\begin{pmatrix}
+\mu_{i,HEMS} \\
+\mu_{i,d30}
+\end{pmatrix},
+\mathbf{S}
+\end{pmatrix}
+$$
+
+Where the $\mu$ variables are modeled by their own linear equations modeling the expectation (of the invlogit...) for being exposed to HEMS treatment and dying within 30 days respectively. This would allow us to account for $U$, undefined and unmeasured confounders, since the model naturally accepts residual variation between the exposure and the outcome. (McElreath recommends against using a chained linear model approach when using instruments, see p. 474.)
