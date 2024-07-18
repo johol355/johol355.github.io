@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.306">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Johan Olsson">
+<meta name="dcterms.date" content="2024-07-18">
+
+<title>HEMS interfacility transfer: inferential models 1</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="inferential-models-1_files/libs/clipboard/clipboard.min.js"></script>
+<script src="inferential-models-1_files/libs/quarto-html/quarto.js"></script>
+<script src="inferential-models-1_files/libs/quarto-html/popper.min.js"></script>
+<script src="inferential-models-1_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="inferential-models-1_files/libs/quarto-html/anchor.min.js"></script>
+<link href="inferential-models-1_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="inferential-models-1_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="inferential-models-1_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="inferential-models-1_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="inferential-models-1_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script async="" src="https://hypothes.is/embed.js"></script>
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#question-1-what-patient-level-factors-predict-the-utilization-of-hems-ift-in-neuro-icu-patients" id="toc-question-1-what-patient-level-factors-predict-the-utilization-of-hems-ift-in-neuro-icu-patients" class="nav-link" data-scroll-target="#question-1-what-patient-level-factors-predict-the-utilization-of-hems-ift-in-neuro-icu-patients"><span class="header-section-number">2</span> Question 1: What patient level factors predict the utilization of HEMS-IFT in neuro-ICU patients?</a>
+  <ul class="collapse">
+  <li><a href="#univariate-analysis-of-reasonable-predictors" id="toc-univariate-analysis-of-reasonable-predictors" class="nav-link" data-scroll-target="#univariate-analysis-of-reasonable-predictors"><span class="header-section-number">2.1</span> Univariate analysis of reasonable predictors</a></li>
+  <li><a href="#multivariate-varying-intercept-analysis-of-reasonable-predictors-strong-univariate-predictors" id="toc-multivariate-varying-intercept-analysis-of-reasonable-predictors-strong-univariate-predictors" class="nav-link" data-scroll-target="#multivariate-varying-intercept-analysis-of-reasonable-predictors-strong-univariate-predictors"><span class="header-section-number">2.2</span> Multivariate (varying intercept) analysis of reasonable predictors + strong univariate predictors</a></li>
+  </ul></li>
+  <li><a href="#question-2-what-hospital-level-factors-predict-the-utilization-of-hems-ift-in-neuro-icu-patients" id="toc-question-2-what-hospital-level-factors-predict-the-utilization-of-hems-ift-in-neuro-icu-patients" class="nav-link" data-scroll-target="#question-2-what-hospital-level-factors-predict-the-utilization-of-hems-ift-in-neuro-icu-patients"><span class="header-section-number">3</span> Question 2: What hospital level factors predict the utilization of HEMS-IFT in neuro-ICU patients?</a></li>
+  <li><a href="#question-3-what-is-the-causal-effect-of-hems-ift-on-neuro-icu-patients" id="toc-question-3-what-is-the-causal-effect-of-hems-ift-on-neuro-icu-patients" class="nav-link" data-scroll-target="#question-3-what-is-the-causal-effect-of-hems-ift-on-neuro-icu-patients"><span class="header-section-number">4</span> Question 3: What is the causal effect of HEMS-IFT on neuro ICU patients?</a></li>
+  <li><a href="#moving-forward" id="toc-moving-forward" class="nav-link" data-scroll-target="#moving-forward"><span class="header-section-number">5</span> Moving forward</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">HEMS interfacility transfer: inferential models 1</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Johan Olsson </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 18, 2024</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="introduction" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="introduction"><span class="header-section-number">1</span> Introduction</h2>
+<p>In this markdown we will explore prediction of a patient being transferred by HEMS. These models are done with r packages such as <glmer> and <gtsummary>. There is no missing data handling. The Bayesian <pymc> implementation with missing data handling has essentially the same results and has better convergence. But I need to add some tweaks before it is presentable, thus we will do frequentist stuff here.</pymc></gtsummary></glmer></p>
+</section>
+<section id="question-1-what-patient-level-factors-predict-the-utilization-of-hems-ift-in-neuro-icu-patients" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="question-1-what-patient-level-factors-predict-the-utilization-of-hems-ift-in-neuro-icu-patients"><span class="header-section-number">2</span> Question 1: What patient level factors predict the utilization of HEMS-IFT in neuro-ICU patients?</h2>
+<p>This analysis is limited to patients transferred from centers that utilize HEMS-IFT in more than 20% of cases. Note that all predictors are <em>patient level predictors</em>, eg. physiologic parameters.</p>
+<section id="univariate-analysis-of-reasonable-predictors" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="univariate-analysis-of-reasonable-predictors"><span class="header-section-number">2.1</span> Univariate analysis of reasonable predictors</h3>
+<p>Here a set of predictors will be used in univariate logistic models to see if anything surprising pops out. Nothing shocking pops out.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(gtsummary)</span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="fu">set.seed</span>(<span class="dv">1989</span>)</span>
+<span id="cb1-4"><a href="#cb1-4"></a></span>
+<span id="cb1-5"><a href="#cb1-5"></a><span class="co"># Load dataframe</span></span>
+<span id="cb1-6"><a href="#cb1-6"></a>d <span class="ot">&lt;-</span> <span class="fu">read_delim</span>(<span class="st">"/Users/JO/PhD/nsicu-transfers/data/pre-processed-data/patient-df-2024-07-17 13:35:31.900387.csv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-7"><a href="#cb1-7"></a>d <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(d)</span>
+<span id="cb1-8"><a href="#cb1-8"></a></span>
+<span id="cb1-9"><a href="#cb1-9"></a><span class="co"># Convert the sir_adm_time_UTC column to POSIXct class (date-time class in R)</span></span>
+<span id="cb1-10"><a href="#cb1-10"></a>d<span class="sc">$</span>sir_adm_time_UTC <span class="ot">&lt;-</span> <span class="fu">ymd_hms</span>(d<span class="sc">$</span>sir_adm_time_UTC)</span>
+<span id="cb1-11"><a href="#cb1-11"></a></span>
+<span id="cb1-12"><a href="#cb1-12"></a><span class="co"># Extract the hour and month using lubridate functions and create new columns</span></span>
+<span id="cb1-13"><a href="#cb1-13"></a>d<span class="sc">$</span>HOUR <span class="ot">&lt;-</span> <span class="fu">hour</span>(d<span class="sc">$</span>sir_adm_time_UTC)</span>
+<span id="cb1-14"><a href="#cb1-14"></a>d<span class="sc">$</span>HOUR <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(d<span class="sc">$</span>HOUR)</span>
+<span id="cb1-15"><a href="#cb1-15"></a>d<span class="sc">$</span>MONTH <span class="ot">&lt;-</span> <span class="fu">month</span>(d<span class="sc">$</span>sir_adm_time_UTC)</span>
+<span id="cb1-16"><a href="#cb1-16"></a>d<span class="sc">$</span>MONTH <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(d<span class="sc">$</span>MONTH)</span>
+<span id="cb1-17"><a href="#cb1-17"></a></span>
+<span id="cb1-18"><a href="#cb1-18"></a><span class="co"># Use dplyr to mutate the DX_GROUP column</span></span>
+<span id="cb1-19"><a href="#cb1-19"></a>keep_values <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"SDH"</span>, <span class="st">"ASAH"</span>, <span class="st">"TBI"</span>, <span class="st">"ABM"</span>, <span class="st">"AIS"</span>, <span class="st">"CFX"</span>)</span>
+<span id="cb1-20"><a href="#cb1-20"></a>d <span class="ot">&lt;-</span> d <span class="sc">%&gt;%</span></span>
+<span id="cb1-21"><a href="#cb1-21"></a>  <span class="fu">mutate</span>(<span class="at">DX_GROUP =</span> <span class="fu">ifelse</span>(DX_GROUP <span class="sc">%in%</span> keep_values, DX_GROUP, <span class="st">"OTHER"</span>))</span>
+<span id="cb1-22"><a href="#cb1-22"></a></span>
+<span id="cb1-23"><a href="#cb1-23"></a>d <span class="ot">&lt;-</span> d <span class="sc">%&gt;%</span></span>
+<span id="cb1-24"><a href="#cb1-24"></a>  <span class="fu">mutate</span>(<span class="at">hems_ift =</span> <span class="fu">ifelse</span>(hems_ift, <span class="dv">1</span>, <span class="dv">0</span>))</span>
+<span id="cb1-25"><a href="#cb1-25"></a></span>
+<span id="cb1-26"><a href="#cb1-26"></a>d <span class="ot">&lt;-</span> d <span class="sc">%&gt;%</span></span>
+<span id="cb1-27"><a href="#cb1-27"></a>  <span class="fu">mutate</span>(<span class="at">hems_minima =</span> <span class="fu">ifelse</span>(hems_minima, <span class="dv">1</span>, <span class="dv">0</span>))</span>
+<span id="cb1-28"><a href="#cb1-28"></a></span>
+<span id="cb1-29"><a href="#cb1-29"></a>d<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="fu">scale</span>(d<span class="sc">$</span>age)</span>
+<span id="cb1-30"><a href="#cb1-30"></a>d<span class="sc">$</span>SAPS_total_score <span class="ot">&lt;-</span> <span class="fu">scale</span>(d<span class="sc">$</span>SAPS_total_score)</span>
+<span id="cb1-31"><a href="#cb1-31"></a>d<span class="sc">$</span>SAPS_score_excluding_gcs_age <span class="ot">&lt;-</span> <span class="fu">scale</span>(d<span class="sc">$</span>SAPS_score_excluding_gcs_age)</span>
+<span id="cb1-32"><a href="#cb1-32"></a>d<span class="sc">$</span>SAPS_min_SBP <span class="ot">&lt;-</span> <span class="fu">scale</span>(d<span class="sc">$</span>SAPS_min_SBP)</span>
+<span id="cb1-33"><a href="#cb1-33"></a>d<span class="sc">$</span>road_distance <span class="ot">&lt;-</span> <span class="fu">scale</span>(d<span class="sc">$</span>road_distance)</span>
+<span id="cb1-34"><a href="#cb1-34"></a></span>
+<span id="cb1-35"><a href="#cb1-35"></a>tbl_uv <span class="ot">&lt;-</span> d <span class="sc">%&gt;%</span></span>
+<span id="cb1-36"><a href="#cb1-36"></a>  <span class="fu">filter</span>(hems_ift_proportion <span class="sc">&gt;</span> <span class="fl">0.2</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-37"><a href="#cb1-37"></a>  <span class="fu">select</span>(<span class="fu">c</span>(<span class="st">"hems_ift"</span>, <span class="st">"age"</span>, <span class="st">"sex_female"</span>, <span class="st">"hems_minima"</span>, <span class="st">"any_AMV"</span>, <span class="st">"sir_consciousness_level"</span>, <span class="st">"DX_GROUP"</span>, <span class="st">"MONTH"</span>, <span class="st">"HOUR"</span>, <span class="st">"DNR"</span>, <span class="st">"icu_discharge_afterhours"</span>, <span class="st">"SAPS_score_excluding_gcs_age"</span>, <span class="st">"SAPS_total_score"</span>, <span class="st">"SAPS_hypotension"</span>, <span class="st">"SAPS_hypertension"</span>, <span class="st">"SAPS_hypothermia"</span>, <span class="st">"SAPS_hypoxia"</span>, <span class="st">"SAPS_acidosis"</span>, <span class="st">"SAPS_tachycardia"</span>, <span class="st">"SAPS_bradycardia"</span>, <span class="st">"ARDS"</span>, <span class="st">"hemodynamic_instability_markers"</span>, <span class="st">"respiratory_instability_markers"</span>, <span class="st">"BMI"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb1-38"><a href="#cb1-38"></a>  <span class="fu">tbl_uvregression</span>(</span>
+<span id="cb1-39"><a href="#cb1-39"></a>    <span class="at">method =</span> glm,</span>
+<span id="cb1-40"><a href="#cb1-40"></a>    <span class="at">y =</span> <span class="st">"hems_ift"</span>,</span>
+<span id="cb1-41"><a href="#cb1-41"></a>    <span class="at">method.args =</span> <span class="fu">list</span>(<span class="at">family =</span> binomial),</span>
+<span id="cb1-42"><a href="#cb1-42"></a>    <span class="at">exponentiate =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-43"><a href="#cb1-43"></a>    <span class="at">label =</span> <span class="fu">list</span>(</span>
+<span id="cb1-44"><a href="#cb1-44"></a>      age <span class="sc">~</span> <span class="st">"Age, years"</span>,</span>
+<span id="cb1-45"><a href="#cb1-45"></a>      sex_female <span class="sc">~</span> <span class="st">"Female"</span>,</span>
+<span id="cb1-46"><a href="#cb1-46"></a>      DNR <span class="sc">~</span> <span class="st">"DNR order"</span>,</span>
+<span id="cb1-47"><a href="#cb1-47"></a>      BMI <span class="sc">~</span> <span class="st">"BMI, kg/m2"</span>,</span>
+<span id="cb1-48"><a href="#cb1-48"></a>      DX_GROUP <span class="sc">~</span> <span class="st">"Inferred diagnosis"</span>,</span>
+<span id="cb1-49"><a href="#cb1-49"></a>      sir_consciousness_level <span class="sc">~</span> <span class="st">"SIR SAPS consciousness level"</span>,</span>
+<span id="cb1-50"><a href="#cb1-50"></a>      any_AMV <span class="sc">~</span> <span class="st">"Pre-transfer Mechanical Ventilation"</span>,</span>
+<span id="cb1-51"><a href="#cb1-51"></a>      SAPS_hypoxia <span class="sc">~</span> <span class="st">"SAPS Hypoxemia (PAO2&lt;8 kPa)"</span>,</span>
+<span id="cb1-52"><a href="#cb1-52"></a>      respiratory_instability_markers <span class="sc">~</span> <span class="st">"Markers of respiratory instability"</span>,</span>
+<span id="cb1-53"><a href="#cb1-53"></a>      SAPS_hypotension <span class="sc">~</span> <span class="st">"SAPS hypotension (&lt;90 mmHg)"</span>,</span>
+<span id="cb1-54"><a href="#cb1-54"></a>      SAPS_hypertension <span class="sc">~</span> <span class="st">"SAPS hypertension (&gt;180 mmHg)"</span>,</span>
+<span id="cb1-55"><a href="#cb1-55"></a>      SAPS_bradycardia <span class="sc">~</span> <span class="st">"SAPS bradycardia (&lt;50 bpm)"</span>,</span>
+<span id="cb1-56"><a href="#cb1-56"></a>      SAPS_tachycardia <span class="sc">~</span> <span class="st">"SAPS tachycardia (&gt;110 bpm) "</span>,</span>
+<span id="cb1-57"><a href="#cb1-57"></a>      hemodynamic_instability_markers <span class="sc">~</span> <span class="st">"Markers of hemodynamic instability"</span>,</span>
+<span id="cb1-58"><a href="#cb1-58"></a>      SAPS_acidosis <span class="sc">~</span> <span class="st">"SAPS acidosis (pH &lt;7.25)"</span>,</span>
+<span id="cb1-59"><a href="#cb1-59"></a>      SAPS_hypothermia <span class="sc">~</span> <span class="st">"SAPS hypothermia (&lt;35°C)"</span>,</span>
+<span id="cb1-60"><a href="#cb1-60"></a>      ARDS <span class="sc">~</span> <span class="st">"ARDS"</span>,</span>
+<span id="cb1-61"><a href="#cb1-61"></a>      icu_discharge_afterhours <span class="sc">~</span> <span class="st">"Discharge outside of office hours (jourtid)"</span>,</span>
+<span id="cb1-62"><a href="#cb1-62"></a>      hems_minima <span class="sc">~</span> <span class="st">"HEMS weather minima met at discharge"</span>,</span>
+<span id="cb1-63"><a href="#cb1-63"></a>      SAPS_score_excluding_gcs_age <span class="sc">~</span> <span class="st">"SAPS score excl. age/GCS"</span>,</span>
+<span id="cb1-64"><a href="#cb1-64"></a>      SAPS_total_score <span class="sc">~</span> <span class="st">"SAPS total score"</span>,</span>
+<span id="cb1-65"><a href="#cb1-65"></a>      MONTH <span class="sc">~</span> <span class="st">"Month, admission"</span>,</span>
+<span id="cb1-66"><a href="#cb1-66"></a>      HOUR <span class="sc">~</span> <span class="st">"Hour, admission"</span></span>
+<span id="cb1-67"><a href="#cb1-67"></a>      )</span>
+<span id="cb1-68"><a href="#cb1-68"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-69"><a href="#cb1-69"></a>  <span class="fu">add_global_p</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb1-70"><a href="#cb1-70"></a>  <span class="fu">bold_p</span>(<span class="at">t =</span> <span class="fl">0.20</span>)</span>
+<span id="cb1-71"><a href="#cb1-71"></a></span>
+<span id="cb1-72"><a href="#cb1-72"></a>tbl_uv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+
+<div id="jibowelweu" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#jibowelweu table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#jibowelweu thead, #jibowelweu tbody, #jibowelweu tfoot, #jibowelweu tr, #jibowelweu td, #jibowelweu th {
+  border-style: none;
+}
+
+#jibowelweu p {
+  margin: 0;
+  padding: 0;
+}
+
+#jibowelweu .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#jibowelweu .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#jibowelweu .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#jibowelweu .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#jibowelweu .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#jibowelweu .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#jibowelweu .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#jibowelweu .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#jibowelweu .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#jibowelweu .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#jibowelweu .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#jibowelweu .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#jibowelweu .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#jibowelweu .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#jibowelweu .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#jibowelweu .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#jibowelweu .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#jibowelweu .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#jibowelweu .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jibowelweu .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#jibowelweu .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#jibowelweu .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#jibowelweu .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jibowelweu .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#jibowelweu .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#jibowelweu .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#jibowelweu .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jibowelweu .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#jibowelweu .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#jibowelweu .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#jibowelweu .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#jibowelweu .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#jibowelweu .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jibowelweu .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#jibowelweu .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#jibowelweu .gt_left {
+  text-align: left;
+}
+
+#jibowelweu .gt_center {
+  text-align: center;
+}
+
+#jibowelweu .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#jibowelweu .gt_font_normal {
+  font-weight: normal;
+}
+
+#jibowelweu .gt_font_bold {
+  font-weight: bold;
+}
+
+#jibowelweu .gt_font_italic {
+  font-style: italic;
+}
+
+#jibowelweu .gt_super {
+  font-size: 65%;
+}
+
+#jibowelweu .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#jibowelweu .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#jibowelweu .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#jibowelweu .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#jibowelweu .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#jibowelweu .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#jibowelweu .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="<strong>Characteristic</strong>"><strong>Characteristic</strong></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="<strong>N</strong>"><strong>N</strong></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="<strong>OR</strong><span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;><sup>1</sup></span>"><strong>OR</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="<strong>95% CI</strong><span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;><sup>1</sup></span>"><strong>95% CI</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="<strong>p-value</strong>"><strong>p-value</strong></th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers="label" class="gt_row gt_left">Age, years</td>
+<td headers="stat_n" class="gt_row gt_center">607</td>
+<td headers="estimate" class="gt_row gt_center">0.93</td>
+<td headers="ci" class="gt_row gt_center">0.79, 1.10</td>
+<td headers="p.value" class="gt_row gt_center">0.4</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Female</td>
+<td headers="stat_n" class="gt_row gt_center">607</td>
+<td headers="estimate" class="gt_row gt_center">1.15</td>
+<td headers="ci" class="gt_row gt_center">0.83, 1.59</td>
+<td headers="p.value" class="gt_row gt_center">0.4</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">HEMS weather minima met at discharge</td>
+<td headers="stat_n" class="gt_row gt_center">607</td>
+<td headers="estimate" class="gt_row gt_center">31.0</td>
+<td headers="ci" class="gt_row gt_center">9.59, 190</td>
+<td headers="p.value" class="gt_row gt_center" style="font-weight: bold;">&lt;0.001</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Pre-transfer Mechanical Ventilation</td>
+<td headers="stat_n" class="gt_row gt_center">607</td>
+<td headers="estimate" class="gt_row gt_center">1.86</td>
+<td headers="ci" class="gt_row gt_center">1.34, 2.57</td>
+<td headers="p.value" class="gt_row gt_center" style="font-weight: bold;">&lt;0.001</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">SIR SAPS consciousness level</td>
+<td headers="stat_n" class="gt_row gt_center">596</td>
+<td headers="estimate" class="gt_row gt_center"><br></td>
+<td headers="ci" class="gt_row gt_center"><br></td>
+<td headers="p.value" class="gt_row gt_center" style="font-weight: bold;">&lt;0.001</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;I (GCS ≥13)</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">—</td>
+<td headers="ci" class="gt_row gt_center">—</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;II (GCS 7-12)</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">1.96</td>
+<td headers="ci" class="gt_row gt_center">1.32, 2.91</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;III (GCS 6)</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">1.17</td>
+<td headers="ci" class="gt_row gt_center">0.63, 2.15</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;IV (GCS 5)</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">3.48</td>
+<td headers="ci" class="gt_row gt_center">1.50, 8.75</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;V (GCS ≤4)</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">2.07</td>
+<td headers="ci" class="gt_row gt_center">1.09, 3.97</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Inferred diagnosis</td>
+<td headers="stat_n" class="gt_row gt_center">607</td>
+<td headers="estimate" class="gt_row gt_center"><br></td>
+<td headers="ci" class="gt_row gt_center"><br></td>
+<td headers="p.value" class="gt_row gt_center">0.6</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;ABM</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">—</td>
+<td headers="ci" class="gt_row gt_center">—</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;AIS</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.96</td>
+<td headers="ci" class="gt_row gt_center">0.31, 3.12</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;ASAH</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.91</td>
+<td headers="ci" class="gt_row gt_center">0.30, 2.86</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;CFX</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.92</td>
+<td headers="ci" class="gt_row gt_center">0.25, 3.49</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;OTHER</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">1.26</td>
+<td headers="ci" class="gt_row gt_center">0.41, 4.06</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;SDH</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.67</td>
+<td headers="ci" class="gt_row gt_center">0.14, 3.02</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;TBI</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">1.30</td>
+<td headers="ci" class="gt_row gt_center">0.44, 4.10</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Month, admission</td>
+<td headers="stat_n" class="gt_row gt_center">607</td>
+<td headers="estimate" class="gt_row gt_center"><br></td>
+<td headers="ci" class="gt_row gt_center"><br></td>
+<td headers="p.value" class="gt_row gt_center" style="font-weight: bold;">&lt;0.001</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;1</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">—</td>
+<td headers="ci" class="gt_row gt_center">—</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;2</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">1.63</td>
+<td headers="ci" class="gt_row gt_center">0.77, 3.48</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;3</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">2.01</td>
+<td headers="ci" class="gt_row gt_center">0.95, 4.33</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;4</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">2.12</td>
+<td headers="ci" class="gt_row gt_center">0.95, 4.77</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;5</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">3.09</td>
+<td headers="ci" class="gt_row gt_center">1.47, 6.67</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;6</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">3.56</td>
+<td headers="ci" class="gt_row gt_center">1.70, 7.68</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;7</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">3.68</td>
+<td headers="ci" class="gt_row gt_center">1.72, 8.06</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;8</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">3.22</td>
+<td headers="ci" class="gt_row gt_center">1.48, 7.23</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;9</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">3.59</td>
+<td headers="ci" class="gt_row gt_center">1.57, 8.46</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;10</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">1.73</td>
+<td headers="ci" class="gt_row gt_center">0.83, 3.64</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;11</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">1.15</td>
+<td headers="ci" class="gt_row gt_center">0.52, 2.54</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;12</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.60</td>
+<td headers="ci" class="gt_row gt_center">0.23, 1.43</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Hour, admission</td>
+<td headers="stat_n" class="gt_row gt_center">607</td>
+<td headers="estimate" class="gt_row gt_center"><br></td>
+<td headers="ci" class="gt_row gt_center"><br></td>
+<td headers="p.value" class="gt_row gt_center" style="font-weight: bold;">0.031</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;0</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">—</td>
+<td headers="ci" class="gt_row gt_center">—</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;1</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.11</td>
+<td headers="ci" class="gt_row gt_center">0.01, 0.63</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;2</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.36</td>
+<td headers="ci" class="gt_row gt_center">0.08, 1.44</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;3</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.50</td>
+<td headers="ci" class="gt_row gt_center">0.11, 2.21</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;4</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.17</td>
+<td headers="ci" class="gt_row gt_center">0.02, 1.02</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;5</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.21</td>
+<td headers="ci" class="gt_row gt_center">0.04, 0.88</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;6</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.58</td>
+<td headers="ci" class="gt_row gt_center">0.12, 2.69</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;7</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">1.00</td>
+<td headers="ci" class="gt_row gt_center">0.21, 4.68</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;8</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.38</td>
+<td headers="ci" class="gt_row gt_center">0.09, 1.44</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;9</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.89</td>
+<td headers="ci" class="gt_row gt_center">0.22, 3.39</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;10</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.39</td>
+<td headers="ci" class="gt_row gt_center">0.10, 1.36</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;11</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">1.00</td>
+<td headers="ci" class="gt_row gt_center">0.26, 3.59</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;12</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.45</td>
+<td headers="ci" class="gt_row gt_center">0.12, 1.52</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;13</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.32</td>
+<td headers="ci" class="gt_row gt_center">0.08, 1.11</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;14</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.38</td>
+<td headers="ci" class="gt_row gt_center">0.10, 1.29</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;15</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.31</td>
+<td headers="ci" class="gt_row gt_center">0.08, 1.06</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;16</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.67</td>
+<td headers="ci" class="gt_row gt_center">0.18, 2.30</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;17</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.36</td>
+<td headers="ci" class="gt_row gt_center">0.09, 1.33</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;18</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.62</td>
+<td headers="ci" class="gt_row gt_center">0.16, 2.20</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;19</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.17</td>
+<td headers="ci" class="gt_row gt_center">0.04, 0.59</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;20</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.32</td>
+<td headers="ci" class="gt_row gt_center">0.08, 1.09</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;21</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.27</td>
+<td headers="ci" class="gt_row gt_center">0.06, 1.01</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;22</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.25</td>
+<td headers="ci" class="gt_row gt_center">0.06, 0.88</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;23</td>
+<td headers="stat_n" class="gt_row gt_center"><br></td>
+<td headers="estimate" class="gt_row gt_center">0.38</td>
+<td headers="ci" class="gt_row gt_center">0.09, 1.44</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">DNR order</td>
+<td headers="stat_n" class="gt_row gt_center">607</td>
+<td headers="estimate" class="gt_row gt_center">0.25</td>
+<td headers="ci" class="gt_row gt_center">0.01, 1.53</td>
+<td headers="p.value" class="gt_row gt_center" style="font-weight: bold;">0.14</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Discharge outside of office hours (jourtid)</td>
+<td headers="stat_n" class="gt_row gt_center">607</td>
+<td headers="estimate" class="gt_row gt_center">0.88</td>
+<td headers="ci" class="gt_row gt_center">0.61, 1.28</td>
+<td headers="p.value" class="gt_row gt_center">0.5</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">SAPS score excl. age/GCS</td>
+<td headers="stat_n" class="gt_row gt_center">606</td>
+<td headers="estimate" class="gt_row gt_center">1.29</td>
+<td headers="ci" class="gt_row gt_center">1.09, 1.52</td>
+<td headers="p.value" class="gt_row gt_center" style="font-weight: bold;">0.003</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">SAPS total score</td>
+<td headers="stat_n" class="gt_row gt_center">606</td>
+<td headers="estimate" class="gt_row gt_center">1.30</td>
+<td headers="ci" class="gt_row gt_center">1.09, 1.56</td>
+<td headers="p.value" class="gt_row gt_center" style="font-weight: bold;">0.004</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">SAPS hypotension (&lt;90 mmHg)</td>
+<td headers="stat_n" class="gt_row gt_center">585</td>
+<td headers="estimate" class="gt_row gt_center">1.16</td>
+<td headers="ci" class="gt_row gt_center">0.67, 2.00</td>
+<td headers="p.value" class="gt_row gt_center">0.6</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">SAPS hypertension (&gt;180 mmHg)</td>
+<td headers="stat_n" class="gt_row gt_center">585</td>
+<td headers="estimate" class="gt_row gt_center">1.05</td>
+<td headers="ci" class="gt_row gt_center">0.59, 1.86</td>
+<td headers="p.value" class="gt_row gt_center">0.9</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">SAPS hypothermia (&lt;35°C)</td>
+<td headers="stat_n" class="gt_row gt_center">515</td>
+<td headers="estimate" class="gt_row gt_center">1.27</td>
+<td headers="ci" class="gt_row gt_center">0.46, 3.50</td>
+<td headers="p.value" class="gt_row gt_center">0.6</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">SAPS Hypoxemia (PAO2&lt;8 kPa)</td>
+<td headers="stat_n" class="gt_row gt_center">508</td>
+<td headers="estimate" class="gt_row gt_center">1.39</td>
+<td headers="ci" class="gt_row gt_center">0.52, 3.75</td>
+<td headers="p.value" class="gt_row gt_center">0.5</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">SAPS acidosis (pH &lt;7.25)</td>
+<td headers="stat_n" class="gt_row gt_center">519</td>
+<td headers="estimate" class="gt_row gt_center">0.94</td>
+<td headers="ci" class="gt_row gt_center">0.38, 2.26</td>
+<td headers="p.value" class="gt_row gt_center">0.9</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">SAPS tachycardia (&gt;110 bpm) </td>
+<td headers="stat_n" class="gt_row gt_center">578</td>
+<td headers="estimate" class="gt_row gt_center">0.95</td>
+<td headers="ci" class="gt_row gt_center">0.58, 1.55</td>
+<td headers="p.value" class="gt_row gt_center">0.8</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">SAPS bradycardia (&lt;50 bpm)</td>
+<td headers="stat_n" class="gt_row gt_center">578</td>
+<td headers="estimate" class="gt_row gt_center">0.71</td>
+<td headers="ci" class="gt_row gt_center">0.19, 2.39</td>
+<td headers="p.value" class="gt_row gt_center">0.6</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">ARDS</td>
+<td headers="stat_n" class="gt_row gt_center">263</td>
+<td headers="estimate" class="gt_row gt_center">1.89</td>
+<td headers="ci" class="gt_row gt_center">1.02, 3.54</td>
+<td headers="p.value" class="gt_row gt_center" style="font-weight: bold;">0.042</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Markers of hemodynamic instability</td>
+<td headers="stat_n" class="gt_row gt_center">607</td>
+<td headers="estimate" class="gt_row gt_center">1.57</td>
+<td headers="ci" class="gt_row gt_center">0.61, 4.17</td>
+<td headers="p.value" class="gt_row gt_center">0.3</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Markers of respiratory instability</td>
+<td headers="stat_n" class="gt_row gt_center">607</td>
+<td headers="estimate" class="gt_row gt_center">0.36</td>
+<td headers="ci" class="gt_row gt_center">0.08, 1.21</td>
+<td headers="p.value" class="gt_row gt_center" style="font-weight: bold;">0.10</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">BMI, kg/m2</td>
+<td headers="stat_n" class="gt_row gt_center">176</td>
+<td headers="estimate" class="gt_row gt_center">0.99</td>
+<td headers="ci" class="gt_row gt_center">0.93, 1.05</td>
+<td headers="p.value" class="gt_row gt_center">0.7</td></tr>
+  </tbody>
+  
+  <tfoot class="gt_footnotes">
+    <tr>
+      <td class="gt_footnote" colspan="5"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span> OR = Odds Ratio, CI = Confidence Interval</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="multivariate-varying-intercept-analysis-of-reasonable-predictors-strong-univariate-predictors" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="multivariate-varying-intercept-analysis-of-reasonable-predictors-strong-univariate-predictors"><span class="header-section-number">2.2</span> Multivariate (varying intercept) analysis of reasonable predictors + strong univariate predictors</h3>
+<p>Here a set of predictors will be choosen based on domain knowledge and on the p-value for predictors being &lt;.20 in the univariate analysis. Out of “markers of respiratory instability” and “ARDS” I’ve only choosen the first as the missingness is lower. This model is a varying intercept model where sending ICU is a level. The slopes are <em>not</em> varying per sending ICU. (I’ve triend a varying slope model in the Bayesian framework, but it is not much different.) Important predictors are weather conditions being acceptable and the patient being on mechanical ventilation. Transfers during summer also increase the chance of HEMS transfer. This could be due to staffing factors. But, I think it is mainly and effect of my HEMS minima predictor not telling the <em>full</em> story as it is only describing the weather conditions at the time of ICU discharge at the sending hospital (not the conditions expected in flight et cetera). Other than that, there is a trend sicker (as per SAPS score) being transferred by HEMS.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="cb2-2"><a href="#cb2-2"></a></span>
+<span id="cb2-3"><a href="#cb2-3"></a>d_hems <span class="ot">&lt;-</span> d <span class="sc">%&gt;%</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a>  <span class="fu">filter</span>(hems_ift_proportion <span class="sc">&gt;</span> <span class="fl">0.2</span>)</span>
+<span id="cb2-5"><a href="#cb2-5"></a>m <span class="ot">&lt;-</span> <span class="fu">glmer</span>(<span class="st">"hems_ift ~ (1|formatted_icu_name) + hems_minima + age + sex_female + SAPS_score_excluding_gcs_age + any_AMV + sir_consciousness_level + DX_GROUP + MONTH + HOUR + DNR + respiratory_instability_markers"</span>, <span class="at">data=</span>d_hems, <span class="at">family =</span> <span class="st">"binomial"</span>, <span class="at">nAGQ=</span><span class="dv">0</span>)</span>
+<span id="cb2-6"><a href="#cb2-6"></a>m <span class="sc">%&gt;%</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>    <span class="fu">tbl_regression</span>(</span>
+<span id="cb2-8"><a href="#cb2-8"></a>      <span class="at">exponentiate =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb2-9"><a href="#cb2-9"></a>        <span class="at">label =</span> <span class="fu">list</span>(</span>
+<span id="cb2-10"><a href="#cb2-10"></a>        age <span class="sc">~</span> <span class="st">"Age, years"</span>,</span>
+<span id="cb2-11"><a href="#cb2-11"></a>        sex_female <span class="sc">~</span> <span class="st">"Female"</span>,</span>
+<span id="cb2-12"><a href="#cb2-12"></a>        DNR <span class="sc">~</span> <span class="st">"DNR order"</span>,</span>
+<span id="cb2-13"><a href="#cb2-13"></a>        DX_GROUP <span class="sc">~</span> <span class="st">"Inferred diagnosis"</span>,</span>
+<span id="cb2-14"><a href="#cb2-14"></a>        sir_consciousness_level <span class="sc">~</span> <span class="st">"SIR SAPS consciousness level"</span>,</span>
+<span id="cb2-15"><a href="#cb2-15"></a>        any_AMV <span class="sc">~</span> <span class="st">"Pre-transfer Mechanical Ventilation"</span>,</span>
+<span id="cb2-16"><a href="#cb2-16"></a>        hems_minima <span class="sc">~</span> <span class="st">"HEMS weather minima met at discharge"</span>,</span>
+<span id="cb2-17"><a href="#cb2-17"></a>        SAPS_score_excluding_gcs_age <span class="sc">~</span> <span class="st">"SAPS score excl. age/GCS"</span>,</span>
+<span id="cb2-18"><a href="#cb2-18"></a>        MONTH <span class="sc">~</span> <span class="st">"Month"</span>,</span>
+<span id="cb2-19"><a href="#cb2-19"></a>        HOUR <span class="sc">~</span> <span class="st">"Hour, admission"</span>,</span>
+<span id="cb2-20"><a href="#cb2-20"></a>        respiratory_instability_markers <span class="sc">~</span> <span class="st">"Markers of respiratory instability"</span></span>
+<span id="cb2-21"><a href="#cb2-21"></a>        )</span>
+<span id="cb2-22"><a href="#cb2-22"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb2-23"><a href="#cb2-23"></a>    <span class="fu">add_global_p</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb2-24"><a href="#cb2-24"></a>    <span class="fu">bold_p</span>(<span class="at">t =</span> <span class="fl">0.05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+
+<div id="krthvyylgs" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#krthvyylgs table {
+  font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#krthvyylgs thead, #krthvyylgs tbody, #krthvyylgs tfoot, #krthvyylgs tr, #krthvyylgs td, #krthvyylgs th {
+  border-style: none;
+}
+
+#krthvyylgs p {
+  margin: 0;
+  padding: 0;
+}
+
+#krthvyylgs .gt_table {
+  display: table;
+  border-collapse: collapse;
+  line-height: normal;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  font-weight: normal;
+  font-style: normal;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#krthvyylgs .gt_caption {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#krthvyylgs .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#krthvyylgs .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 3px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#krthvyylgs .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#krthvyylgs .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#krthvyylgs .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#krthvyylgs .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#krthvyylgs .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#krthvyylgs .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#krthvyylgs .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#krthvyylgs .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#krthvyylgs .gt_spanner_row {
+  border-bottom-style: hidden;
+}
+
+#krthvyylgs .gt_group_heading {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  text-align: left;
+}
+
+#krthvyylgs .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#krthvyylgs .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#krthvyylgs .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#krthvyylgs .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#krthvyylgs .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#krthvyylgs .gt_stub_row_group {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+#krthvyylgs .gt_row_group_first td {
+  border-top-width: 2px;
+}
+
+#krthvyylgs .gt_row_group_first th {
+  border-top-width: 2px;
+}
+
+#krthvyylgs .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#krthvyylgs .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-color: #D3D3D3;
+}
+
+#krthvyylgs .gt_first_summary_row.thick {
+  border-top-width: 2px;
+}
+
+#krthvyylgs .gt_last_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#krthvyylgs .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#krthvyylgs .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#krthvyylgs .gt_last_grand_summary_row_top {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-bottom-style: double;
+  border-bottom-width: 6px;
+  border-bottom-color: #D3D3D3;
+}
+
+#krthvyylgs .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#krthvyylgs .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#krthvyylgs .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#krthvyylgs .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#krthvyylgs .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#krthvyylgs .gt_sourcenote {
+  font-size: 90%;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#krthvyylgs .gt_left {
+  text-align: left;
+}
+
+#krthvyylgs .gt_center {
+  text-align: center;
+}
+
+#krthvyylgs .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#krthvyylgs .gt_font_normal {
+  font-weight: normal;
+}
+
+#krthvyylgs .gt_font_bold {
+  font-weight: bold;
+}
+
+#krthvyylgs .gt_font_italic {
+  font-style: italic;
+}
+
+#krthvyylgs .gt_super {
+  font-size: 65%;
+}
+
+#krthvyylgs .gt_footnote_marks {
+  font-size: 75%;
+  vertical-align: 0.4em;
+  position: initial;
+}
+
+#krthvyylgs .gt_asterisk {
+  font-size: 100%;
+  vertical-align: 0;
+}
+
+#krthvyylgs .gt_indent_1 {
+  text-indent: 5px;
+}
+
+#krthvyylgs .gt_indent_2 {
+  text-indent: 10px;
+}
+
+#krthvyylgs .gt_indent_3 {
+  text-indent: 15px;
+}
+
+#krthvyylgs .gt_indent_4 {
+  text-indent: 20px;
+}
+
+#krthvyylgs .gt_indent_5 {
+  text-indent: 25px;
+}
+</style>
+<table class="gt_table" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+  <thead>
+    <tr class="gt_col_headings">
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1" scope="col" id="<strong>Characteristic</strong>"><strong>Characteristic</strong></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="<strong>OR</strong><span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;><sup>1</sup></span>"><strong>OR</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="<strong>95% CI</strong><span class=&quot;gt_footnote_marks&quot; style=&quot;white-space:nowrap;font-style:italic;font-weight:normal;&quot;><sup>1</sup></span>"><strong>95% CI</strong><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1" scope="col" id="<strong>p-value</strong>"><strong>p-value</strong></th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr><td headers="label" class="gt_row gt_left">HEMS weather minima met at discharge</td>
+<td headers="estimate" class="gt_row gt_center">19.2</td>
+<td headers="ci" class="gt_row gt_center">4.37, 84.5</td>
+<td headers="p.value" class="gt_row gt_center" style="font-weight: bold;">&lt;0.001</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Age, years</td>
+<td headers="estimate" class="gt_row gt_center">0.96</td>
+<td headers="ci" class="gt_row gt_center">0.77, 1.20</td>
+<td headers="p.value" class="gt_row gt_center">0.7</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Female</td>
+<td headers="estimate" class="gt_row gt_center">1.01</td>
+<td headers="ci" class="gt_row gt_center">0.66, 1.53</td>
+<td headers="p.value" class="gt_row gt_center">&gt;0.9</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">SAPS score excl. age/GCS</td>
+<td headers="estimate" class="gt_row gt_center">1.17</td>
+<td headers="ci" class="gt_row gt_center">0.90, 1.51</td>
+<td headers="p.value" class="gt_row gt_center">0.2</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Pre-transfer Mechanical Ventilation</td>
+<td headers="estimate" class="gt_row gt_center">1.76</td>
+<td headers="ci" class="gt_row gt_center">1.02, 3.05</td>
+<td headers="p.value" class="gt_row gt_center" style="font-weight: bold;">0.042</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">SIR SAPS consciousness level</td>
+<td headers="estimate" class="gt_row gt_center"><br></td>
+<td headers="ci" class="gt_row gt_center"><br></td>
+<td headers="p.value" class="gt_row gt_center">0.3</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;I (GCS ≥13)</td>
+<td headers="estimate" class="gt_row gt_center">—</td>
+<td headers="ci" class="gt_row gt_center">—</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;II (GCS 7-12)</td>
+<td headers="estimate" class="gt_row gt_center">1.49</td>
+<td headers="ci" class="gt_row gt_center">0.85, 2.63</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;III (GCS 6)</td>
+<td headers="estimate" class="gt_row gt_center">0.95</td>
+<td headers="ci" class="gt_row gt_center">0.41, 2.23</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;IV (GCS 5)</td>
+<td headers="estimate" class="gt_row gt_center">2.78</td>
+<td headers="ci" class="gt_row gt_center">0.87, 8.86</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;V (GCS ≤4)</td>
+<td headers="estimate" class="gt_row gt_center">1.34</td>
+<td headers="ci" class="gt_row gt_center">0.58, 3.10</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Inferred diagnosis</td>
+<td headers="estimate" class="gt_row gt_center"><br></td>
+<td headers="ci" class="gt_row gt_center"><br></td>
+<td headers="p.value" class="gt_row gt_center">&gt;0.9</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;ABM</td>
+<td headers="estimate" class="gt_row gt_center">—</td>
+<td headers="ci" class="gt_row gt_center">—</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;AIS</td>
+<td headers="estimate" class="gt_row gt_center">0.84</td>
+<td headers="ci" class="gt_row gt_center">0.21, 3.37</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;ASAH</td>
+<td headers="estimate" class="gt_row gt_center">0.76</td>
+<td headers="ci" class="gt_row gt_center">0.20, 2.94</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;CFX</td>
+<td headers="estimate" class="gt_row gt_center">0.90</td>
+<td headers="ci" class="gt_row gt_center">0.17, 4.66</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;OTHER</td>
+<td headers="estimate" class="gt_row gt_center">0.75</td>
+<td headers="ci" class="gt_row gt_center">0.20, 2.85</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;SDH</td>
+<td headers="estimate" class="gt_row gt_center">0.43</td>
+<td headers="ci" class="gt_row gt_center">0.08, 2.46</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;TBI</td>
+<td headers="estimate" class="gt_row gt_center">0.85</td>
+<td headers="ci" class="gt_row gt_center">0.23, 3.21</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Month</td>
+<td headers="estimate" class="gt_row gt_center"><br></td>
+<td headers="ci" class="gt_row gt_center"><br></td>
+<td headers="p.value" class="gt_row gt_center" style="font-weight: bold;">0.022</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;1</td>
+<td headers="estimate" class="gt_row gt_center">—</td>
+<td headers="ci" class="gt_row gt_center">—</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;2</td>
+<td headers="estimate" class="gt_row gt_center">0.87</td>
+<td headers="ci" class="gt_row gt_center">0.35, 2.16</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;3</td>
+<td headers="estimate" class="gt_row gt_center">1.16</td>
+<td headers="ci" class="gt_row gt_center">0.47, 2.87</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;4</td>
+<td headers="estimate" class="gt_row gt_center">1.71</td>
+<td headers="ci" class="gt_row gt_center">0.65, 4.47</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;5</td>
+<td headers="estimate" class="gt_row gt_center">2.33</td>
+<td headers="ci" class="gt_row gt_center">0.96, 5.66</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;6</td>
+<td headers="estimate" class="gt_row gt_center">2.70</td>
+<td headers="ci" class="gt_row gt_center">1.13, 6.46</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;7</td>
+<td headers="estimate" class="gt_row gt_center">2.50</td>
+<td headers="ci" class="gt_row gt_center">1.02, 6.17</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;8</td>
+<td headers="estimate" class="gt_row gt_center">2.10</td>
+<td headers="ci" class="gt_row gt_center">0.85, 5.23</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;9</td>
+<td headers="estimate" class="gt_row gt_center">2.16</td>
+<td headers="ci" class="gt_row gt_center">0.81, 5.77</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;10</td>
+<td headers="estimate" class="gt_row gt_center">1.09</td>
+<td headers="ci" class="gt_row gt_center">0.45, 2.62</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;11</td>
+<td headers="estimate" class="gt_row gt_center">0.94</td>
+<td headers="ci" class="gt_row gt_center">0.34, 2.54</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;12</td>
+<td headers="estimate" class="gt_row gt_center">0.47</td>
+<td headers="ci" class="gt_row gt_center">0.16, 1.37</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Hour, admission</td>
+<td headers="estimate" class="gt_row gt_center"><br></td>
+<td headers="ci" class="gt_row gt_center"><br></td>
+<td headers="p.value" class="gt_row gt_center">0.7</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;0</td>
+<td headers="estimate" class="gt_row gt_center">—</td>
+<td headers="ci" class="gt_row gt_center">—</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;1</td>
+<td headers="estimate" class="gt_row gt_center">0.27</td>
+<td headers="ci" class="gt_row gt_center">0.03, 2.43</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;2</td>
+<td headers="estimate" class="gt_row gt_center">0.51</td>
+<td headers="ci" class="gt_row gt_center">0.09, 2.84</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;3</td>
+<td headers="estimate" class="gt_row gt_center">0.46</td>
+<td headers="ci" class="gt_row gt_center">0.07, 2.83</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;4</td>
+<td headers="estimate" class="gt_row gt_center">0.24</td>
+<td headers="ci" class="gt_row gt_center">0.03, 2.07</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;5</td>
+<td headers="estimate" class="gt_row gt_center">0.18</td>
+<td headers="ci" class="gt_row gt_center">0.03, 1.05</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;6</td>
+<td headers="estimate" class="gt_row gt_center">0.84</td>
+<td headers="ci" class="gt_row gt_center">0.12, 5.82</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;7</td>
+<td headers="estimate" class="gt_row gt_center">0.82</td>
+<td headers="ci" class="gt_row gt_center">0.14, 4.85</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;8</td>
+<td headers="estimate" class="gt_row gt_center">0.39</td>
+<td headers="ci" class="gt_row gt_center">0.07, 2.05</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;9</td>
+<td headers="estimate" class="gt_row gt_center">1.00</td>
+<td headers="ci" class="gt_row gt_center">0.19, 5.17</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;10</td>
+<td headers="estimate" class="gt_row gt_center">0.43</td>
+<td headers="ci" class="gt_row gt_center">0.09, 2.08</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;11</td>
+<td headers="estimate" class="gt_row gt_center">1.00</td>
+<td headers="ci" class="gt_row gt_center">0.21, 4.79</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;12</td>
+<td headers="estimate" class="gt_row gt_center">0.47</td>
+<td headers="ci" class="gt_row gt_center">0.10, 2.20</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;13</td>
+<td headers="estimate" class="gt_row gt_center">0.32</td>
+<td headers="ci" class="gt_row gt_center">0.07, 1.53</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;14</td>
+<td headers="estimate" class="gt_row gt_center">0.44</td>
+<td headers="ci" class="gt_row gt_center">0.09, 2.09</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;15</td>
+<td headers="estimate" class="gt_row gt_center">0.41</td>
+<td headers="ci" class="gt_row gt_center">0.09, 1.89</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;16</td>
+<td headers="estimate" class="gt_row gt_center">0.89</td>
+<td headers="ci" class="gt_row gt_center">0.18, 4.30</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;17</td>
+<td headers="estimate" class="gt_row gt_center">0.61</td>
+<td headers="ci" class="gt_row gt_center">0.12, 3.18</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;18</td>
+<td headers="estimate" class="gt_row gt_center">0.62</td>
+<td headers="ci" class="gt_row gt_center">0.13, 2.98</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;19</td>
+<td headers="estimate" class="gt_row gt_center">0.29</td>
+<td headers="ci" class="gt_row gt_center">0.06, 1.39</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;20</td>
+<td headers="estimate" class="gt_row gt_center">0.33</td>
+<td headers="ci" class="gt_row gt_center">0.07, 1.57</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;21</td>
+<td headers="estimate" class="gt_row gt_center">0.32</td>
+<td headers="ci" class="gt_row gt_center">0.06, 1.72</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;22</td>
+<td headers="estimate" class="gt_row gt_center">0.31</td>
+<td headers="ci" class="gt_row gt_center">0.06, 1.54</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">&nbsp;&nbsp;&nbsp;&nbsp;23</td>
+<td headers="estimate" class="gt_row gt_center">0.51</td>
+<td headers="ci" class="gt_row gt_center">0.10, 2.77</td>
+<td headers="p.value" class="gt_row gt_center"><br></td></tr>
+    <tr><td headers="label" class="gt_row gt_left">DNR order</td>
+<td headers="estimate" class="gt_row gt_center">0.11</td>
+<td headers="ci" class="gt_row gt_center">0.01, 1.79</td>
+<td headers="p.value" class="gt_row gt_center">0.12</td></tr>
+    <tr><td headers="label" class="gt_row gt_left">Markers of respiratory instability</td>
+<td headers="estimate" class="gt_row gt_center">0.39</td>
+<td headers="ci" class="gt_row gt_center">0.08, 1.88</td>
+<td headers="p.value" class="gt_row gt_center">0.2</td></tr>
+  </tbody>
+  
+  <tfoot class="gt_footnotes">
+    <tr>
+      <td class="gt_footnote" colspan="4"><span class="gt_footnote_marks" style="white-space:nowrap;font-style:italic;font-weight:normal;"><sup>1</sup></span> OR = Odds Ratio, CI = Confidence Interval</td>
+    </tr>
+  </tfoot>
+</table>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="question-2-what-hospital-level-factors-predict-the-utilization-of-hems-ift-in-neuro-icu-patients" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="question-2-what-hospital-level-factors-predict-the-utilization-of-hems-ift-in-neuro-icu-patients"><span class="header-section-number">3</span> Question 2: What hospital level factors predict the utilization of HEMS-IFT in neuro-ICU patients?</h2>
+<p>Interesting predictors here would be thing such as: - Transfer distance (mean) - Having a helipad on the hospital - Having an airport nearby - The type of hospital</p>
+<p>I’m not sure what type of model should be used to estimate this. I’ve been thinking of a count model, such as a Poisson model, but the issue is that the hospitals differ in size (and thus the number of trials at “a success”).</p>
+</section>
+<section id="question-3-what-is-the-causal-effect-of-hems-ift-on-neuro-icu-patients" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="question-3-what-is-the-causal-effect-of-hems-ift-on-neuro-icu-patients"><span class="header-section-number">4</span> Question 3: What is the causal effect of HEMS-IFT on neuro ICU patients?</h2>
+<p>This is the assument underlying data generating process:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">library</span>(dagitty)</span>
+<span id="cb3-2"><a href="#cb3-2"></a></span>
+<span id="cb3-3"><a href="#cb3-3"></a>dag <span class="ot">&lt;-</span> <span class="fu">dagitty</span>(<span class="st">'</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="st">dag {</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="st">bb="0,0,1,1"</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="st">"HEMS-IFT" [exposure,pos="0.374,0.333"]</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="st">"Weather minima" [pos="0.129,0.337"]</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a><span class="st">L [adjusted,pos="0.562,0.497"]</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a><span class="st">Month [adjusted,pos="0.432,0.494"]</span></span>
+<span id="cb3-10"><a href="#cb3-10"></a><span class="st">Outcome [outcome,pos="0.614,0.331"]</span></span>
+<span id="cb3-11"><a href="#cb3-11"></a><span class="st">U [latent,pos="0.480,0.184"]</span></span>
+<span id="cb3-12"><a href="#cb3-12"></a><span class="st">"HEMS-IFT" -&gt; Outcome</span></span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="st">"Weather minima" -&gt; "HEMS-IFT"</span></span>
+<span id="cb3-14"><a href="#cb3-14"></a><span class="st">L -&gt; "HEMS-IFT"</span></span>
+<span id="cb3-15"><a href="#cb3-15"></a><span class="st">L -&gt; Outcome</span></span>
+<span id="cb3-16"><a href="#cb3-16"></a><span class="st">Month -&gt; "HEMS-IFT"</span></span>
+<span id="cb3-17"><a href="#cb3-17"></a><span class="st">Month -&gt; "Weather minima"</span></span>
+<span id="cb3-18"><a href="#cb3-18"></a><span class="st">Month -&gt; Outcome</span></span>
+<span id="cb3-19"><a href="#cb3-19"></a><span class="st">U -&gt; "HEMS-IFT"</span></span>
+<span id="cb3-20"><a href="#cb3-20"></a><span class="st">U -&gt; Outcome</span></span>
+<span id="cb3-21"><a href="#cb3-21"></a><span class="st">}'</span>)</span>
+<span id="cb3-22"><a href="#cb3-22"></a></span>
+<span id="cb3-23"><a href="#cb3-23"></a><span class="fu">plot</span>(dag)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="inferential-models-1_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Where L is a set of measured confounders: - Diagnosis - Age - Sex - Sending site - SAPS score - Conciousness level - Presence of mechanical ventilation</p>
+<p>Month is also a potential confounder (as it might affect staffing and the quality of ICU care, as well as the availability of HEMS, mainly via the weather exposure).</p>
+<p>HEMS minima affects the exposure and is, conditional on the time of year, an <em>instrumental variable</em> that could potentially be used to infer the causal effect of HEMS-IFT. I’ve run into some issues here: (1) the “standard” way of using instrumental variables in a two-stage least squares regression is not applicable here, since the outcome is binary (this means that the odds-ratios are very hard to interpret/unusable due to the “non-collapsability” of this statistic); (2) It makes sense to do the analysis in a hierarchical manner, but the available software does not allow for this.</p>
+<p>This is a quick test with the <ivtools> package doing IV analysis by way of Robins’/Hernan “g-estimation”.</ivtools></p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="fu">library</span>(ivtools)</span>
+<span id="cb4-2"><a href="#cb4-2"></a>fitX.L <span class="ot">&lt;-</span> <span class="fu">glm</span>(<span class="at">formula=</span>hems_ift <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> formatted_icu_name <span class="sc">+</span> DX_GROUP <span class="sc">+</span> age <span class="sc">+</span> SAPS_score_excluding_gcs_age <span class="sc">+</span> sir_consciousness_level <span class="sc">+</span> any_AMV <span class="sc">+</span> MONTH, <span class="at">data =</span> d, <span class="at">family =</span> binomial)</span>
+<span id="cb4-3"><a href="#cb4-3"></a>fitX.LZ <span class="ot">&lt;-</span> <span class="fu">glm</span>(<span class="at">formula=</span>hems_ift <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> formatted_icu_name <span class="sc">+</span> DX_GROUP <span class="sc">+</span> age <span class="sc">+</span> SAPS_score_excluding_gcs_age <span class="sc">+</span> sir_consciousness_level <span class="sc">+</span> any_AMV <span class="sc">+</span> MONTH <span class="sc">+</span> hems_minima, <span class="at">data =</span> d, <span class="at">family =</span> binomial)</span>
+<span id="cb4-4"><a href="#cb4-4"></a>fitY.LZX <span class="ot">&lt;-</span> <span class="fu">glm</span>(<span class="at">formula=</span>d30 <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> formatted_icu_name <span class="sc">+</span> DX_GROUP <span class="sc">+</span> age <span class="sc">+</span> SAPS_score_excluding_gcs_age <span class="sc">+</span> sir_consciousness_level <span class="sc">+</span> any_AMV <span class="sc">+</span> MONTH <span class="sc">+</span> hems_minima <span class="sc">+</span> hems_ift, <span class="at">data =</span> d, <span class="at">family =</span> binomial)</span>
+<span id="cb4-5"><a href="#cb4-5"></a>fitY.LX <span class="ot">&lt;-</span> <span class="fu">glm</span>(<span class="at">formula=</span>d30 <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> formatted_icu_name <span class="sc">+</span> DX_GROUP <span class="sc">+</span> age <span class="sc">+</span> SAPS_score_excluding_gcs_age <span class="sc">+</span> sir_consciousness_level <span class="sc">+</span> any_AMV <span class="sc">+</span> MONTH <span class="sc">+</span> hems_ift, <span class="at">data =</span> d, <span class="at">family =</span> binomial)</span>
+<span id="cb4-6"><a href="#cb4-6"></a></span>
+<span id="cb4-7"><a href="#cb4-7"></a>ivm <span class="ot">&lt;-</span> <span class="fu">ivglm</span>(<span class="at">estmethod =</span> <span class="st">"g"</span>, <span class="at">fitX.LZ =</span> fitX.LZ, <span class="at">fitX.L =</span> fitX.L, <span class="at">fitY.LZX =</span> fitY.LZX, <span class="at">fitY.LX =</span> fitY.LX, <span class="at">data =</span> d, <span class="at">link=</span><span class="st">"logit"</span>)</span>
+<span id="cb4-8"><a href="#cb4-8"></a><span class="fu">summary</span>(ivm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:  
+ivglm(estmethod = "g", fitX.LZ = fitX.LZ, fitX.L = fitX.L, fitY.LX = fitY.LX, 
+    fitY.LZX = fitY.LZX, data = d, link = "logit")
+
+Coefficients: 
+         Estimate Std. Error z value Pr(&gt;|z|)
+hems_ift  -0.5266     0.5980  -0.881    0.379</code></pre>
+</div>
+</div>
+<p>The outcome here is 30-day mortality. The point estimate for the coefficient for the causal predictor HEMS is -0.5266, i.e.&nbsp;OR = 0.59. The 95% CI would be:</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="fu">exp</span>(<span class="fu">confint</span>(ivm))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>             2.5 %   97.5 %
+hems_ift 0.1829341 1.906955</code></pre>
+</div>
+</div>
+<p>I.e., OR 0.18-1.9. Wide, that is. If 1-yr mortality is used, the OR point estimate is very close to being “signficant”. It could be reasonable to try out a time-to-event model as 30-day mortality is completely arbitrary.</p>
+<p>What I don’t like is that this model uses sending ICU as a predictor rather than a level. Also, there is no missing data handling as always with these frequentist approaches. However, I have not found an obvious way to do this analysis in a Bayesian way yet.</p>
+</section>
+<section id="moving-forward" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="moving-forward"><span class="header-section-number">5</span> Moving forward</h2>
+<ul>
+<li>Is the descriptive stuff + prediction of HEMS usage enough?</li>
+<li>What type of model is reasonable on the <em>hospital level</em>?</li>
+<li>The IV analysis is interesting, but I feel the need to involve somebody that has a better understanding of this.</li>
+<li>Of course, everything should be re-run as the new data comes in (new patients, functional outcome data, comorbidities)</li>
+</ul>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
