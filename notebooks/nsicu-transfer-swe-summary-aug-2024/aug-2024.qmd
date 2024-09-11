@@ -1,0 +1,948 @@
+---
+title: "Transporter av NIVA-patienter"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    html-math-method: katex
+    number-sections: true
+author: Johan Olsson
+date: 2024-08-08
+code-fold: true
+code-line-numbers: true
+warning: false
+comments:
+  hypothesis: true
+  
+cite-method: citeproc
+bibliography: references.bib
+csl: scandinavian-journal-of-trauma-resuscitation-and-emergency-medicine.csl
+---
+```{r load_dependencies}
+#| output: false
+#| echo: false
+
+library(tidyverse)
+library(patchwork)
+library(brms)
+library(marginaleffects)
+library(gtsummary)
+library(glue)
+library(htmlTable)
+library(RSQLite)
+library(grid)
+library(dagitty)
+library(devtools)
+install_github("ryanfalckjones/rcmswe", force = TRUE)
+library(rcmswe)
+library(lwgeom)
+library(ggspatial)
+library(geosphere)
+library(rnaturalearth)
+library(sf)
+library(ivtools)
+library(aod)
+
+set.seed(1989)
+```
+# Bakgrund
+
+Årligen transporteras tusentals patienter från intensivvårdsavdelningar på mindre sjukhus till universitetssjukhus för definitiv vård. De till antalet största patientkategorierna är de som flyttas för att få avancerad vård inom trauma, kirurgi, neurologi/neurokirurgi och pediatrik. De flesta av dessa patienter behöver flyttas för att de är *för sjuka för att kunna vårdas på hemsjukhuset*.
+
+Att transportera en intensivvårdspatient är ett komplicerat logistiskt och medicinskt företag. Patienten är ofta tidigt i sitt sjukdomsförlopp, med en ännu dynamisk patofysiologi, vilket kan kräva aktiva intensivvårdsåtgärder under transporten. Den nödvändiga vården måste tillgodoses, samtidigt som patienten förflyttas mellan sjukhusen. Miljöfaktorer såsom acceleration, lufttryck och temperatur kan ha en direkt komplicerande fysiologisk påverkan på patienten. Andra miljöfaktorer såsom tidspress, mörker, den fysiska arbetsmiljön och buller gör samtliga att miljön mellan sjukhus är besvärligare att arbeta i än inne på en intensivvårdsavdelning. Utöver dessa problem behöver den transporterande klinikern samtidigt koordinera flytten med avsändande och mottagande vårdgivare, samt, i förekommande fall, ambulanspersonal, piloter och andra intressenter.
+
+Det går därför att förstå varför komplikationsfrekvensen vid intensivvårdstransporter är hög. Beroende på vilken definition av komplikation som används, visar tidigare studier på en frekvens om 5-25% [@singh_incidence_2009; @van_lieshout_nurses_2016; @lyphout_patient_2018; @sundbom_total_2021; @seymour_adverse_2008; @swickard_patient_2018; @wiegersma_quality_2011; @grier_critical_2020; @jeyaraju_safety_2021]. Det är dock möjligt att den verkliga komplikationsfrekvensen är ännu högre, givet begränsningarna i studier som bygger på egenrapporterade komplikationer [@grier_critical_2020; @archer_development_2017]. Längre transporttid tycks vara associerat med ett högre antal komplikationer [@singh_incidence_2009, @sundbom_total_2021, @swickard_patient_2018].
+
+Förutsättningarna under vilka patienter transporteras varierar vida, både avseende logistiska aspekter (t.ex. val av transportmedel), tillgänglig utrustning (t.ex övervakningsutrustning), men framförallt gällande de(n) transporterande klinikerns erfarenhet och nivå av träning. I Sverige kan två patienter, med likvärdig medicinsk komplexitet och vårdbehov, komma att transporteras på mycket olika sätt. Den transporterande personalen kan vara allt från en läkare under specialistutbildning i anestesi- och intensivvård (ST-läkare), en anestesisjuksköterska ingående i en beredskapslinje för intensivvårdstransporter eller ett specialiserat team bestående av specialistläkare inom intensivvård och en specialistsjuksköterska inom anestesi eller intensivvård.
+
+Graden av formell träning inom transportmedicin kommer skilja sig mellan de ovan beskrivna personalkategorierna, där ST-läkaren typiskt har begränsad specifik utbildning i transportmedicin, medan sjuksköterskan och de specialiserade teamen kommer att ha en högre grad utbildning. Erfarenheten av faktiska transporter varierar likaså. De specialiserade teamen får antas ha störst volym av patientfall. Både ST-läkaren och den ensamma sjuksköterskan torde ha sämre förutsättningar att hantera komplicerade fall och akut uppkomna krissituationer, just för att de inte har någon assisterande vårdgivare samt då de kan sakna både formell och reell kompetens att genomföra avancerade åtgärder och att fatta komplicerade medicinska beslut.
+
+Vid transport med helikopter kommer, i Sverige, patienten *med all säkerhet* vårdas av ett specialiserat team bestående av specialistläkare inom intensivvård och en intensivvårdssköterska. Vid transporter med **annat** transportmedel kan vården utföras det nyss beskrivna teamet i vägambulans (eller i förekommande fall flygplan), men betydligt oftare av en ensam narkossköterska eller ST-läkare.
+
+Val av transportmedel, vilket i vissa fall kommer att påverka totaltiden för transport, tiden i transport och fysiologin under transporter, varierar också. Vägambulans, flygplan, helikopter eller kombinationer av dessa färdmedel, används vid transporter. Tillgänglighet av transportmedel och personal, geografi, väder, lokala kliniska traditioner och organisatoriska beslut får antas påverka vilka förutsättningar som ges för en given transport. Den ekonomiska aspekten kan inte underskattas. En typisk transport kostar, i grova drag, mellan 50-500 tkr. Generellt är transporter företagna av specialiserade team med helikopter som transportmedel dyrare än de flesta andra alternativ om man ej beaktar alternativkostnader.
+
+Studierna som försöker beskriva konsekvenserna av ovanstående val är få och har i regel metodologiska begränsningar. Vid transport av vuxna intensivvårdspatienter tycks specialiserade transportteam, i motsats till ensamma kliniker (ofta sjuksköterskor eller läkare under utbildning) eller team sammansatta *ad-hoc*, medföra bättre fysiologiska parametrar hos patienten [@van_lieshout_nurses_2016; @wiegersma_quality_2011; @kennedy_impact_2015]. I vissa sammanhang argumenterar man för att en mortalitetsvinst kan ses [@bellingan_comparison_2000; @kennedy_impact_2015]. Studierna är dock få och sammanhangen i vilka studierna är gjorda under varierar Liknande slutsatser tycks vara något mer etablerade inom pediatrisk intensivvård [@ramnarayan_effect_2010; @orr_pediatric_2009; @vos_comparison_2004; @meyer_pediatric_2016]. Flera expertgrupper och samfund rekommenderar att intensivvårdstransporter ska utföras av specialiserade team [@droogh_transferring_2015; @foex_guidance_2019; @warren_guidelines_2004; @nathanson_guidelines_2020].
+
+Patienter i behov av neurointensivvård utgör en stor del av de patienter som flyttas mellan sjukhus. Ett viktigt mål inom neurointensivvården är att undvika så kallade "secondary insults", dvs. episoder av fysiologisk påverkan som riskerar att förvärra den redan uppkomna hjärnskadan [@signorini_adding_1999]. Exempel på sådana insulter är hypotension och hypoxi, vilka båda är vanliga komplikationer vid allmänna intensivvårdstransporter [@lyphout_patient_2018; @sundbom_total_2021; @seymour_adverse_2008; @swickard_patient_2018]. Det är därför tänkbart att kvaliteten på vården under transporter av neurointensivvårdspatienter kan påverka utfallet. Dock finns relativt få försök att studera just transporter av neurointensivvårdspatienter och endast en studie beskriver t.ex. betydelsen av transportmedel [@safaee_interfacility_2019; @nuno_effect_2012; @weyhenmeyer_effects_2018].
+
+Sammanfattningsvis är intensivvårdstransporter komplicerade och behäftade med komplikationer. Få studier beskriver betydelsen av kvaliteten av vård under transport, kompetens hos klinikerna eller val av transportmedel. Vidare är de flesta studierna single-center studier och utförda i en kontext relativt olik den svenska. Transporter av neurointensivvårdspatienter är än mindre studerat.
+
+# Frågeställningar
+
+## Några obesvarade frågor
+-   Vilka patienter transporteras i Sverige?
+-   Under vilka förutsättningar ska en vuxen intensivvårdspatient transporteras givet förutsättningarna i Sverige?
+    -   Vilken betydelse har kompetens hos de transporterande klinikerna för utfallet?
+    -   Spelar val gällande logistiken, t.ex. transportmedel, roll för utfallet?
+-   Finns där subgrupper av patienter som har särskilt hög risk för dåligt utfall efter en transport?
+
+## Konkreta frågor
+
+1.  Vilka neurointensivvårdspatienter transporteras från läns-/länsdelssjukhus till universitetssjukhus i Sverige? Vilka diagnoser har patienterna? Hur ser demografin ut? Hur sjuka är de som transporteras? Vilka åtgärder är gjorda före avtransport?
+
+2.  Vilka patientfaktorer kan identifieras som prediktorer för valet att transportera en neurointensivvårdspatient med helikopter kontra andra transportmedel?
+
+3.  Finns där skillnad i utfall för neurointensivvårdspatienter som transporterats med helikopter (och således med ett specialiserat transportteam) kontra andra transportmedel (odefinierad klinisk kompetens under transport)?
+
+# Iordningsställande av data
+Nedan kommer övergripande principer för framställandet av data att presenteras. Detaljer för varje delmoment finns dokumenterade annorstädes (mestadels på engelska). För att spara plats förbigås detaljerna här. Exempelvis utgörs processandet av flygdatan av cirka 10 separata steg (500 rader kod i python) med en hel del nyanser.
+
+## Övergripande principer
+
+Där finns idag ingen sammanhållen nationell databas för patienter som flyttas mellan intensivvårdsavdelningar. Således har jag försökt att bygga ett dataset med hjälp av flera separata datakällor. Data kommer från flera källor: \* Svenskt intensivvårdsregister (SIR) \* Patientregistret (PAR) \* Dödsorsaksregistret \* Flygdata (ADS-B) från FlightRadar24 AB \* Väderdata (METAR) från Luftfartsverket (via ogimet.com) \* Longitudinell integrationsdatabas för Sjukförsäkrings- och Arbetsmarknadsstudier (LISA)
+
+Datasetet innehåller neurointensivvårdspatienter som förmodas ha flyttats från ett läns-/länsdelssjukhus till ett universitetssjukhus. Patienterna identifieras som intensivvårdskrävande i och med att de har ett registrerat vårdtillfälle i svenskt intensivvårdsregister (SIR) på ett läns-/länsdelssjukhus. Om patienten skrivs ut därifrån inom 24 timmar och, samma dag (eller dagen efter), enligt PAR läggs in på ett universitetssjukhus med en för neurointensivvården relevant diagnos (baserat på en uppsättning ICD-10 kriterier), betraktas patienten som en sådan som flyttats för neurointensivvård.
+
+Klinisk data från avsändande sjukhus (SIR) beskriver fysiologisk påverkan och insatta åtgärder före avfärd. Demografisk data hämtas från PAR och SIR. Ur dödsorsaksregistret hämtas uppgifter om tidpunkt för eventuell död. I ett senare skede kommer uppgifter om återgång till arbete, vilket anses vara ett surrogatmått för funktionellt utfall, hämtas från LISA.
+
+Data för samtliga, av FlightRadar24 AB, registrerade rörelser för helikoptrar inom svenskt luftrum under perioden 2017-2024 har använts för att identifiera flygningar mellan svenska sjukhus. Dessa flygningar har sedan "matchats" mot i SIR/PAR identifierade patienttransporter för att dra slutsatser om hur patienten transporterats (helikopter vs icke-helikopter).
+
+Väderdata, från automatiserade s.k. METAR-rapporter från flygplatser i närheten av sjukhus, har hämtats och behandlats för att utröna om väderförutsättningarna (sikt, molnbas) i kombination med beräknade ljusförhållanden (huruvida det var s.k. "borgerlig skymning" eller ljusare vid tidpunkten) medgav helikoptertransport under lagarna utfärdade av European Union Aviation Safety Agency (EASA), dvs. EU:s byrå för luftfartssäkerhet.
+
+## Kommentarer om data
+
+### SIR
+
+SIR har utmärkt täckningsgrad från intensivvårdspatienter med svenskt personnummer. Vissa variabler, särskilt fysiologiska värden vid inskrivning, har relativt låg grad av "missingness". De flesta avsändande intensivvårdsavdelningar rapporterade till SIR under perioden 2017-2024.
+
+### PAR
+
+PAR har i det närmast komplett täckningsgrad. Kvaliteten för diagnossättning i PAR är något osäker, men har i jämförelser mot kvalitetsgranskade registerdata för t.ex. strokediagnoser visat sig vara rimligt bra.
+
+### Flygdata
+
+All flygdata bygger på s.k. Automatic Dependent Surveillance–Broadcast, ADS-B, vilket förutsätter att ett luftfartyg har en transponder som skickar signaler som sedan registreras av flera mottagare på marken som, i sin tur, skickar vidare data till FlightRadar24. Denna data innehåller uppgifter om bl.a. ett givet luftfartygs position (longitud, latitud, altitud), rörelse (bl.a. hastighet) och tidpunkt för observationen. Kvaliteten av data är beroende av transpondern och den lokala förekomsten av mottagarstationer på marken. Under det senaste decenniet har helikopterflottan för sjukvårdstransporter moderniserats till typer som använder modernare transpondrar. Från senare delen av 2019, när "Luftburen intensivvård mitt" (baserade i Uppsala) börjar flyga en modern helikoptermodell, noteras en tydlig och varaktig förbättring av flygdata. Således har bara flygdata från oktober 2019 och framåt använts.
+
+Att identifiera flygningar mellan sjukhus visar sig vara mer komplicerat och intressant än att t.ex. identifiera kommersiell reguljärtrafik mellan flygplatser, då data om flygningens destination (flygplatskod) oftast saknas i signalen från ADS-B. Signalen kan ibland tappas och återupptas en tid senare, vilket gör att en enskild flygning kommer att registreras som flera separata flygningar i FlightRadar24s data.
+
+Ett sätt att identifiera flygningar är att definiera de relevanta landningsplatserna för samtliga akutsjukhus i Sverige (normalt 1-2 st/sjukhus). Runt dessa landningsplatser definieras en avgränsad "landningszon", storleken på vilken får variera i storlek baserat på lokal signalkvalitetet. När en relevant helikopter befinner sig i en sådan zon, och är det väsentligt längre än den tid det tar att flyga över zonen, antas det att helikoptern har landat vid sjukhuset. Nästa liknande landning identifieras och därmed kan man dra slutsatser om luftfartygets historiska "rutt". Ytterligare kontrollpunkter i algoritmen finns för att försöka sålla bort bl.a. primäruppdrag med destination utanför sjukhus (t.ex. uppdrag vid trafikolyckor).
+
+Identifierade flygningar mellan sjukhus har matchats mot patienttransporter. Om det går att hitta en flygning med samma rutt som en patients IVA-transport går inom ett fönster om +/-3 timmar från IVA-utskrivning på det primära sjukhuset, antas patienten ha flyttats med helikopter. Detta medför en viss risk för "falskt positiva" helikoptertransporter, men risken torde vara relativt låg då både flyttar av neurointensivvårspatienter och helikoptertransporter är ovanliga för ett givet sjukhus (5-30 patienter/år/sjukhus respektive 0-90 flygningar/år/sjukhus). Indirekt bevis för detta resonemang går att få när man jämföra patienters utskrivningstid med avfärdstid för helikoptern vid den matchade flygningen. Differensen mellan dessa tidpunkter är relativt liten.
+
+```{r time_differences, fig.width=10, fig.height=8, fig.popup=TRUE, fig.cap="A histogram of time differences between the helicopter leaving the hospital zone vs. SIR discharge time"}
+d <- read_delim("/Users/JO/PhD/nsicu-transfers/data/pre-processed-data/patient-df-2024-07-17 13:35:31.900387.csv", show_col_types = FALSE)
+
+# add comorb per Ryan
+lopnr_date <- d %>% select(c("LopNr", "par_adm_date"))
+comorb <- rcmswe::extract_comorbs(search_df = lopnr_date, sqlite_path = "/Users/JO/PhD/nsicu-transfers/data/patient-data/db.sqlite", LMED=FALSE)
+d <- d %>% left_join(comorb) %>% mutate(CCIunw = replace_na(CCIunw, 0)) %>% mutate(CCIw = replace_na(CCIw, 0))
+d$CCIunw_scaled <- scale(d$CCIunw)
+d$CCIw_scaled <- scale(d$CCIw)
+
+# Convert the sir_adm_time_UTC column to POSIXct class (date-time class in R)
+d$sir_adm_time_UTC <- ymd_hms(d$sir_adm_time_UTC)
+
+# Extract the hour and month using lubridate functions and create new columns
+d$HOUR <- hour(d$sir_adm_time_UTC)
+d$HOUR <- as.factor(d$HOUR)
+d$MONTH <- month(d$sir_adm_time_UTC)
+d$MONTH <- as.factor(d$MONTH)
+
+# Use dplyr to mutate the DX_GROUP column
+keep_values <- c("SDH", "ASAH", "TBI", "ABM", "ICH", "AIS", "CFX")
+d <- d %>%
+  mutate(DX_GROUP = ifelse(DX_GROUP %in% keep_values, DX_GROUP, "OTHER"))
+
+# Converting categorical variables to factors
+d$dx <- factor(d$DX_GROUP)
+d$dx <- relevel(factor(d$dx), ref = "TBI")
+
+# Add season variable
+d <- d %>%
+  mutate(season = case_when(
+    MONTH %in% c(11, 12, 1, 2) ~ "winter",
+    MONTH %in% c(3, 4) ~ "spring",
+    MONTH %in% c(5, 6, 7, 8) ~ "summer",
+    MONTH %in% c(9, 10) ~ "fall"
+  ))
+d$season <- relevel(factor(d$season), ref = "summer")
+
+dsc_time <- ymd_hms(d$sir_dsc_time_UTC, tz="UTC")
+out_time <-  ymd_hms(d$UTC_out_sending_hems, tz="UTC")
+timediff_minutes <- data.frame((out_time - dsc_time) / 60)
+names(timediff_minutes) <- c("SIR_discharge_time_relative_helicopter_out_time")
+
+ggplot(timediff_minutes, aes(x = SIR_discharge_time_relative_helicopter_out_time)) +
+  geom_histogram(binwidth = 5, fill = "maroon", color = "black") +
+  labs(title = "Histogram of Time Difference Between Helicopter Leaving Hospital vs. SIR Discharge Time",
+       x = "Minutes", y = "Frequency") +
+  scale_x_continuous(breaks = c(-120, -90, -60, -45, -30, -15, 0, 15, 30, 45, 60, 90, 120)) +
+  theme_minimal()
+```
+
+Data har validerats mot ett lokalt register på ett mindre sjukhus i Norrland samt registret hos en större transportorgansiation (Intensivvårdstransportcentrum, Karolinska universitetsjukhuset) med goda resultat. Samtliga flygningar till det mindre sjukhuset identifierades. I det större registret vid Karolinskas transportorgansiation ses en sensitivet för identifierade flygningar (nota bene: ej "matchade flygningar" då registret ej möjliggör det) på nära 100% och en specificitet kring 95%.
+
+### Väderdata
+Väderdatan är i det närmaste komplett. Då väderdata samlas in på flygplatser, och inte på sjukhusens landningsplatser, har den närmaste flygplatsen varit datakälla. Väderförutsättningar för HEMS *vid en given tidpunkt och plats* är i teorin binära: antingen är det, baserat på framförallt sikt och ljusförhållanden, tillåtet att flyga eller inte. Verkligheten är dock lite mer komplicerad, exempelvis kan förutsättningarna för flygning *just nu* vara uppfyllda, men inte om 10 minuter, vilket kan omöjliggöra en flygning. Vidare säger METAR-rapporterna i princip inget om vädret *mellan* sjukhusen. Väderminima behöver vara uppfyllda på både start och landningsplats. Tillgången på alternativa landningsplatser och huruvida det finns lokala procedurer för instrumentinflygning kan också påverka om en flygning går att genomföra. Komplexiteten har gjort att jag har valt ett förenklat mått på väderförutsättningar: om HEMS-minima var uppfyllda på avsändande sjukhus vid tiden för utskrivning från IVA anses väderminima vara uppfyllda.
+
+# Deskriptiv analys av data
+Nedan följer en översiktlig sammanställning av transporterade patienter. Antalet patienter är just nu cirka 1200, men förväntas öka till cirka 1900 efter att data kompletterats med patientuppgifter från 2022-2024. IFT = interfacility transfer. HEMS = helicopter emergency medical service, dvs. helikoptertransport.
+
+## Samtliga transporterade patienter
+```{r summary_table, fig.popup=TRUE, fig.cap="Sammanfattande tabell av patientkohorten"}
+theme_gtsummary_compact()
+
+d %>%
+  tbl_summary(include=c(age,
+                        sex_female,
+                        CCIw,
+                        DNR,
+                        BMI,
+                        DX_GROUP,
+                        sir_consciousness_level,
+                        overall_obtunded,
+                        SAPS_GCS,
+                        SAPS_RLS85,
+                        any_AMV,
+                        respiratory_instability_markers,
+                        SAPS_hypoxia,
+                        SAPS_hypotension,
+                        SAPS_hypertension,
+                        SAPS_bradycardia,
+                        SAPS_tachycardia,
+                        hemodynamic_instability_markers,
+                        SAPS_acidosis,
+                        SAPS_hypothermia,
+                        hospital_name_receiving,
+                        formatted_icu_name,
+                        sir_hospital_type,
+                        sir_total_time,
+                        icu_discharge_afterhours,
+                        icu_discharge_nighttime,
+                        road_distance,
+                        geodesic_distance,
+                        hems_minima,
+                        hems_ift,
+                        d7,
+                        d30,
+                        d365
+                ),
+              statistic = c("CCIw") ~ "{mean}",
+              
+              label = list(age ~ "Age, years",
+                           sex_female ~ "Female",
+                           CCIw ~ "Weighted Charlson Comorbidity Index (CCI)",
+                           DNR ~ "DNR order",
+                           BMI ~ "BMI, kg/m2",
+                           DX_GROUP ~ "Inferred diagnosis",
+                           sir_consciousness_level ~ "SIR SAPS consciousness level",
+                           overall_obtunded ~ "Pre-transfer obtunded (not fully alert)",
+                           SAPS_GCS ~ "SAPS GCS",
+                           SAPS_RLS85 ~ "SAPS RLS85",
+                           any_AMV ~ "Pre-transfer Mechanical Ventilation",
+                           SAPS_hypoxia ~ "SAPS Hypoxemia (PAO2<8 kPa)",
+                           respiratory_instability_markers ~ "Markers of respiratory instability",
+                           SAPS_hypotension ~ "SAPS hypotension (<90 mmHg)",
+                           SAPS_hypertension ~ "SAPS hypertension (>180 mmHg)",
+                           SAPS_bradycardia ~ "SAPS bradycardia (<50 bpm)",
+                           SAPS_tachycardia ~ "SAPS tachycardia (>110 bpm) ",
+                           hemodynamic_instability_markers ~ "Markers of hemodynamic instability",
+                           SAPS_acidosis ~ "SAPS acidosis (pH <7.25)",
+                           SAPS_hypothermia ~ "SAPS hypothermia (<35°C)",
+                           hospital_name_receiving ~ "Receiving hospital",
+                           formatted_icu_name ~ "Sending ICU",
+                           sir_hospital_type ~ "Sending hospital type",
+                           sir_total_time ~ "Time in primary ICU, minutes",
+                           icu_discharge_afterhours ~ "Discharge outside of office hours (jourtid)",
+                           icu_discharge_nighttime ~ "Discharge between hours 22:00 - 07:00",
+                           road_distance ~ "Road distance, km",
+                           geodesic_distance ~ "Geodesic distance, km",
+                           hems_minima ~ "HEMS weather minima met at discharge",
+                           hems_ift ~ "Interfacility transfer by HEMS",
+                           d7 ~ "7-day mortality",
+                           d30 ~ "30-day mortality",
+                           d365 ~ "90-day mortality"
+                           ),
+              missing="always",
+              missing_text="Missing"
+                        ) %>%
+  add_n()
+```
+
+Nedan en grafisk representation av färdvägar. Mottagande centra (NIVA) är kastanjebruna och avsändande centra där mer än >20% av patienterna flygs har blå cirklar kring sig.
+
+```{r map_of_transfers, fig.popup=TRUE, fig.cap="Sammanfattande karta"}
+#| label: fig-swedem
+#| 
+#| fig-cap: "Transfers of ICU patients in the cohort. The opacity of the line denotes the relative frequency of transfers. Receiving centers are maroon. Centers where >20% of patients are transferred by HEMS are circled"
+
+# Create a dataframe of routes in the dataset and the frequencies
+routes <- d %>%
+  group_by(formatted_icu_name, hospital_name_receiving) %>%
+  count() %>%
+  ungroup() %>%
+  arrange(n)
+
+# Create a tibble of longitude and latitude values of sources
+sources_tbl <- d %>% 
+  select(start_longitude, start_latitude)
+# Create a tibble of longitude and latitude values of destinations
+destinations_tbl <- d %>%
+  select(end_longitude, end_latitude)
+
+# Calculate great circles
+sl_routes <- gcIntermediate(sources_tbl, destinations_tbl, 
+                            n = 50, addStartEnd = TRUE, 
+                            sp = TRUE)
+
+# Get mapdata for Sweden from Naturalearth
+swe <- ne_countries(scale = "medium", country="Sweden", type="countries", returnclass="sf")
+
+routes_id <- rowid_to_column(routes, var = "id")
+routes_long <- routes_id %>% 
+  gather(key = "type", value = "place", formatted_icu_name, hospital_name_receiving)
+
+end <- d %>% select(hospital_name_receiving, end_latitude, end_longitude) %>% rename("place" = "hospital_name_receiving", "latitude" = "end_latitude", "longitude" = "end_longitude")
+start <- d %>% select(formatted_icu_name, start_latitude, start_longitude) %>% rename("place" = "formatted_icu_name", "latitude" = "start_latitude", "longitude" = "start_longitude")
+locations <- bind_rows(end, start) %>% distinct()
+routes_long_geo <- left_join(routes_long, locations, by = "place")
+
+routes_long_sf <- st_as_sf(routes_long_geo,
+                           coords = c("longitude", "latitude"),
+                           crs = 4326)
+
+routes_lines <- routes_long_sf %>% 
+  group_by(id) %>% 
+  summarise(do_union = FALSE) %>% 
+  st_cast("LINESTRING")
+
+routes_lines <- left_join(routes_lines, routes_id, by = "id")
+
+routes_sf_tidy <- routes_lines %>% 
+  st_segmentize(units::set_units(20, km))
+
+routes_sf_tidy <- routes_lines %>% 
+  st_segmentize(units::set_units(20, km))
+
+heavy_users <- unique(filter(d, hems_ift_proportion >= 0.2)$formatted_icu_name)
+
+
+ggplot() +
+  geom_sf(data = swe, fill = gray(0.95), color = gray(0.3)) +
+  geom_sf(data = routes_sf_tidy, aes(alpha = routes_sf_tidy$n), show.legend = FALSE) +
+  scale_alpha_continuous(range = c(0.1, 1), breaks = pretty(range(routes_sf_tidy$n), n = 4)) +
+  geom_sf(data = routes_long_sf) +
+  geom_point(data = filter(locations, place %in% unique(d$hospital_name_receiving)), aes(x = longitude, y = latitude), color = "maroon", size = 2) +
+  geom_point(shape=21, data = filter(locations, place %in% c(heavy_users)), aes(x = longitude, y = latitude), color = "#004080", size = 3) +
+
+  ggtitle("NSICU transfers in the Cohort (Oct 2019 - Jul 2022)") +
+  theme_minimal() + 
+  ggspatial::annotation_scale(style="ticks", location="br")
+```
+
+
+# Vilka variabler kan identiferas som prediktorer för att transporteras med helikopter?
+Där finns uppenbara skillnader mellan sjukhus i hur ofta helikoptertransporter används. För att besvara vilka prediktorer som är betydande för valet att transportera en patient med helikopter är kommer patienter skickade från sjukhus där <20% av transporterna genomförs med helikopter att exkluderas. Denna cut-off är förstås arbiträr, men ska ungefär motsvara svaret "ibland" på frågan "Använder ditt sjukhus helikoptertransporter"? De inkluderade faktorerna är huvudsakligen patientfaktorer och andra variabler som är kopplade till det enskilda fallet.
+
+## Univariat analys
+```{r univariate_prediction_ift_modality}
+d$age_scaled <- scale(d$age)
+d$SAPS_total_score_scaled <- scale(d$SAPS_total_score)
+d$SAPS_score_excluding_gcs_age_scaled <- scale(d$SAPS_score_excluding_gcs_age)
+d$SAPS_min_SBP_scaled <- scale(d$SAPS_min_SBP)
+d$road_distance_scaled <- scale(d$road_distance)
+
+tbl_uv <- d %>%
+  filter(hems_ift_proportion > 0.2) %>%
+  select(c("hems_ift", "age_scaled", "sex_female", "hems_minima", "any_AMV", "sir_consciousness_level", "DX_GROUP", "MONTH", "HOUR", "DNR", "BMI", "CCIw", "icu_discharge_afterhours", "SAPS_score_excluding_gcs_age_scaled", "SAPS_total_score_scaled", "SAPS_hypotension", "SAPS_hypertension", "SAPS_hypothermia", "SAPS_hypoxia", "SAPS_acidosis", "SAPS_tachycardia", "SAPS_bradycardia", "ARDS", "hemodynamic_instability_markers", "respiratory_instability_markers", "BMI")) %>%
+tbl_uvregression(
+    method = glm,
+    y = "hems_ift",
+    method.args = list(family = binomial),
+    exponentiate = TRUE,
+    label = list(
+      age_scaled ~ "Age, years (scaled)",
+      sex_female ~ "Female",
+      DNR ~ "DNR order",
+      BMI ~ "BMI, kg/m2",
+      CCIw ~ "Weighted Charlson Comorbidity Index (CCI)",
+      DX_GROUP ~ "Inferred diagnosis",
+      sir_consciousness_level ~ "SIR SAPS consciousness level",
+      any_AMV ~ "Pre-transfer Mechanical Ventilation",
+      SAPS_hypoxia ~ "SAPS Hypoxemia (PAO2<8 kPa)",
+      respiratory_instability_markers ~ "Markers of respiratory instability",
+      SAPS_hypotension ~ "SAPS hypotension (<90 mmHg)",
+      SAPS_hypertension ~ "SAPS hypertension (>180 mmHg)",
+      SAPS_bradycardia ~ "SAPS bradycardia (<50 bpm)",
+      SAPS_tachycardia ~ "SAPS tachycardia (>110 bpm) ",
+      hemodynamic_instability_markers ~ "Markers of hemodynamic instability",
+      SAPS_acidosis ~ "SAPS acidosis (pH <7.25)",
+      SAPS_hypothermia ~ "SAPS hypothermia (<35°C)",
+      ARDS ~ "ARDS",
+      icu_discharge_afterhours ~ "Discharge outside of office hours (jourtid)",
+      hems_minima ~ "HEMS weather minima met at discharge",
+      SAPS_score_excluding_gcs_age_scaled ~ "SAPS score excl. age/GCS (scaled)",
+      SAPS_total_score_scaled ~ "SAPS total score (scaled)",
+      MONTH ~ "Month, admission",
+      HOUR ~ "Hour, admission"
+      )
+  ) %>% 
+  add_global_p()
+
+tbl_uv
+```
+
+Inget särskilt uppseendeväckande här. Väderminima sticker ut mest.
+
+## Multivariat bayesisisk GLM
+Denna modell är hierarkisk där varje avsändande sjukhus (drygt 40 st) är en enhet. Variablerna i denna modell är valda valda utifrån klinisk rimlighet och vad som framkom i den univariata analysen.
+```{r mv_prediction_ift_modality}
+#| output: false
+
+# Define the formula + sex_female + SAPS_score_excluding_gcs_age + any_AMV + sir_consciousness_level + dx + season + HOUR + DNR
+formula_hems <- bf(hems_ift ~ 1 + hems_minima + CCIw_scaled + any_AMV + age_scaled + dx + season + sex_female + SAPS_score_excluding_gcs_age_scaled + sir_consciousness_level + DNR + icu_discharge_afterhours + (1 + hems_minima + CCIw_scaled + any_AMV + age_scaled + dx + season + sex_female + SAPS_score_excluding_gcs_age_scaled + sir_consciousness_level + DNR + icu_discharge_afterhours| formatted_icu_name))
+
+# Fit the model
+m_hems_choice <- d %>% 
+  filter(hems_ift_proportion > 0.2) %>%
+  brm(
+  formula = formula_hems,
+  family = bernoulli(link = "logit"),
+  control = list(adapt_delta = 0.97),
+  iter = 2000,
+  warmup = 100,
+  chains = 4,
+  cores = 4
+)
+
+```
+
+Så, låt oss titta på en sammanfattning av estimaten för parametrarna i modellen Notera att detta är en bayesisk modell, så CI står här för "credible interval". Ett 89% credible interval är valt p.g.a. att det är ett primtal.
+
+```{r}
+m_hems_choice %>% tbl_regression(exponentiate = TRUE,
+                                 conf.level = .89,
+                                 label = list(age_scaled ~ "Age, years",
+                                               sex_female ~ "Female",
+                                               DNR ~ "DNR order",
+                                               CCIw_scaled ~ "Weighted Charlson Comorbidity Index (CCI)",
+                                               dx ~ "Inferred diagnosis",
+                                               sir_consciousness_level ~ "SIR SAPS consciousness level",
+                                               any_AMV ~ "Pre-transfer Mechanical Ventilation",
+                                               season ~ "Season",
+                                               SAPS_score_excluding_gcs_age_scaled ~ "SAPS score (excl. age and GCS)",
+                                               icu_discharge_afterhours ~ "Discharge outside of office hours (jourtid)",
+                                               hems_minima ~ "HEMS weather minima met at discharge"
+                                               )
+)
+```
+
+Alltså, bland alla diagnosgrupper tycks huvudsakligen väderminima och avsändande centra spela roll i valet av transportmodalitet. Högre SAPS3 (sjukare patient) och förekomst av mekanisk ventilation trendar mot HEMS-transport. Vidare ses att säsong (på sätt och vis ännu tydligare om man använder månad istället) också spelar roll. Detta förklaras av att variabeln HEMS-minima bara fångar sikt/ljusförhållanden vid tidpunkten för utskrivning. Det faktum att en transport företas på vintern ökar också sannolikheten för att nedisning eller liknande begränsar.
+
+Hur mycket av variansen förklarar denna modell då? R2 per Gelman et. al. är:
+
+```{r}
+bayes_R2(m_hems_choice)
+```
+
+En hierarkisk modell med enbart väderminima (per avsändande sjukhus) som prediktor ger ett R2:
+
+```{r}
+#| output: false
+
+formula_hems_only_weather <- bf(hems_ift ~ 1 + hems_minima + (1 + hems_minima | formatted_icu_name))
+
+# Fit the model
+m_hems_choice_only_weather <- d %>% 
+  filter(hems_ift_proportion > 0.2) %>%
+  brm(
+  formula = formula_hems_only_weather,
+  family = bernoulli(link = "logit"),
+  control = list(adapt_delta = 0.97),
+  iter = 2000,
+  warmup = 100,
+  chains = 4,
+  cores = 4
+)
+```
+
+```{r}
+bayes_R2(m_hems_choice_only_weather)
+```
+
+# Effekten av hems på 30-dagarsmortalittet
+Hädanefter kommer enbart patienter med traumatisk hjärnskada (TBI), subaraknoidalblödning (ASAH), intracerebral blödning (ICH) och akut ischemisk stroke (AIS) inkluderas. Dessa diagnoskategorier utgör huvuddelen av ursprungskohorten och kan anses vara mer akuta och har högre mortalitet. Då just mortalitet kommer att användas som utfallsmått är det rimligt att exkludera diagnosgrupper med relativt låg mortalitet såsom halsryggsfrakturer (CFX). Vidare bedöms sannolikheten att interventioner under transporten ska påverka utfallet, som låg för de andra diagnosgrupperna såsom status EP (SEP), hydrocefalus (HC) och tumörer (TUM). Också de få patienter med vårdbegänsningar före avfärd har exkluderats. Detta innebär att ungefär 1000 patienter är kvar, större delen av ursprungskohorten. Efter datakomplettering för 2022-20224 kan man förvänta sig att kohorten kommer vara 1400-1500 patienter. Man kan tänka sig att också exkludera alla patienter som vid inskrivning på primär IVA är opåverkade i sitt medvetande (GCS 15/RLS 1) för att få fram en sjukare kohort. Då försvinner några hundra patienter. Låt oss behålla dessa till att börja med.
+
+Nedan följer en sammanfattning av denna sub-kohort uppdelad efter transportmodalitet.
+
+```{r summary_table_per_ift_modality, fig.popup=TRUE}
+d %>%
+  filter(DX_GROUP %in% c("TBI", "ASAH", "ICH", "AIS")) %>%
+  mutate(hems_ift = if_else(hems_ift, "HEMS", "Non-HEMS")) %>%
+  filter(DNR != 1) %>%
+  select(DX_GROUP, age, sex_female, CCIw, sir_consciousness_level, overall_obtunded, overall_unconcious, any_AMV, SAPS_total_score, SAPS_hypoxia, SAPS_hypotension, SAPS_hypertension, SAPS_bradycardia, SAPS_hypothermia, SAPS_acidosis, hems_ift, formatted_icu_name, icu_discharge_afterhours, icu_discharge_nighttime, sir_total_time, road_distance, geodesic_distance, hems_minima, d7, d30, d90, d365) %>%
+  tbl_summary(by='hems_ift', label = list(
+                                    age ~ "Age, years",
+                                    DX_GROUP ~ "Inferred diagnosis",
+                                    sex_female ~ "Female",
+                                    CCIw ~ "Weighted Charlson Comorbidity Index (CCI)",
+                                    sir_consciousness_level ~ "SIR SAPS consciousness level",
+                                    overall_obtunded ~ "Pre-transfer obtunded (not fully alert)",
+                                    overall_unconcious ~ "Pre-transfer unconscious (GCS <9)",
+                                    any_AMV ~ "Pre-transfer Mechanical Ventilation",
+                                    SAPS_total_score ~ "SAPS total score",
+                                    SAPS_hypoxia ~ "SAPS Hypoxemia (PAO2<8 kPa)",
+                                    SAPS_hypotension ~ "SAPS hypotension <90 mmHg",
+                                    SAPS_hypertension ~ "SAPS hypertension (>180 mmHg)",
+                                    SAPS_bradycardia ~ "SAPS bradycardia (<50 bpm)",
+                                    SAPS_hypothermia ~ "SAPS hypothermia (<35°C)",
+                                    SAPS_acidosis ~ "SAPS acidosis (pH <7.25)",
+                                    sir_total_time ~ "Time in primary ICU, minutes",
+                                    icu_discharge_afterhours ~ "Discharge outside of office hours (jourtid)",
+                                    icu_discharge_nighttime ~ "Discharge between hours 22:00 - 07:00",
+                                    formatted_icu_name ~ "Sending ICU",
+                                    road_distance ~ "Road distance, km",
+                                    geodesic_distance ~ "Geodesic distance, km",
+                                    hems_minima ~ "HEMS weather minima met at discharge",
+                                    d7 ~ "7-day mortality",
+                                    d30 ~ "30-day mortality",
+                                    d90 ~ "90-day mortality",
+                                    d365 ~ "365-day mortality"
+                           ),
+              statistic = c("CCIw") ~ "{mean}",
+              
+              missing_text="Missing"
+                        ) %>%
+  add_n()
+```
+
+## Univariat analys av prediktorer för 30-dagarsmortalitet
+```{r univariate_prediction_mortality}
+tbl_uv_d30 <- d %>%
+  filter(DX_GROUP %in% c("TBI", "ASAH", "ICH", "AIS")) %>%
+  mutate(hems_ift = if_else(hems_ift, "HEMS", "Non-HEMS")) %>%
+  select(c("d30", "hems_ift", "road_distance", "geodesic_distance", "sir_hospital_type", "sir_total_time", "age_scaled", "sex_female", "hems_minima", "any_AMV", "sir_consciousness_level", "DX_GROUP", "MONTH", "DNR", "BMI", "CCIw", "icu_discharge_afterhours", "icu_discharge_nighttime", "SAPS_score_excluding_gcs_age_scaled", "SAPS_total_score_scaled", "SAPS_hypotension", "SAPS_hypertension", "SAPS_hypothermia", "SAPS_hypoxia", "SAPS_acidosis", "SAPS_tachycardia", "SAPS_bradycardia", "ARDS", "hemodynamic_instability_markers", "respiratory_instability_markers", "BMI")) %>%
+tbl_uvregression(
+    method = glm,
+    y = "d30",
+    method.args = list(family = binomial),
+    exponentiate = TRUE,
+    label = list(
+      age_scaled ~ "Age, years (scaled)",
+      sex_female ~ "Female",
+      DNR ~ "DNR order",
+      BMI ~ "BMI, kg/m2",
+      CCIw ~ "Weighted Charlson Comorbidity Index (CCI)",
+      DX_GROUP ~ "Inferred diagnosis",
+      sir_consciousness_level ~ "SIR SAPS consciousness level",
+      any_AMV ~ "Pre-transfer Mechanical Ventilation",
+      SAPS_hypoxia ~ "SAPS Hypoxemia (PAO2<8 kPa)",
+      respiratory_instability_markers ~ "Markers of respiratory instability",
+      SAPS_hypotension ~ "SAPS hypotension (<90 mmHg)",
+      SAPS_hypertension ~ "SAPS hypertension (>180 mmHg)",
+      SAPS_bradycardia ~ "SAPS bradycardia (<50 bpm)",
+      SAPS_tachycardia ~ "SAPS tachycardia (>110 bpm) ",
+      hemodynamic_instability_markers ~ "Markers of hemodynamic instability",
+      SAPS_acidosis ~ "SAPS acidosis (pH <7.25)",
+      SAPS_hypothermia ~ "SAPS hypothermia (<35°C)",
+      ARDS ~ "ARDS",
+      icu_discharge_afterhours ~ "Discharge outside of office hours (jourtid)",
+      icu_discharge_nighttime ~ "Discharge between hours 22:00 - 07:00",
+      hems_minima ~ "HEMS weather minima met at discharge",
+      SAPS_score_excluding_gcs_age_scaled ~ "SAPS score excl. age/GCS (scaled)",
+      SAPS_total_score_scaled ~ "SAPS total score (scaled)",
+      MONTH ~ "Month, admission",
+      hems_ift ~ "Transfer modality",
+      road_distance ~ "Road distance, km",
+      geodesic_distance ~ "Geodesic distance, km",
+      sir_hospital_type ~ "Sending hospital type",
+      sir_total_time ~ "Time in primary ICU, minutes"
+      )
+  ) %>% 
+  add_global_p()
+
+tbl_uv_d30
+```
+
+## Underliggande kausal mekanismer
+Denna graf beskriver grovt tänkta kausala mekanismer mellan val av transportmodalitet och utfall (t.ex. död).
+
+```{r}
+dag <- dagitty('
+dag {
+bb="0,0,1,1"
+"HEMS-IFT" [exposure,pos="0.374,0.333"]
+"Weather minima" [pos="0.129,0.337"]
+L [adjusted,pos="0.562,0.497"]
+Month [adjusted,pos="0.432,0.494"]
+Outcome [outcome,pos="0.614,0.331"]
+U [latent,pos="0.480,0.184"]
+"HEMS-IFT" -> Outcome
+"Weather minima" -> "HEMS-IFT"
+L -> "HEMS-IFT"
+L -> Outcome
+Month -> "HEMS-IFT"
+Month -> "Weather minima"
+U -> "HEMS-IFT"
+U -> Outcome
+}')
+
+plot(dag)
+```
+Där L utgör tillgängliga rimliga confounders: förekomst av mekanisk ventilation, ålder, kön, medvetandegrad, diagnos, grad av akut fysiologisk påverkan (SAPS) och tillgängliga resurser (jourtid eller ej). U är icke-observerade confounders, där de mest uppenbara är andra aspekter av den akuta sjukdomen som inte fångas i SAPS/diagnos/medvetandegrad. Exempelvis kan man tänka sig att en medvetandesänkning vid inkomst kan vara övergående, såsom vid kramp, vilket förstås förbättrar prognosen och kan medge en lägre kompetensnivå under transporten. Patientvikt, förväntant kliniskt förlopp, elektrolytrubbningar, gasutbytesproblem, komplexitet i given behandling (t.ex. hur cirkulationen behöver understödjas med inotropi/vasopressorer) är alla faktorer som kan påverka både valet av transportmedel och utfall.
+
+Här har jag valt att inte ha med en "pil" mellan månad (eller årstid) och outcome. Utan att ha gjort en djupdykning i litteraturen på området, förstår jag det som att den årstidsvariation för mortalitet som ses i vissa material (bl.a. ett brittiskt register) tros bero på "case-mix" snarare än variationer i belastning/bemanning, vilket hade varit relevant här. Man kan således göra ett argument för att månad/årstid inte är en relevant confounder.
+
+Notera att väderminima en s.k. "(conditional) instrumental variable", vilket vi återkommer till senare.
+
+## Modell 1: hierarkisk bayesisk GLM
+Denna modell har följande prediktorer: transportmodalitet (hems_ift), diagnos, mekanisk ventilation, medvetandegrad, ålder (standardiserad), SAPS exkl. medvetandegrad och ålder, kön, årstid. Modellen är hierarkisk, med både "random intercept" och "random effects", där avsändande IVA utgör kluster. Priors är icke-informativa standard-priors i ```brms```.
+
+```{r model_1}
+#| output: false
+
+# Define the formula
+formula_1 <- bf(d30 ~ 1 + hems_ift + dx + any_AMV + sir_consciousness_level + age_scaled + CCIw_scaled + SAPS_score_excluding_gcs_age_scaled + sex_female + (1 + hems_ift + dx + any_AMV + sir_consciousness_level + age_scaled + CCIw_scaled + SAPS_score_excluding_gcs_age_scaled + sex_female | formatted_icu_name))
+
+# Fit the model
+model_1 <- d %>%
+  filter(DNR != 1) %>%
+  filter(dx %in% c("TBI", "ASAH", "ICH", "AIS")) %>%
+  brm(
+    formula = formula_1,
+    family = bernoulli(link = "logit"),
+    control = list(adapt_delta = 0.99),
+    iter = 2000,
+    warmup = 1000,
+    chains = 4,
+    cores = 8)
+```
+
+### Fixed effects
+En kort titt på exponerade koefficienter för fixed-effects delen av modell 1.
+```{r model_1 fixed effects}
+model_1 %>% tbl_regression(exponentiate = TRUE, conf.level = .89)
+```
+
+### "Marginal effects" av modalitet på 30-dagarsmortalitet
+Paketet ```marginaleffects``` låter här alla andra prediktorer vara oförändrade jämfört med de faktiska observationerna, förutom transportmodalitet som sätts till "HEMS" respektive "icke-HEMS". Därefter beräknas skillnaden (mellan punktestimaten) för varje individs väntevärde vid de två olika tillstånden. Att redovisa denna data, ad modum Frank Harell (förvisso i kontexten av en RCT) ger ett hum om absoluta riskskillnader samt fördelningen av "behandlingseffekt". I nedanstående graf är varje punkt en patient där förväntad 
+
+```{r}
+cmp_model_1_fixed <- comparisons(model_1, variables = "hems_ift", re_formula=NA)
+cmp_model_1_random <- comparisons(model_1, variables = "hems_ift", re_formula=NULL)
+
+# Define common x and y axis limits and breaks
+axis_limits <- range(c(cmp_model_1_fixed$predicted_hi, cmp_model_1_fixed$predicted_lo, 
+                       cmp_model_1_random$predicted_hi, cmp_model_1_random$predicted_lo))
+axis_breaks <- pretty(axis_limits)
+
+# Plot 1
+plot_cmp_model_1_fixed <- ggplot(cmp_model_1_fixed, aes(predicted_hi, predicted_lo)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, linetype = 3) +
+  coord_fixed() +
+  scale_x_continuous(limits = axis_limits, breaks = axis_breaks) +
+  scale_y_continuous(limits = axis_limits, breaks = axis_breaks) +
+  labs(x = "HEMS", y = "Non-HEMS", title = "Fixed effects only")
+
+# Plot 2
+plot_cmp_model_1_random <- ggplot(cmp_model_1_random, aes(predicted_hi, predicted_lo)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, linetype = 3) +
+  coord_fixed() +
+  scale_x_continuous(limits = axis_limits, breaks = axis_breaks) +
+  scale_y_continuous(limits = axis_limits, breaks = axis_breaks) +
+  labs(x = "HEMS", y = "Non-HEMS", title = "Random effects included")
+
+# Combine the plots
+combined_plot <- plot_cmp_model_1_fixed + plot_cmp_model_1_random +
+  plot_annotation(title = "Marginal Effect of Transfer Modality, Comparison of Fixed and Random Effects Models")
+
+combined_plot
+```
+Riskdifferensen kan också redovisas i ett histogram.
+
+```{r}
+ggplot(cmp_model_1_random, aes(estimate)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 100, fill = "lightblue", color = "black") +  # Use after_stat(density)
+  geom_density(color = "black", size = 1) +  # Add KDE line
+  geom_vline(aes(xintercept = mean(estimate), color = "Mean"), linetype = "solid", size = 1) +
+  geom_vline(aes(xintercept = median(estimate), color = "Median"), linetype = "solid", size = 1) +
+  labs(x = "HEMS - Non-HEMS", title = "Distribution of Unit-Level Contrasts (Random Effects Included)", color = "Statistics") +
+  scale_color_manual(values = c("Mean" = "maroon", "Median" = "orange"))
+```
+
+#### Effekt per diagnos i modell 1
+Här redovisas marginaleffekten för HEMS per diagnos. Notera att effekten, som väntat givet att det är en logistisk regression utan interaktionsterm, är störst i strokegruppen eftersom den har högst mortalitet.
+
+```{r}
+model_1 %>%
+  plot_slopes(variables = "hems_ift", by = "dx", re_formula=NULL, conf_level = 0.89) +
+  labs(x = "Diagnosis", y = "Risk difference (89% CI)", title = "Marginal effect of HEMS IFT, per diagnosis")
+```
+
+## Modell 2: hierarkisk bayesisk GLM med diagnos som kluster
+Detta är en "crossed-random effects model", dvs. där finns kluster för avsändande IVA och för diagnos.
+
+```{r model_2}
+#| output: false
+
+# Define the formula
+formula_2 <- bf(d30 ~ 1 + hems_ift + any_AMV + sir_consciousness_level + age_scaled + CCIw_scaled + SAPS_score_excluding_gcs_age_scaled + sex_female + (1 + hems_ift + dx + any_AMV + sir_consciousness_level + age_scaled + CCIw_scaled + SAPS_score_excluding_gcs_age_scaled + sex_female | formatted_icu_name) + (1 + hems_ift + any_AMV + sir_consciousness_level + age_scaled + CCIw_scaled + SAPS_score_excluding_gcs_age_scaled + sex_female | dx))
+
+# Fit the model
+model_2 <- d %>%
+  filter(DNR != 1) %>%
+  filter(dx %in% c("TBI", "ASAH", "ICH", "AIS")) %>%
+  brm(
+    formula = formula_2,
+    family = bernoulli(link = "logit"),
+    control = list(adapt_delta = 0.99),
+    iter = 2000,
+    warmup = 1000,
+    chains = 4,
+    cores = 8)
+```
+
+
+```{r model_2 fixed effects}
+model_2 %>% tbl_regression(exponentiate = TRUE, conf.level = .89)
+```
+
+```{r}
+model_2 %>%
+  plot_slopes(variables = "hems_ift", by = "dx", re_formula=NULL, conf_level = 0.89) +
+  labs(x = "Diagnosis", y = "Risk difference (89% CI)", title = "Marginal effect of HEMS IFT, per diagnosis")
+```
+
+```{r}
+cmp_model_2_fixed <- comparisons(model_2, variables = "hems_ift", re_formula=NA)
+cmp_model_2_random <- comparisons(model_2, variables = "hems_ift", re_formula=NULL)
+
+# Define common x and y axis limits and breaks
+axis_limits <- range(c(cmp_model_2_fixed$predicted_hi, cmp_model_2_fixed$predicted_lo, 
+                       cmp_model_2_random$predicted_hi, cmp_model_2_random$predicted_lo))
+axis_breaks <- pretty(axis_limits)
+
+# Plot 1
+plot_cmp_model_2_fixed <- ggplot(cmp_model_2_fixed, aes(predicted_hi, predicted_lo)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, linetype = 3) +
+  coord_fixed() +
+  scale_x_continuous(limits = axis_limits, breaks = axis_breaks) +
+  scale_y_continuous(limits = axis_limits, breaks = axis_breaks) +
+  labs(x = "HEMS", y = "Non-HEMS", title = "Fixed effects only")
+
+# Plot 2
+plot_cmp_model_2_random <- ggplot(cmp_model_2_random, aes(predicted_hi, predicted_lo)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, linetype = 3) +
+  coord_fixed() +
+  scale_x_continuous(limits = axis_limits, breaks = axis_breaks) +
+  scale_y_continuous(limits = axis_limits, breaks = axis_breaks) +
+  labs(x = "HEMS", y = "Non-HEMS", title = "Random effects included")
+
+# Combine the plots
+combined_plot <- plot_cmp_model_2_fixed + plot_cmp_model_2_random +
+  plot_annotation(title = "Marginal Effect of Transfer Modality, Comparison of Fixed and Random Effects Models")
+
+combined_plot
+```
+
+## Modell 3: hierarkisk bayesisk GLM med diagnos som interaktion
+Denna modell är som modell 1, fast med en interaktionsterm (både på klusternivå och på "gemensam" nivå) mellan diagnos och transportmodalitet. Sammantaget ses samma sak som i modell 2, dvs. högre mortalitet i HEMS-gruppen vid stroke. Skillnaden är att effekten jämfört med modell 2 torde vara mer uttalad och osäkerhetsintervallen smalare då modellen inte blir regulariserad lika kraftfullt som en hierarkisk modell. 
+
+```{r model_3}
+#| output: false
+
+# Define the formula
+formula_3 <- bf(d30 ~ 1 + hems_ift + dx + any_AMV + sir_consciousness_level + age_scaled + CCIw_scaled + SAPS_score_excluding_gcs_age_scaled + sex_female + dx * hems_ift + (1 + hems_ift + dx + any_AMV + sir_consciousness_level + age_scaled + CCIw_scaled + SAPS_score_excluding_gcs_age_scaled + sex_female + dx * hems_ift| formatted_icu_name))
+
+# Fit the model
+model_3 <- d %>%
+  filter(DNR != 1) %>%
+  filter(dx %in% c("TBI", "ASAH", "ICH", "AIS")) %>%
+  brm(
+    formula = formula_3,
+    family = bernoulli(link = "logit"),
+    control = list(adapt_delta = 0.99),
+    iter = 2000,
+    warmup = 1000,
+    chains = 4,
+    cores = 8)
+```
+
+```{r model_3 fixed effects}
+model_3 %>% tbl_regression(exponentiate = TRUE, conf.level = .89)
+```
+
+```{r}
+model_3 %>%
+  plot_slopes(variables = "hems_ift", by = "dx", re_formula=NULL, conf_level = 0.89) +
+  labs(x = "Diagnosis", y = "Risk difference (89% CI)", title = "Marginal effect of HEMS IFT, per diagnosis")
+```
+
+```{r}
+cmp_model_3_fixed <- comparisons(model_3, variables = "hems_ift", re_formula=NA)
+cmp_model_3_random <- comparisons(model_3, variables = "hems_ift", re_formula=NULL)
+
+# Define common x and y axis limits and breaks
+axis_limits <- range(c(cmp_model_3_fixed$predicted_hi, cmp_model_3_fixed$predicted_lo, 
+                       cmp_model_3_random$predicted_hi, cmp_model_3_random$predicted_lo))
+axis_breaks <- pretty(axis_limits)
+
+# Plot 1
+plot_cmp_model_3_fixed <- ggplot(cmp_model_3_fixed, aes(predicted_hi, predicted_lo)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, linetype = 3) +
+  coord_fixed() +
+  scale_x_continuous(limits = axis_limits, breaks = axis_breaks) +
+  scale_y_continuous(limits = axis_limits, breaks = axis_breaks) +
+  labs(x = "HEMS", y = "Non-HEMS", title = "Fixed effects only")
+
+# Plot 2
+plot_cmp_model_3_random <- ggplot(cmp_model_3_random, aes(predicted_hi, predicted_lo)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, linetype = 3) +
+  coord_fixed() +
+  scale_x_continuous(limits = axis_limits, breaks = axis_breaks) +
+  scale_y_continuous(limits = axis_limits, breaks = axis_breaks) +
+  labs(x = "HEMS", y = "Non-HEMS", title = "Random effects included")
+
+# Combine the plots
+combined_plot <- plot_cmp_model_3_fixed + plot_cmp_model_3_random +
+  plot_annotation(title = "Marginal Effect of Transfer Modality, Comparison of Fixed and Random Effects Models")
+
+combined_plot
+```
+#### No-pooling modell med (dvs. separata modeller för varje diagnosgrupp)
+Problem:
+
+* Betyder i princip att variabeln diagnos får interagera med *alla* variabler i modellen.
+
+* Information mellan modellerna (t.ex. effekten av en variabel) kommer inte att delas, dvs. ineffektiv inferens...
+
+* ... detta samtidigt som avsaknaden av regularisering ökar risken för "overfitting"
+
+Oavsett, såhär ser det ut om man kör fyra separata regressionsmodeller:
+
+```{r}
+#| output: false
+
+ #Define the formula
+formula_4 <- bf(d30 ~ 1 + hems_ift + any_AMV + sir_consciousness_level + age_scaled + CCIw_scaled + SAPS_score_excluding_gcs_age_scaled + sex_female + (1 + hems_ift + any_AMV + sir_consciousness_level + age_scaled + CCIw_scaled + SAPS_score_excluding_gcs_age_scaled + sex_female | formatted_icu_name))
+
+# Fit the models
+model_4_a <- d %>%
+  filter(DNR != 1) %>%
+  filter(dx %in% c("TBI")) %>%
+  brm(
+    formula = formula_4,
+    family = bernoulli(link = "logit"),
+    iter = 2000,
+    warmup = 1000,
+    chains = 4,
+    cores = 8)
+
+model_4_b <- d %>%
+  filter(DNR != 1) %>%
+  filter(dx %in% c("AIS")) %>%
+  brm(
+    formula = formula_4,
+    family = bernoulli(link = "logit"),
+    control = list(adapt_delta = 0.95),
+    iter = 2000,
+    warmup = 1000,
+    chains = 4,
+    cores = 8)
+
+model_4_c <- d %>%
+  filter(DNR != 1) %>%
+  filter(dx %in% c("ASAH")) %>%
+  brm(
+    formula = formula_4,
+    family = bernoulli(link = "logit"),
+    iter = 2000,
+    warmup = 1000,
+    chains = 4,
+    cores = 8)
+
+model_4_d <- d %>%
+  filter(DNR != 1) %>%
+  filter(dx %in% c("ICH")) %>%
+  brm(
+    formula = formula_4,
+    family = bernoulli(link = "logit"),
+    control = list(adapt_delta = 0.95),
+    iter = 2000,
+    warmup = 1000,
+    chains = 4,
+    cores = 8)
+```
+
+```{r}
+t_model_4_a <- model_4_a %>% tbl_regression(exponentiate = TRUE, conf.level = .89)
+t_model_4_b <- model_4_b %>% tbl_regression(exponentiate = TRUE, conf.level = .89)
+t_model_4_c <- model_4_c %>% tbl_regression(exponentiate = TRUE, conf.level = .89)
+t_model_4_d <- model_4_d %>% tbl_regression(exponentiate = TRUE, conf.level = .89)
+
+tbl_merge(
+  tbls = list(t_model_4_a, t_model_4_b, t_model_4_c, t_model_4_d),
+  tab_spanner = c("TBI", "AIS", "ASAH", "ICH"))
+```
+
+## Randomisering via väderminima
+Patientens tillstånd och bakgrund, som utgör de huvudsakliga confounders man kan tänka sig, påverkar inte väderförhållanden vid deras insjuknande. Väderförhållanden påverkar hur transporten genomförs. Väderförhållanden påverkar inte utfallet på något annat sätt än genom transporten. I någon mening utgör alltså väder en mekanism genom vilken patienter randomiseras till olika behandlingar. Per definition är väder också vad som kallas för en "instrumental variable".
+
+Informationen i denna randomisering borde kunna utnyttjas för inferens. Där finns något som heter "instrumental variable analysis" där man använder sig av Robins/Hernans "G-estimation", som för mig tyvärr är något höljt i dunkel. Dessutom är jag osäker hur modellen ska generaliseras till en hierarkisk struktur. Tyvärr fungerar inte en enkel s.k. "two stage least square regression" då det är en icke-linjär modell.
+
+Nedan följer en tabell som jämför patienter som transporterats under respektive vädersituation.
+
+```{r summary_table_per_weather, fig.popup=TRUE}
+d %>%
+  filter(DX_GROUP %in% c("TBI", "ASAH", "ICH", "AIS")) %>%
+  mutate(hems_ift = if_else(hems_ift, "HEMS", "Non-HEMS")) %>%
+  filter(DNR != 1) %>%
+  select(DX_GROUP, age, sex_female, CCIw, sir_consciousness_level, overall_obtunded, overall_unconcious, any_AMV, SAPS_total_score, hems_ift, icu_discharge_afterhours, icu_discharge_nighttime, sir_total_time, hems_minima, d7, d30, d90, d365) %>%
+  tbl_summary(by='hems_minima', label = list(
+                                    hems_ift ~ "Transport modality",
+                                    age ~ "Age, years",
+                                    DX_GROUP ~ "Inferred diagnosis",
+                                    sex_female ~ "Female",
+                                    CCIw ~ "Weighted Charlson Comorbidity Index (CCI)",
+                                    sir_consciousness_level ~ "SIR SAPS consciousness level",
+                                    overall_obtunded ~ "Pre-transfer obtunded (not fully alert)",
+                                    overall_unconcious ~ "Pre-transfer unconscious (GCS <9)",
+                                    any_AMV ~ "Pre-transfer Mechanical Ventilation",
+                                    SAPS_total_score ~ "SAPS total score",
+                                    sir_total_time ~ "Time in primary ICU, minutes",
+                                    icu_discharge_afterhours ~ "Discharge outside of office hours (jourtid)",
+                                    icu_discharge_nighttime ~ "Discharge between hours 22:00 - 07:00",
+                                    d7 ~ "7-day mortality",
+                                    d30 ~ "30-day mortality",
+                                    d90 ~ "90-day mortality",
+                                    d365 ~ "365-day mortality"
+
+                           ),
+              statistic = c("CCIw") ~ "{mean}",
+              
+              missing_text="Missing"
+                        ) %>%
+  add_n()
+```
+
+### G-estimation
+Tyvärr är metoden väldigt mycket en "blackbox" för mig än så länge. Vidare är jag inte säker på att det går att generalisera den till en hierarkisk modell. Här följer i alla fall estimat för *koefficienter* i modellen. Exponera estimaten för att få OR. -0.1507 -> OR om 0.86...
+
+```{r}
+d_reduced <- d %>%
+  filter(DX_GROUP %in% c("TBI", "ASAH", "ICH", "AIS")) %>%
+  filter(DNR != 1) %>%
+  select(c("hems_ift", "d30", "hems_minima", "age_scaled", "dx", "any_AMV", "sir_consciousness_level", "CCIw_scaled", "SAPS_score_excluding_gcs_age_scaled", "icu_discharge_afterhours")) %>% drop_na()
+d_reduced <- data.frame(d_reduced)
+
+fitZ.L <- glm(formula=hems_minima ~ 1, data=d_reduced)
+fitY.LZX <- glm(formula=d30 ~ hems_minima + hems_ift + age_scaled + dx + any_AMV + sir_consciousness_level + CCIw_scaled + SAPS_score_excluding_gcs_age_scaled + icu_discharge_afterhours, data=d_reduced)
+iv_model <- ivglm(estmethod = "g", link = "logit", fitZ.L = fitZ.L, fitY.LZX = fitY.LZX, X="hems_ift", data=d_reduced)
+print(iv_model)
+```
+
+```{r}
+confint(iv_model, level=.95)
+```
+
+# Referenser
+
+::: {#refs}
+:::
