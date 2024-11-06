@@ -1,0 +1,3454 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.306">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Bayesiska nätverk I</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="first-try_files/libs/clipboard/clipboard.min.js"></script>
+<script src="first-try_files/libs/quarto-html/quarto.js"></script>
+<script src="first-try_files/libs/quarto-html/popper.min.js"></script>
+<script src="first-try_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="first-try_files/libs/quarto-html/anchor.min.js"></script>
+<link href="first-try_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="first-try_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="first-try_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="first-try_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="first-try_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+<script src="https://unpkg.com/@jupyter-widgets/html-manager@*/dist/embed-amd.js" crossorigin="anonymous"></script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Bayesiska nätverk I</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pgmpy</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> daft</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> itertools <span class="im">import</span> product</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> yaml</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">"/Users/JO/PhD/nsicu-transfers/data/config.yaml"</span>, <span class="st">"r"</span>) <span class="im">as</span> <span class="bu">file</span>:</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    config <span class="op">=</span> yaml.safe_load(<span class="bu">file</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    file_path <span class="op">=</span> config[<span class="st">"data"</span>][<span class="st">"file_path"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="problemets-struktur-dag" class="level2">
+<h2 class="anchored" data-anchor-id="problemets-struktur-dag">Problemets struktur (DAG)</h2>
+<p>Här används 4 variabler: väderminima (V), transportmodalitet (H), avsändande sjukhus (S) samt död inom 30 dagar från inskrivning på universitetssjukhuset (D). Sjukhus påverkar mekanismen med vilken transportmodalitet väljs, men styr också utfallet.</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Instantiate the PGM</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>pgm <span class="op">=</span> daft.PGM()</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>pgm.add_node(<span class="st">"hems_minima"</span>, <span class="st">"V"</span>, <span class="dv">0</span>, <span class="dv">1</span>, observed<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>pgm.add_node(<span class="st">"hems_ift"</span>, <span class="vs">r"H"</span>, <span class="dv">1</span>, <span class="dv">1</span>, observed<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>pgm.add_node(<span class="st">"d30"</span>, <span class="vs">r"D"</span>, <span class="dv">2</span>, <span class="dv">1</span>, observed<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>pgm.add_node(<span class="st">"hospital"</span>, <span class="st">"S"</span>, <span class="fl">1.5</span>, <span class="dv">2</span>, observed<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Add in the edges</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>pgm.add_edge(<span class="st">"hospital"</span>, <span class="st">"hems_ift"</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>pgm.add_edge(<span class="st">"hems_minima"</span>, <span class="st">"hems_ift"</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>pgm.add_edge(<span class="st">"hems_ift"</span>, <span class="st">"d30"</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>pgm.add_edge(<span class="st">"hospital"</span>, <span class="st">"d30"</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Render</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>pgm.render()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="first-try_files/figure-html/cell-3-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>En titt på data sammanfattad enligt “formatet ovan”. Detta är data aktuell i slutet av okt 2024, dvs. innan kompletteringen. Just denna är ju faktiskt anonymiserad, varför den kan spridas.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ladda ett dataset med endast de relevanta kolumnerna</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    file_path,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    sep<span class="op">=</span><span class="st">";"</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    usecols<span class="op">=</span>[<span class="st">"hems_minima"</span>, <span class="st">"hems_ift"</span>, <span class="st">"d30"</span>, <span class="st">"DX_GROUP"</span>, <span class="st">"formatted_icu_name"</span>]</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Tag bort rader med de mindre intressanta diagnoserna</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df[df[<span class="st">"DX_GROUP"</span>].isin([<span class="st">"ASAH"</span>, <span class="st">"TBI"</span>, <span class="st">"AIS"</span>, <span class="st">"ICH"</span>])]</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Tag bort diagnoskolumnen</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>df.drop(columns<span class="op">=</span><span class="st">"DX_GROUP"</span>, inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Tag bort missing data för enkelhetens skull, just nu, i detta fall ~30 fall med missing data för väder</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>df.dropna(inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Gör om kolumner till 1/0</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"hems_minima"</span>] <span class="op">=</span> df[<span class="st">"hems_minima"</span>].astype(<span class="bu">int</span>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"hems_ift"</span>] <span class="op">=</span> df[<span class="st">"hems_ift"</span>].astype(<span class="bu">int</span>)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Snyggare namn</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>df.rename(columns<span class="op">=</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>{</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">"formatted_icu_name"</span>: <span class="st">"S"</span>,</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">"d30"</span>: <span class="st">"D"</span>,</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hems_minima"</span>: <span class="st">"V"</span>,</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hems_ift"</span>: <span class="st">"H"</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>    },</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>    inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Spara som en csv</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>df.to_csv(<span class="st">"df.csv"</span>, sep<span class="op">=</span><span class="st">";"</span>, index<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Snabbtitt</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">D</th>
+<th data-quarto-table-cell-role="th">S</th>
+<th data-quarto-table-cell-role="th">V</th>
+<th data-quarto-table-cell-role="th">H</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>Hudiksvall IVA</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1</td>
+<td>Östersund IVA</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0</td>
+<td>Skövde IVA</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>0</td>
+<td>Eskilstuna IVA</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0</td>
+<td>Falun IVA</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1227</td>
+<td>1</td>
+<td>Varberg IVA</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1228</td>
+<td>0</td>
+<td>Falun IVA</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1229</td>
+<td>0</td>
+<td>Västerås IVA</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1230</td>
+<td>0</td>
+<td>Karlstad IVA</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1231</td>
+<td>1</td>
+<td>Växjö IVA</td>
+<td>1</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+
+<p>1049 rows × 4 columns</p>
+</div>
+</div>
+</div>
+</section>
+<section id="conditional-probability-tables" class="level2">
+<h2 class="anchored" data-anchor-id="conditional-probability-tables">“Conditional probability tables”</h2>
+<p>Detta går säkert att göra smidigare och snyggare, men det får duga för stunden. Funktionen <code>cond_prob_table</code> ger “conditional probability tables” eller en “joint distribution” givet data och vilka variabler man är intresserad av. Dessutom redovisas antalet fall med de olika instansieringarna av de angivna variablerna. En konstant <span class="math inline">\(\lambda\)</span> läggs till summeringarna för att undvika problem med summor om 0. Någon slags “smoothing” alltså som förstås bör göras bättre av flera skäl…</p>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cond_prob_table(df: pd.DataFrame, A: <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">=</span> [], B: <span class="bu">list</span>[<span class="bu">str</span>] <span class="op">=</span> [],  lam: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.01</span>):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">    En funktion som skapar en "conditional probability table" för P(A|B) där A och B är listor av variabler i data df.</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Om B är tom kommer en tabell för P(A) att beräknas.</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">    lam är en konstant som adderas när antal fall givet varibler summeras, detta framförallt för att undvika problem med summor = 0.</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Ta fram alla unika värden hos variablerna</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    levels_A <span class="op">=</span> [df[a].unique() <span class="cf">for</span> a <span class="kw">in</span> A]</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    levels_B <span class="op">=</span> [df[b].unique() <span class="cf">for</span> b <span class="kw">in</span> B]</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Ta fram den kartesiska produkten av mängderna A och B</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    all_combinations <span class="op">=</span> pd.DataFrame(product(<span class="op">*</span>levels_B, <span class="op">*</span>levels_A), columns<span class="op">=</span>[b <span class="cf">for</span> b <span class="kw">in</span> B] <span class="op">+</span> [a <span class="cf">for</span> a <span class="kw">in</span> A])</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Räkna antal baserat på data df</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    counts <span class="op">=</span> df.groupby(B <span class="op">+</span> A).size().reset_index(name<span class="op">=</span><span class="st">"count"</span>)</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Left join all_combinations med counts och sätt NaN:s till 0</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    merged <span class="op">=</span> all_combinations.merge(counts, left_on<span class="op">=</span>B<span class="op">+</span>A, right_on<span class="op">=</span>B<span class="op">+</span>A, how<span class="op">=</span><span class="st">"left"</span>).fillna(<span class="dv">0</span>)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Addera en konstant (0.01) för "smoothing" och för att hantera "icke instansierade fall"</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    merged[<span class="st">"count"</span>] <span class="op">+=</span> <span class="op">+</span> lam</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Beräkna proportionerna</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> B:</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>      merged[<span class="st">"proportion"</span>] <span class="op">=</span> merged.groupby(B)[<span class="st">"count"</span>].transform(<span class="kw">lambda</span> x: x <span class="op">/</span> x.<span class="bu">sum</span>())</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>      merged[<span class="st">"proportion"</span>] <span class="op">=</span> merged[<span class="st">"count"</span>].transform(<span class="kw">lambda</span> x: x <span class="op">/</span> x.<span class="bu">sum</span>())</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> merged</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Låt oss t.ex. titta på <span class="math inline">\(P(H|S,V)\)</span>:</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cond_prob_table(df, A<span class="op">=</span>[<span class="st">"H"</span>], B<span class="op">=</span>[<span class="st">"S"</span>, <span class="st">"V"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">S</th>
+<th data-quarto-table-cell-role="th">V</th>
+<th data-quarto-table-cell-role="th">H</th>
+<th data-quarto-table-cell-role="th">count</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Hudiksvall IVA</td>
+<td>1</td>
+<td>0</td>
+<td>10.01</td>
+<td>0.416736</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Hudiksvall IVA</td>
+<td>1</td>
+<td>1</td>
+<td>14.01</td>
+<td>0.583264</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Hudiksvall IVA</td>
+<td>0</td>
+<td>0</td>
+<td>0.01</td>
+<td>0.500000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Hudiksvall IVA</td>
+<td>0</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.500000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>Östersund IVA</td>
+<td>1</td>
+<td>0</td>
+<td>27.01</td>
+<td>0.613585</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">167</td>
+<td>Eksjö IVA</td>
+<td>0</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.009804</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">168</td>
+<td>Södertälje IVA</td>
+<td>1</td>
+<td>0</td>
+<td>1.01</td>
+<td>0.990196</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">169</td>
+<td>Södertälje IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.009804</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">170</td>
+<td>Södertälje IVA</td>
+<td>0</td>
+<td>0</td>
+<td>0.01</td>
+<td>0.500000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">171</td>
+<td>Södertälje IVA</td>
+<td>0</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.500000</td>
+</tr>
+</tbody>
+</table>
+
+<p>172 rows × 5 columns</p>
+</div>
+</div>
+</div>
+<p>Detta resulterar ju bland annat i galenheten att sannolikheten för en patient att bli flyttad med helikopter i Hudiksvall vid dåligt väder är 0.5, detta p.g.a. att det inte finns några fall av dåligt väder i Hudiksvall i detta väder, vilket medför att “antalet fall” sätts till 0.01 för både H = 0 och H = 1. Ett annat fall där det blir galet är:</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cond_prob_table(df, A<span class="op">=</span>[<span class="st">"D"</span>], B<span class="op">=</span>[<span class="st">"S"</span>, <span class="st">"H"</span>]).iloc[:<span class="dv">4</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">S</th>
+<th data-quarto-table-cell-role="th">H</th>
+<th data-quarto-table-cell-role="th">D</th>
+<th data-quarto-table-cell-role="th">count</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Hudiksvall IVA</td>
+<td>0</td>
+<td>0</td>
+<td>10.01</td>
+<td>0.999002</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Hudiksvall IVA</td>
+<td>0</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.000998</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Hudiksvall IVA</td>
+<td>1</td>
+<td>0</td>
+<td>11.01</td>
+<td>0.785307</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Hudiksvall IVA</td>
+<td>1</td>
+<td>1</td>
+<td>3.01</td>
+<td>0.214693</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Alltså, sannolikhetnen att dö efter landtransport är 0. Även om det finns andra confounders som saknas här är det orimligt och har att göra med det relativt låga antalet transporter. Om man adderar 1 (istället för 0.01) blir det rimligare just för denna query, men mindre rimligt för andra queries såsom <span class="math inline">\(P(H|S,V=0)\)</span>.</p>
+</section>
+<section id="en-övning-i-inferens" class="level2">
+<h2 class="anchored" data-anchor-id="en-övning-i-inferens">En övning i inferens</h2>
+<p>Säg att vi vill ha <span class="math inline">\(P(D|H)\)</span> från <span class="math inline">\(P(V)P(S)P(H|S,V)P(D|S,H)\)</span>, vilket man kan nå med “variable elimination”:</p>
+<p>Först “joinar” man t.ex. faktorer med variabeln <span class="math inline">\(S\)</span> och “summerar bort den”.</p>
+<p><span class="math inline">\(\sum_{S}P(S)P(H|S,V)P(D|S,H) = \sum_{S}P(S,H,D|V) = P(H,D|V) = f_{1}(H,D,V)\)</span></p>
+<p>Därefter samma procedur fast för <span class="math inline">\(V\)</span></p>
+<p><span class="math inline">\(\sum_{V}P(V)f_{1}(H,D,V) = \sum_{V}P(V)P(H,D|V) = \sum_{V}P(V,H,D) = P(D,H)\)</span></p>
+<p>Som slutligen behöver normaliseras:</p>
+<p><span class="math inline">\(P(D,H) \frac{1}{P(H)} = P(D|H)\)</span></p>
+<p>Så, låt oss testa att göra denna procedur i python…</p>
+<p><span class="math inline">\(P(S)\)</span>:</p>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>PS <span class="op">=</span> cond_prob_table(df, A<span class="op">=</span>[<span class="st">"S"</span>])</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>PS</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">S</th>
+<th data-quarto-table-cell-role="th">count</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Hudiksvall IVA</td>
+<td>24.01</td>
+<td>0.022879</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Östersund IVA</td>
+<td>52.01</td>
+<td>0.049560</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Skövde IVA</td>
+<td>44.01</td>
+<td>0.041937</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Eskilstuna IVA</td>
+<td>27.01</td>
+<td>0.025738</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>Falun IVA</td>
+<td>77.01</td>
+<td>0.073383</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>Kalix IVA</td>
+<td>12.01</td>
+<td>0.011444</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>Lycksele IVA</td>
+<td>17.01</td>
+<td>0.016209</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">7</td>
+<td>Karlskoga IVA</td>
+<td>8.01</td>
+<td>0.007633</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">8</td>
+<td>Lidköping IVA</td>
+<td>9.01</td>
+<td>0.008586</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">9</td>
+<td>Skellefteå IVA</td>
+<td>32.01</td>
+<td>0.030502</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">10</td>
+<td>Sunderby IVA</td>
+<td>37.01</td>
+<td>0.035267</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">11</td>
+<td>Växjö IVA</td>
+<td>11.01</td>
+<td>0.010491</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">12</td>
+<td>Trollhättan IVA</td>
+<td>13.01</td>
+<td>0.012397</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">13</td>
+<td>Örebro IVA</td>
+<td>32.01</td>
+<td>0.030502</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">14</td>
+<td>Karlskrona IVA</td>
+<td>25.01</td>
+<td>0.023832</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">15</td>
+<td>Jönköping IVA</td>
+<td>51.01</td>
+<td>0.048607</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">16</td>
+<td>Mora IVA</td>
+<td>45.01</td>
+<td>0.042890</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">17</td>
+<td>Gävle IVA</td>
+<td>29.01</td>
+<td>0.027644</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">18</td>
+<td>Kristianstad IVA</td>
+<td>21.01</td>
+<td>0.020020</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">19</td>
+<td>Helsingborg IVA</td>
+<td>19.01</td>
+<td>0.018115</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">20</td>
+<td>Kalmar IVA</td>
+<td>66.01</td>
+<td>0.062901</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">21</td>
+<td>Nyköping IVA</td>
+<td>14.01</td>
+<td>0.013350</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">22</td>
+<td>Sundsvall IVA</td>
+<td>44.01</td>
+<td>0.041937</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">23</td>
+<td>Gällivare IVA</td>
+<td>20.01</td>
+<td>0.019067</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">24</td>
+<td>Sollefteå IVA</td>
+<td>11.01</td>
+<td>0.010491</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">25</td>
+<td>Västerås IVA</td>
+<td>29.01</td>
+<td>0.027644</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">26</td>
+<td>Borås IVA</td>
+<td>12.01</td>
+<td>0.011444</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">27</td>
+<td>Visby IVA</td>
+<td>30.01</td>
+<td>0.028596</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">28</td>
+<td>Lindesberg IVA</td>
+<td>11.01</td>
+<td>0.010491</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">29</td>
+<td>Bollnäs IVA</td>
+<td>19.01</td>
+<td>0.018115</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">30</td>
+<td>Karlstad IVA</td>
+<td>58.01</td>
+<td>0.055278</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">31</td>
+<td>Norrtälje IVA</td>
+<td>5.01</td>
+<td>0.004774</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">32</td>
+<td>Värnamo IVA</td>
+<td>3.01</td>
+<td>0.002868</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">33</td>
+<td>Halmstad IVA</td>
+<td>29.01</td>
+<td>0.027644</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">34</td>
+<td>Örnsköldsvik IVA</td>
+<td>24.01</td>
+<td>0.022879</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">35</td>
+<td>Piteå IVA</td>
+<td>14.01</td>
+<td>0.013350</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">36</td>
+<td>Torsby IVA</td>
+<td>14.01</td>
+<td>0.013350</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">37</td>
+<td>Ystad IVA</td>
+<td>5.01</td>
+<td>0.004774</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">38</td>
+<td>Varberg IVA</td>
+<td>25.01</td>
+<td>0.023832</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">39</td>
+<td>Ljungby IVA</td>
+<td>8.01</td>
+<td>0.007633</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">40</td>
+<td>Arvika IVA</td>
+<td>6.01</td>
+<td>0.005727</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">41</td>
+<td>Eksjö IVA</td>
+<td>16.01</td>
+<td>0.015256</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">42</td>
+<td>Södertälje IVA</td>
+<td>1.01</td>
+<td>0.000962</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><span class="math inline">\(P[H|S,V):\)</span></p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>PH_SV <span class="op">=</span> cond_prob_table(df, A<span class="op">=</span>[<span class="st">"H"</span>], B<span class="op">=</span>[<span class="st">"S"</span>, <span class="st">"V"</span>])</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>PH_SV</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">S</th>
+<th data-quarto-table-cell-role="th">V</th>
+<th data-quarto-table-cell-role="th">H</th>
+<th data-quarto-table-cell-role="th">count</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Hudiksvall IVA</td>
+<td>1</td>
+<td>0</td>
+<td>10.01</td>
+<td>0.416736</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Hudiksvall IVA</td>
+<td>1</td>
+<td>1</td>
+<td>14.01</td>
+<td>0.583264</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Hudiksvall IVA</td>
+<td>0</td>
+<td>0</td>
+<td>0.01</td>
+<td>0.500000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Hudiksvall IVA</td>
+<td>0</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.500000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>Östersund IVA</td>
+<td>1</td>
+<td>0</td>
+<td>27.01</td>
+<td>0.613585</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">167</td>
+<td>Eksjö IVA</td>
+<td>0</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.009804</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">168</td>
+<td>Södertälje IVA</td>
+<td>1</td>
+<td>0</td>
+<td>1.01</td>
+<td>0.990196</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">169</td>
+<td>Södertälje IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.009804</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">170</td>
+<td>Södertälje IVA</td>
+<td>0</td>
+<td>0</td>
+<td>0.01</td>
+<td>0.500000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">171</td>
+<td>Södertälje IVA</td>
+<td>0</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.500000</td>
+</tr>
+</tbody>
+</table>
+
+<p>172 rows × 5 columns</p>
+</div>
+</div>
+</div>
+<p><span class="math inline">\(P[D|S,H):\)</span></p>
+<div class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>PD_SH <span class="op">=</span> cond_prob_table(df, A<span class="op">=</span>[<span class="st">"D"</span>], B<span class="op">=</span>[<span class="st">"S"</span>, <span class="st">"H"</span>])</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>PD_SH</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">S</th>
+<th data-quarto-table-cell-role="th">H</th>
+<th data-quarto-table-cell-role="th">D</th>
+<th data-quarto-table-cell-role="th">count</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>Hudiksvall IVA</td>
+<td>0</td>
+<td>0</td>
+<td>10.01</td>
+<td>0.999002</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Hudiksvall IVA</td>
+<td>0</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.000998</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Hudiksvall IVA</td>
+<td>1</td>
+<td>0</td>
+<td>11.01</td>
+<td>0.785307</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Hudiksvall IVA</td>
+<td>1</td>
+<td>1</td>
+<td>3.01</td>
+<td>0.214693</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>Östersund IVA</td>
+<td>0</td>
+<td>0</td>
+<td>32.01</td>
+<td>0.914049</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">167</td>
+<td>Eksjö IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.500000</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">168</td>
+<td>Södertälje IVA</td>
+<td>0</td>
+<td>0</td>
+<td>1.01</td>
+<td>0.990196</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">169</td>
+<td>Södertälje IVA</td>
+<td>0</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.009804</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">170</td>
+<td>Södertälje IVA</td>
+<td>1</td>
+<td>0</td>
+<td>0.01</td>
+<td>0.500000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">171</td>
+<td>Södertälje IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.500000</td>
+</tr>
+</tbody>
+</table>
+
+<p>172 rows × 5 columns</p>
+</div>
+</div>
+</div>
+<p><span class="math inline">\(P(S) × P(H|S,V) = P(S,H|V)\)</span>:</p>
+<div class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> pd.merge(PS, PH_SV, on<span class="op">=</span><span class="st">"S"</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>result[<span class="st">"proportion"</span>] <span class="op">=</span> result[<span class="st">"proportion_x"</span>] <span class="op">*</span> result[<span class="st">"proportion_y"</span>]</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>PSH_V <span class="op">=</span> result[[<span class="st">"V"</span>, <span class="st">"S"</span>, <span class="st">"H"</span>, <span class="st">"proportion"</span>]]</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>PSH_V</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">V</th>
+<th data-quarto-table-cell-role="th">S</th>
+<th data-quarto-table-cell-role="th">H</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>Hudiksvall IVA</td>
+<td>0</td>
+<td>0.009535</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1</td>
+<td>Hudiksvall IVA</td>
+<td>1</td>
+<td>0.013345</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0</td>
+<td>Hudiksvall IVA</td>
+<td>0</td>
+<td>0.011440</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>0</td>
+<td>Hudiksvall IVA</td>
+<td>1</td>
+<td>0.011440</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1</td>
+<td>Östersund IVA</td>
+<td>0</td>
+<td>0.030409</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">167</td>
+<td>0</td>
+<td>Eksjö IVA</td>
+<td>1</td>
+<td>0.000150</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">168</td>
+<td>1</td>
+<td>Södertälje IVA</td>
+<td>0</td>
+<td>0.000953</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">169</td>
+<td>1</td>
+<td>Södertälje IVA</td>
+<td>1</td>
+<td>0.000009</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">170</td>
+<td>0</td>
+<td>Södertälje IVA</td>
+<td>0</td>
+<td>0.000481</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">171</td>
+<td>0</td>
+<td>Södertälje IVA</td>
+<td>1</td>
+<td>0.000481</td>
+</tr>
+</tbody>
+</table>
+
+<p>172 rows × 4 columns</p>
+</div>
+</div>
+</div>
+<p><span class="math inline">\(P(H|S,V) × P(D|S,H) = P(S,H,D|V)\)</span>:</p>
+<div class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> pd.merge(PSH_V, PD_SH, on<span class="op">=</span>[<span class="st">"S"</span>, <span class="st">"H"</span>])</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>result[<span class="st">"proportion"</span>] <span class="op">=</span> result[<span class="st">"proportion_x"</span>] <span class="op">*</span> result[<span class="st">"proportion_y"</span>]</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>result</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>PSHD_V <span class="op">=</span> result[[<span class="st">"V"</span>, <span class="st">"S"</span>, <span class="st">"H"</span>, <span class="st">"D"</span>, <span class="st">"proportion"</span>]]</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>PSHD_V</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">V</th>
+<th data-quarto-table-cell-role="th">S</th>
+<th data-quarto-table-cell-role="th">H</th>
+<th data-quarto-table-cell-role="th">D</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>Hudiksvall IVA</td>
+<td>0</td>
+<td>0</td>
+<td>0.009525</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1</td>
+<td>Hudiksvall IVA</td>
+<td>0</td>
+<td>1</td>
+<td>0.000010</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1</td>
+<td>Hudiksvall IVA</td>
+<td>1</td>
+<td>0</td>
+<td>0.010480</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1</td>
+<td>Hudiksvall IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.002865</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0</td>
+<td>Hudiksvall IVA</td>
+<td>0</td>
+<td>0</td>
+<td>0.011428</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">339</td>
+<td>1</td>
+<td>Södertälje IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.000005</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">340</td>
+<td>0</td>
+<td>Södertälje IVA</td>
+<td>0</td>
+<td>0</td>
+<td>0.000476</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">341</td>
+<td>0</td>
+<td>Södertälje IVA</td>
+<td>0</td>
+<td>1</td>
+<td>0.000005</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">342</td>
+<td>0</td>
+<td>Södertälje IVA</td>
+<td>1</td>
+<td>0</td>
+<td>0.000241</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">343</td>
+<td>0</td>
+<td>Södertälje IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.000241</td>
+</tr>
+</tbody>
+</table>
+
+<p>344 rows × 5 columns</p>
+</div>
+</div>
+</div>
+<p><span class="math inline">\(\sum_{S}P(S,H,D|V) = P(H,D|V)\)</span></p>
+<div class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>PHD_V <span class="op">=</span> PSHD_V.groupby([<span class="st">"V"</span>, <span class="st">"H"</span>, <span class="st">"D"</span>], as_index<span class="op">=</span><span class="va">False</span>)[<span class="st">"proportion"</span>].<span class="bu">sum</span>()</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>PHD_V</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">V</th>
+<th data-quarto-table-cell-role="th">H</th>
+<th data-quarto-table-cell-role="th">D</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.791465</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0.165071</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0.037440</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0.006025</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.590274</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>0.136451</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0.234217</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">7</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0.039057</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><span class="math inline">\(P(V) × P(H,D|V) = P(V,H,D)\)</span>:</p>
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>PV <span class="op">=</span> cond_prob_table(df, A<span class="op">=</span>[<span class="st">"V"</span>])</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> pd.merge(PV, PHD_V, on<span class="op">=</span>[<span class="st">"V"</span>])</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>result[<span class="st">"proportion"</span>] <span class="op">=</span> result[<span class="st">"proportion_x"</span>] <span class="op">*</span> result[<span class="st">"proportion_y"</span>]</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>PVHD <span class="op">=</span> result[[<span class="st">"V"</span>, <span class="st">"H"</span>, <span class="st">"D"</span>, <span class="st">"proportion"</span>]]</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>PVHD</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">V</th>
+<th data-quarto-table-cell-role="th">H</th>
+<th data-quarto-table-cell-role="th">D</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>0.509804</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>0.117849</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0.202287</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0.033733</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.107898</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">5</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>0.022504</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">6</td>
+<td>0</td>
+<td>1</td>
+<td>0</td>
+<td>0.005104</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">7</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0.000821</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><span class="math inline">\(\sum_{V} P(V,H,D) = P(H,D)\)</span>:</p>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>PDH <span class="op">=</span> PVHD.groupby([<span class="st">"H"</span>, <span class="st">"D"</span>], as_index<span class="op">=</span><span class="va">False</span>)[<span class="st">"proportion"</span>].<span class="bu">sum</span>()</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>PDH</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">H</th>
+<th data-quarto-table-cell-role="th">D</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>0</td>
+<td>0.617702</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0</td>
+<td>1</td>
+<td>0.140353</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1</td>
+<td>0</td>
+<td>0.207391</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1</td>
+<td>1</td>
+<td>0.034554</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><span class="math inline">\(P(D,H) \frac{1}{P(H)} = P(D|H)\)</span></p>
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>PH <span class="op">=</span> cond_prob_table(df, A<span class="op">=</span>[<span class="st">"H"</span>])</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> pd.merge(PDH, PH, on<span class="op">=</span>[<span class="st">"H"</span>])</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>result[<span class="st">"proportion"</span>] <span class="op">=</span> result[<span class="st">"proportion_x"</span>] <span class="op">/</span> result[<span class="st">"proportion_y"</span>]</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>PH_D <span class="op">=</span> result[[<span class="st">"H"</span>, <span class="st">"D"</span>, <span class="st">"proportion"</span>]]</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>PH_D</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">H</th>
+<th data-quarto-table-cell-role="th">D</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>0</td>
+<td>0.816087</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0</td>
+<td>1</td>
+<td>0.185430</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1</td>
+<td>0</td>
+<td>0.853133</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1</td>
+<td>1</td>
+<td>0.142144</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Stämmer det om vi “räknar ut” <span class="math inline">\(P(D|H)\)</span> direkt?</p>
+<div class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>cond_prob_table(df, A<span class="op">=</span>[<span class="st">"D"</span>], B<span class="op">=</span>[<span class="st">"H"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">H</th>
+<th data-quarto-table-cell-role="th">D</th>
+<th data-quarto-table-cell-role="th">count</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>0</td>
+<td>647.01</td>
+<td>0.814854</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0</td>
+<td>1</td>
+<td>147.01</td>
+<td>0.185146</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1</td>
+<td>0</td>
+<td>219.01</td>
+<td>0.858795</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1</td>
+<td>1</td>
+<td>36.01</td>
+<td>0.141205</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Bra nära. Jag kan tänka mig att skillanden beror på “smoothing”.</p>
+</section>
+<section id="interventionella-fördelningar" class="level2">
+<h2 class="anchored" data-anchor-id="interventionella-fördelningar">Interventionella fördelningar</h2>
+<p>Det här är delvis höjt i dunkel för mig. Jag har tittat på många timmar av föreläsningar om koncept som SCM, do-operator, counterfactual interventions osv. Någa föreläsningar följer samma format: * Först försöker man övertyga lyssnaren om att association och kausalitet är olika saker, vilket ofta tillägnas oproportionerligt lång tid med detaljerad argumentation. * Sedan ritar man upp en DAG för ett trivialt exempel, ofta något med rökning/lungcancer. * Nu följer i regel en kvarts ordsallad om något eller några av koncepten: Markov blanket, parental nodes, indentification osv. Mycket notation och lite intuition. * I bästa fall definieras en sannolikhet innehållandes <span class="math inline">\(do(\text{nånting})\)</span> om till en betingad sannolikhet med bara <span class="math inline">\(\text{nånting}\)</span> istället.</p>
+<p>Det fascinerande är att <em>nästan</em> ingen av föreläsningarna ger ett konkret exempel för hur ATE kan beräknas givet tillgänglig data ens i det enklaste fall. Hursomhelst,</p>
+<section id="om-pddohh-är-intressant" class="level4">
+<h4 class="anchored" data-anchor-id="om-pddohh-är-intressant">Om P(D|do(H=h)) är intressant:</h4>
+<p>Grundidén är alltså att göra <span class="math inline">\(P(D|do(H=h))\)</span> till något vi kan räkna på eller se i data.</p>
+<p><span class="math inline">\(P(D=d|do(H=h)) = \sum_{s}P(D=d|H=h,S=s)P(s)\)</span></p>
+<div class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>PD_SH <span class="op">=</span> cond_prob_table(df, A<span class="op">=</span>[<span class="st">"D"</span>], B<span class="op">=</span>[<span class="st">"S"</span>, <span class="st">"H"</span>])</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>PS <span class="op">=</span> cond_prob_table(df, A<span class="op">=</span>[<span class="st">"S"</span>])</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> pd.merge(PD_SH, PS, on<span class="op">=</span><span class="st">"S"</span>, how<span class="op">=</span><span class="st">"left"</span>)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>result[<span class="st">"proportion"</span>] <span class="op">=</span> result[<span class="st">"proportion_x"</span>] <span class="op">*</span> result[<span class="st">"proportion_y"</span>]</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>PDS_H <span class="op">=</span> result[[<span class="st">"D"</span>, <span class="st">"S"</span>, <span class="st">"H"</span>, <span class="st">"proportion"</span>]]</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>PD_H <span class="op">=</span> PDS_H.groupby([<span class="st">"H"</span>, <span class="st">"D"</span>], as_index<span class="op">=</span><span class="va">False</span>)[<span class="st">"proportion"</span>].<span class="bu">sum</span>()</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>PD_H</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">H</th>
+<th data-quarto-table-cell-role="th">D</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>0</td>
+<td>0</td>
+<td>0.830020</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>0</td>
+<td>1</td>
+<td>0.169980</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1</td>
+<td>0</td>
+<td>0.750107</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1</td>
+<td>1</td>
+<td>0.249893</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Alltså får vi att skillnanden i 30d-mortalitet, P(D=1|do(H=1)) - P(D=1|do(H=0)), är cirka 8% till fördel för landtransporter. Detta att jämföra med den “ojusterade” skillnaden på 4% i den andra riktningen.</p>
+<p>Genom att summera över avsändande sjukhus beskriver detta behandlingseffekten i situationen där man inte vet vilket sjukhus patienten skickas från.</p>
+<p>Intressant nog är ju V helt oanvänd i denna övning…</p>
+<p>Förklaringen till varför landtransporter ser så bra ut är åtminstone delvis denna: där finns ett antal sjukhus som inte har några helikoptertransporter noterade. Närmare bestämt 15 st sjukhus med totalt 313 patienter.</p>
+<div class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>few_H <span class="op">=</span> cond_prob_table(df, A<span class="op">=</span>[<span class="st">"H"</span>], B<span class="op">=</span>[<span class="st">"S"</span>]).query(<span class="st">"H == 1 &amp; count &lt; 1"</span>)[<span class="st">"S"</span>].values</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"S"</span>].isin(few_H).<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<pre><code>313</code></pre>
+</div>
+</div>
+<p>I dessa fall kommer alltså <span class="math inline">\(P(D=1|H=1, S=s) = 0.5\)</span></p>
+<div class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>PD1_SH1 <span class="op">=</span> cond_prob_table(df, A<span class="op">=</span>[<span class="st">"D"</span>], B<span class="op">=</span>[<span class="st">"S"</span>, <span class="st">"H"</span>]).query(<span class="st">"H == 1 &amp; D == 1"</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>PD1_SH1[PD1_SH1[<span class="st">"S"</span>].isin(few_H)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">S</th>
+<th data-quarto-table-cell-role="th">H</th>
+<th data-quarto-table-cell-role="th">D</th>
+<th data-quarto-table-cell-role="th">count</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">47</td>
+<td>Växjö IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">59</td>
+<td>Karlskrona IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">75</td>
+<td>Kristianstad IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">79</td>
+<td>Helsingborg IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">83</td>
+<td>Kalmar IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">91</td>
+<td>Sundsvall IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">115</td>
+<td>Lindesberg IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">127</td>
+<td>Norrtälje IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">131</td>
+<td>Värnamo IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">135</td>
+<td>Halmstad IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">139</td>
+<td>Örnsköldsvik IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">151</td>
+<td>Ystad IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">155</td>
+<td>Varberg IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">159</td>
+<td>Ljungby IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">167</td>
+<td>Eksjö IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">171</td>
+<td>Södertälje IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.5</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Att jämföra med cirka 0.15 för de övriga sjukhusen…</p>
+<div class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>PD1_SH1[<span class="op">~</span>PD1_SH1[<span class="st">"S"</span>].isin(few_H)].proportion.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="20">
+<pre><code>0.1489234874781996</code></pre>
+</div>
+</div>
+<p>Då <span class="math inline">\(P(D|H=h)\)</span> beräknats genom att summera över S kommer mortalitetsrisken att blåsas upp.</p>
+</section>
+<section id="parameteriserad-modell" class="level4">
+<h4 class="anchored" data-anchor-id="parameteriserad-modell">“Parameteriserad modell”</h4>
+<p>Sannolikt har jag missförstått mycket om vad interventionella fördelningar är och hur de beräknas. Men en insikt som jag tror håller är att någon form av parameterisering behövs för att hantera situationer där det finns få eller inga datapunkter. Det kanske lättast låter sig göras i ett “PPL” som <code>pymc</code>?</p>
+</section>
+</section>
+<section id="modell-med-pymc" class="level2">
+<h2 class="anchored" data-anchor-id="modell-med-pymc">Modell med pymc</h2>
+<section id="övergripande-idé" class="level3">
+<h3 class="anchored" data-anchor-id="övergripande-idé">Övergripande idé</h3>
+<p>Variablerna V, H, D, S definieras som parametrar med Bernoullifördelningen respektive den kategoriska fördelningen. Priors för dessa parametar får vara betafördelade respektive Dirichletfördelade:</p>
+<div class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pymc <span class="im">as</span> pm</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> arviz <span class="im">as</span> az</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pm.Model(coords<span class="op">=</span>{<span class="st">"i"</span>: [<span class="dv">0</span>]}) <span class="im">as</span> m:</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    P_V <span class="op">=</span> pm.Beta(<span class="st">"P_V"</span>, alpha <span class="op">=</span> <span class="dv">10</span>, beta <span class="op">=</span> <span class="dv">2</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    V <span class="op">=</span> pm.Bernoulli(<span class="st">"V"</span>, p<span class="op">=</span>P_V, dims<span class="op">=</span><span class="st">"i"</span>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    P_S <span class="op">=</span> pm.Dirichlet(<span class="st">"P_S"</span>, a<span class="op">=</span>np.ones(shape<span class="op">=</span>(<span class="dv">43</span>,) ))</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> pm.Categorical(<span class="st">"S"</span>, p<span class="op">=</span>P_S, dims<span class="op">=</span><span class="st">"i"</span>)</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Priorn för P_H beror på V...</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    P_H_V0 <span class="op">=</span> pm.Beta(<span class="st">"P_H_V0"</span>, alpha <span class="op">=</span> <span class="fl">0.2</span>, beta <span class="op">=</span> <span class="dv">10</span>, shape<span class="op">=</span>(<span class="dv">43</span>,))</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    P_H_V1 <span class="op">=</span> pm.Beta(<span class="st">"P_H_V1"</span>, alpha <span class="op">=</span> <span class="dv">1</span>, beta <span class="op">=</span> <span class="dv">3</span>, shape<span class="op">=</span>(<span class="dv">43</span>,))</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    P_H <span class="op">=</span> pm.Deterministic(<span class="st">"P_H"</span>, pm.math.stack([P_H_V0, P_H_V1], axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    H <span class="op">=</span> pm.Bernoulli(<span class="st">"H"</span>, p<span class="op">=</span>P_H[S, V], dims<span class="op">=</span><span class="st">"i"</span>)</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    P_D <span class="op">=</span> pm.Beta(<span class="st">"P_D"</span>, alpha <span class="op">=</span> <span class="dv">2</span>, beta <span class="op">=</span> <span class="dv">5</span>, shape<span class="op">=</span>(<span class="dv">43</span>,<span class="dv">2</span>))</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    D <span class="op">=</span> pm.Bernoulli(<span class="st">"D"</span>, p<span class="op">=</span>P_D[S,H], dims<span class="op">=</span><span class="st">"i"</span>)</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>m.to_graphviz()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
+<p><img src="first-try_files/figure-html/cell-22-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>Därefter presenteras modellen data och parametrarna estimeras med No U-Turn Sampling (NUTS).</p>
+<div class="cell" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> pymc <span class="im">import</span> do, observe</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>V_obs <span class="op">=</span> df[<span class="st">"V"</span>]</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>H_obs <span class="op">=</span> df[<span class="st">"H"</span>]</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>D_obs <span class="op">=</span> df[<span class="st">"D"</span>]</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>S_obs, S_label <span class="op">=</span> pd.factorize(df[<span class="st">"S"</span>])</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>m_inference <span class="op">=</span> observe(m, {<span class="st">"S"</span>: S_obs, <span class="st">"V"</span>: V_obs, <span class="st">"H"</span>: H_obs, <span class="st">"D"</span>: D_obs})</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>m_inference.set_dim(<span class="st">"i"</span>, <span class="bu">len</span>(df), coord_values<span class="op">=</span>np.arange(<span class="bu">len</span>(df)))</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> m_inference:</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    idata <span class="op">=</span> pm.sample(idata_kwargs<span class="op">=</span>{<span class="st">"log_likelihood"</span>: <span class="va">True</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>INFO:pymc.sampling.mcmc:Auto-assigning NUTS sampler...
+INFO:pymc.sampling.mcmc:Initializing NUTS using jitter+adapt_diag...
+INFO:pymc.sampling.mcmc:Multiprocess sampling (4 chains in 4 jobs)
+INFO:pymc.sampling.mcmc:NUTS: [P_V, P_S, P_H_V0, P_H_V1, P_D]
+INFO:pymc.sampling.mcmc:Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 77 seconds.</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"c2d8f518d09149b7b4971d0dec87e480","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+</div>
+<p>Som ett exempel kan man se på posteriors för parametern <code>P_H</code>, alltså sannolikheten för lufttransport (givet sjukhus och väder), som har dimensionerna (sjukhus, väder).</p>
+<div class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>az.summary(idata, var_names<span class="op">=</span>[<span class="st">"P_H"</span>]).head(<span class="dv">12</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="25">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">hdi_3%</th>
+<th data-quarto-table-cell-role="th">hdi_97%</th>
+<th data-quarto-table-cell-role="th">mcse_mean</th>
+<th data-quarto-table-cell-role="th">mcse_sd</th>
+<th data-quarto-table-cell-role="th">ess_bulk</th>
+<th data-quarto-table-cell-role="th">ess_tail</th>
+<th data-quarto-table-cell-role="th">r_hat</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">P_H[0, 0]</td>
+<td>0.020</td>
+<td>0.044</td>
+<td>0.000</td>
+<td>0.095</td>
+<td>0.001</td>
+<td>0.001</td>
+<td>2170.0</td>
+<td>1459.0</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">P_H[0, 1]</td>
+<td>0.536</td>
+<td>0.089</td>
+<td>0.378</td>
+<td>0.713</td>
+<td>0.001</td>
+<td>0.001</td>
+<td>6481.0</td>
+<td>2501.0</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">P_H[1, 0]</td>
+<td>0.012</td>
+<td>0.026</td>
+<td>0.000</td>
+<td>0.053</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>2199.0</td>
+<td>1752.0</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">P_H[1, 1]</td>
+<td>0.374</td>
+<td>0.070</td>
+<td>0.250</td>
+<td>0.512</td>
+<td>0.001</td>
+<td>0.001</td>
+<td>6953.0</td>
+<td>2858.0</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">P_H[2, 0]</td>
+<td>0.013</td>
+<td>0.029</td>
+<td>0.000</td>
+<td>0.060</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>2585.0</td>
+<td>1748.0</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">P_H[2, 1]</td>
+<td>0.580</td>
+<td>0.073</td>
+<td>0.443</td>
+<td>0.719</td>
+<td>0.001</td>
+<td>0.001</td>
+<td>7210.0</td>
+<td>2630.0</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">P_H[3, 0]</td>
+<td>0.016</td>
+<td>0.033</td>
+<td>0.000</td>
+<td>0.074</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>1937.0</td>
+<td>1668.0</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">P_H[3, 1]</td>
+<td>0.310</td>
+<td>0.084</td>
+<td>0.154</td>
+<td>0.466</td>
+<td>0.001</td>
+<td>0.001</td>
+<td>6064.0</td>
+<td>2411.0</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">P_H[4, 0]</td>
+<td>0.011</td>
+<td>0.024</td>
+<td>0.000</td>
+<td>0.049</td>
+<td>0.000</td>
+<td>0.000</td>
+<td>2266.0</td>
+<td>1426.0</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">P_H[4, 1]</td>
+<td>0.506</td>
+<td>0.058</td>
+<td>0.402</td>
+<td>0.621</td>
+<td>0.001</td>
+<td>0.000</td>
+<td>7360.0</td>
+<td>2420.0</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">P_H[5, 0]</td>
+<td>0.017</td>
+<td>0.038</td>
+<td>0.000</td>
+<td>0.079</td>
+<td>0.001</td>
+<td>0.001</td>
+<td>2189.0</td>
+<td>1591.0</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">P_H[5, 1]</td>
+<td>0.133</td>
+<td>0.086</td>
+<td>0.005</td>
+<td>0.286</td>
+<td>0.001</td>
+<td>0.001</td>
+<td>5722.0</td>
+<td>2030.0</td>
+<td>1.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Detta att jämföra med “empiriska” proportioner från data genom <code>cond_prob_table</code>:</p>
+<div class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>cond_prob_table(df, A<span class="op">=</span>[<span class="st">"H"</span>], B<span class="op">=</span>[<span class="st">"S"</span>, <span class="st">"V"</span>]).query(<span class="st">"H == 1"</span>)[[<span class="st">"S"</span>, <span class="st">"V"</span>, <span class="st">"proportion"</span>]].head(<span class="dv">12</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">S</th>
+<th data-quarto-table-cell-role="th">V</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Hudiksvall IVA</td>
+<td>1</td>
+<td>0.583264</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>Hudiksvall IVA</td>
+<td>0</td>
+<td>0.500000</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">5</td>
+<td>Östersund IVA</td>
+<td>1</td>
+<td>0.386415</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">7</td>
+<td>Östersund IVA</td>
+<td>0</td>
+<td>0.001247</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">9</td>
+<td>Skövde IVA</td>
+<td>1</td>
+<td>0.615325</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">11</td>
+<td>Skövde IVA</td>
+<td>0</td>
+<td>0.001992</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">13</td>
+<td>Eskilstuna IVA</td>
+<td>1</td>
+<td>0.320144</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">15</td>
+<td>Eskilstuna IVA</td>
+<td>0</td>
+<td>0.004950</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">17</td>
+<td>Falun IVA</td>
+<td>1</td>
+<td>0.521733</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">19</td>
+<td>Falun IVA</td>
+<td>0</td>
+<td>0.001247</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">21</td>
+<td>Kalix IVA</td>
+<td>1</td>
+<td>0.091652</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">23</td>
+<td>Kalix IVA</td>
+<td>0</td>
+<td>0.009804</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Generell så estimeras <span class="math inline">\(P(H=1|S,V)\)</span> lägre i modellen jämfört med “rådata”. En annan skillnad är att i de fall där det saknas fall av t.ex. dåligt väder kommer <code>cond_prob_table</code> sätta P(H|S,V=0) till 0.5 medan pymc-modellen kommer ge ett värde nära medelvärdet för priorn (cirka 0.02).</p>
+</section>
+<section id="interventioner" class="level3">
+<h3 class="anchored" data-anchor-id="interventioner">Interventioner</h3>
+<p>Jag är fortfarande lite osäker på hur detta fungerar i paketet. <code>pymc</code> har en funktion <code>do</code> för “graph mutilation”. Principen är, vad jag förstår:</p>
+<ol type="1">
+<li>Ta en modell och “träna” den på ett dataset. Dvs. den får en uppsättning parameterestimat.</li>
+<li>Applicera <code>do</code> på modellen. I det här fallet sätts <span class="math inline">\(H\)</span> till 0 eller 1 för alla 1049 patienter i data. Funktionen tar bort ingående påverkan på H i grafen, dvs. i detta fall <span class="math inline">\(H \rarr S\)</span>. Genom att också sätta S och V till de faktiska observationerna kommer ingående effekter tas för dessa noder. Notera att V försvinner ur grafen då dess enda effekt är på H, vilket vi ju har satt till ett fast värde. Nedan en visualisering av denna modell.</li>
+</ol>
+<div class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>m_counterfactual <span class="op">=</span> do(m_inference,{<span class="st">"S"</span>: S_obs, <span class="st">"V"</span>: V_obs})</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>m_H0 <span class="op">=</span> do(m_counterfactual, {<span class="st">"H"</span>: np.zeros(<span class="bu">len</span>(df), dtype<span class="op">=</span><span class="st">"int32"</span>)}, prune_vars<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>m_H1 <span class="op">=</span> do(m_counterfactual, {<span class="st">"H"</span>: np.ones(<span class="bu">len</span>(df), dtype<span class="op">=</span><span class="st">"int32"</span>)}, prune_vars<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>m_H1.to_graphviz()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="27">
+<p><img src="first-try_files/figure-html/cell-26-output-1.svg" class="img-fluid"></p>
+</div>
+</div>
+<p>Låt oss fortsätta…</p>
+<ol start="3" type="1">
+<li>Härnäst samplas posteriors från dessa modeller. Man kan här räkna ut ATE. Det skulle kanske vara bättre att lägga till ett steg till i modellen där <span class="math inline">\(P_{i}(D=1|do(H=h), Z=z_{i})\)</span> explicit definieras och sparas. Där är alltså <span class="math inline">\(i\)</span> är utgör en unik patient och <span class="math inline">\(z_{i}\)</span> är denna patients observerade sjukhus (eller andra relevanta variabler man har i modellen).</li>
+</ol>
+<div class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>SEED<span class="op">=</span><span class="dv">1989</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>idata_H0 <span class="op">=</span> pm.sample_posterior_predictive(</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    trace<span class="op">=</span>idata,</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>m_H0,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    predictions<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    random_seed<span class="op">=</span>SEED,</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>idata_H1 <span class="op">=</span> pm.sample_posterior_predictive(</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    trace<span class="op">=</span>idata,</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>m_H1,</span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    predictions<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    random_seed<span class="op">=</span>SEED,</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>ATE <span class="op">=</span> idata_H1.predictions <span class="op">-</span> idata_H0.predictions</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>ATE.D.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>INFO:pymc.sampling.forward:Sampling: [D]
+INFO:pymc.sampling.forward:Sampling: [D]</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"8b15e4edd592416187997777e0e674e8","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"e68dffdc4d5e4c969972da8abdf42807","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="28">
+
+<div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewbox="0 0 32 32">
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewbox="0 0 32 32">
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg>
+<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
+ *
+ */
+
+:root {
+  --xr-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
+  --xr-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
+  --xr-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
+  --xr-border-color: var(--jp-border-color2, #e0e0e0);
+  --xr-disabled-color: var(--jp-layout-color3, #bdbdbd);
+  --xr-background-color: var(--jp-layout-color0, white);
+  --xr-background-color-row-even: var(--jp-layout-color1, white);
+  --xr-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
+}
+
+html[theme=dark],
+body[data-theme=dark],
+body.vscode-dark {
+  --xr-font-color0: rgba(255, 255, 255, 1);
+  --xr-font-color2: rgba(255, 255, 255, 0.54);
+  --xr-font-color3: rgba(255, 255, 255, 0.38);
+  --xr-border-color: #1F1F1F;
+  --xr-disabled-color: #515151;
+  --xr-background-color: #111111;
+  --xr-background-color-row-even: #111111;
+  --xr-background-color-row-odd: #313131;
+}
+
+.xr-wrap {
+  display: block !important;
+  min-width: 300px;
+  max-width: 700px;
+}
+
+.xr-text-repr-fallback {
+  /* fallback to plain text repr when CSS is not injected (untrusted notebook) */
+  display: none;
+}
+
+.xr-header {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: solid 1px var(--xr-border-color);
+}
+
+.xr-header > div,
+.xr-header > ul {
+  display: inline;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.xr-obj-type,
+.xr-array-name {
+  margin-left: 2px;
+  margin-right: 10px;
+}
+
+.xr-obj-type {
+  color: var(--xr-font-color2);
+}
+
+.xr-sections {
+  padding-left: 0 !important;
+  display: grid;
+  grid-template-columns: 150px auto auto 1fr 20px 20px;
+}
+
+.xr-section-item {
+  display: contents;
+}
+
+.xr-section-item input {
+  display: none;
+}
+
+.xr-section-item input + label {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-item input:enabled + label {
+  cursor: pointer;
+  color: var(--xr-font-color2);
+}
+
+.xr-section-item input:enabled + label:hover {
+  color: var(--xr-font-color0);
+}
+
+.xr-section-summary {
+  grid-column: 1;
+  color: var(--xr-font-color2);
+  font-weight: 500;
+}
+
+.xr-section-summary > span {
+  display: inline-block;
+  padding-left: 0.5em;
+}
+
+.xr-section-summary-in:disabled + label {
+  color: var(--xr-font-color2);
+}
+
+.xr-section-summary-in + label:before {
+  display: inline-block;
+  content: '►';
+  font-size: 11px;
+  width: 15px;
+  text-align: center;
+}
+
+.xr-section-summary-in:disabled + label:before {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-summary-in:checked + label:before {
+  content: '▼';
+}
+
+.xr-section-summary-in:checked + label > span {
+  display: none;
+}
+
+.xr-section-summary,
+.xr-section-inline-details {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.xr-section-inline-details {
+  grid-column: 2 / -1;
+}
+
+.xr-section-details {
+  display: none;
+  grid-column: 1 / -1;
+  margin-bottom: 5px;
+}
+
+.xr-section-summary-in:checked ~ .xr-section-details {
+  display: contents;
+}
+
+.xr-array-wrap {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 20px auto;
+}
+
+.xr-array-wrap > label {
+  grid-column: 1;
+  vertical-align: top;
+}
+
+.xr-preview {
+  color: var(--xr-font-color3);
+}
+
+.xr-array-preview,
+.xr-array-data {
+  padding: 0 5px !important;
+  grid-column: 2;
+}
+
+.xr-array-data,
+.xr-array-in:checked ~ .xr-array-preview {
+  display: none;
+}
+
+.xr-array-in:checked ~ .xr-array-data,
+.xr-array-preview {
+  display: inline-block;
+}
+
+.xr-dim-list {
+  display: inline-block !important;
+  list-style: none;
+  padding: 0 !important;
+  margin: 0;
+}
+
+.xr-dim-list li {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+.xr-dim-list:before {
+  content: '(';
+}
+
+.xr-dim-list:after {
+  content: ')';
+}
+
+.xr-dim-list li:not(:last-child):after {
+  content: ',';
+  padding-right: 5px;
+}
+
+.xr-has-index {
+  font-weight: bold;
+}
+
+.xr-var-list,
+.xr-var-item {
+  display: contents;
+}
+
+.xr-var-item > div,
+.xr-var-item label,
+.xr-var-item > .xr-var-name span {
+  background-color: var(--xr-background-color-row-even);
+  margin-bottom: 0;
+}
+
+.xr-var-item > .xr-var-name:hover span {
+  padding-right: 5px;
+}
+
+.xr-var-list > li:nth-child(odd) > div,
+.xr-var-list > li:nth-child(odd) > label,
+.xr-var-list > li:nth-child(odd) > .xr-var-name span {
+  background-color: var(--xr-background-color-row-odd);
+}
+
+.xr-var-name {
+  grid-column: 1;
+}
+
+.xr-var-dims {
+  grid-column: 2;
+}
+
+.xr-var-dtype {
+  grid-column: 3;
+  text-align: right;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-preview {
+  grid-column: 4;
+}
+
+.xr-index-preview {
+  grid-column: 2 / 5;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-name,
+.xr-var-dims,
+.xr-var-dtype,
+.xr-preview,
+.xr-attrs dt {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 10px;
+}
+
+.xr-var-name:hover,
+.xr-var-dims:hover,
+.xr-var-dtype:hover,
+.xr-attrs dt:hover {
+  overflow: visible;
+  width: auto;
+  z-index: 1;
+}
+
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  display: none;
+  background-color: var(--xr-background-color) !important;
+  padding-bottom: 5px !important;
+}
+
+.xr-var-attrs-in:checked ~ .xr-var-attrs,
+.xr-var-data-in:checked ~ .xr-var-data,
+.xr-index-data-in:checked ~ .xr-index-data {
+  display: block;
+}
+
+.xr-var-data > table {
+  float: right;
+}
+
+.xr-var-name span,
+.xr-var-data,
+.xr-index-name div,
+.xr-index-data,
+.xr-attrs {
+  padding-left: 25px !important;
+}
+
+.xr-attrs,
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  grid-column: 1 / -1;
+}
+
+dl.xr-attrs {
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 125px auto;
+}
+
+.xr-attrs dt,
+.xr-attrs dd {
+  padding: 0;
+  margin: 0;
+  float: left;
+  padding-right: 10px;
+  width: auto;
+}
+
+.xr-attrs dt {
+  font-weight: normal;
+  grid-column: 1;
+}
+
+.xr-attrs dt:hover span {
+  display: inline-block;
+  background: var(--xr-background-color);
+  padding-right: 10px;
+}
+
+.xr-attrs dd {
+  grid-column: 2;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.xr-icon-database,
+.xr-icon-file-text2,
+.xr-no-icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1.5em !important;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+</style><pre class="xr-text-repr-fallback">&lt;xarray.DataArray 'D' ()&gt; Size: 8B
+array(0.03460176)</pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.DataArray</div><div class="xr-array-name">'D'</div></div><ul class="xr-sections"><li class="xr-section-item"><div class="xr-array-wrap"><input id="section-941d1998-3292-4100-9d06-b17251bf7212" class="xr-array-in" type="checkbox" checked=""><label for="section-941d1998-3292-4100-9d06-b17251bf7212" title="Show/hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-array-preview xr-preview"><span>0.0346</span></div><div class="xr-array-data"><pre>array(0.03460176)</pre></div></div></li><li class="xr-section-item"><input id="section-e0ea39be-efee-4bab-9153-44a7d8ca365e" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-e0ea39be-efee-4bab-9153-44a7d8ca365e" class="xr-section-summary" title="Expand/collapse section">Coordinates: <span>(0)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"></ul></div></li><li class="xr-section-item"><input id="section-cda25e10-7f1a-4bf6-b5bc-3e29d277c63c" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-cda25e10-7f1a-4bf6-b5bc-3e29d277c63c" class="xr-section-summary" title="Expand/collapse section">Indexes: <span>(0)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"></ul></div></li><li class="xr-section-item"><input id="section-01ef515d-6aca-4866-879b-59a15c77cebd" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-01ef515d-6aca-4866-879b-59a15c77cebd" class="xr-section-summary" title="Expand/collapse section">Attributes: <span>(0)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"></dl></div></li></ul></div></div>
+</div>
+</div>
+<p>ATE skulle då bli: <span class="math inline">\(\mathrm{E}(P(D=1|do(H=1), S) - P(D=1|do(H=1), S)) = 0.035\)</span>, dvs. ganska stor skillnad (jmfr 10%) om man bara använder CPTs….</p>
+</section>
+</section>
+<section id="saker-jag-inte-begriper" class="level2">
+<h2 class="anchored" data-anchor-id="saker-jag-inte-begriper">Saker jag inte begriper</h2>
+<ul>
+<li>Hela konceptet, sannolikt…</li>
+<li>Vad är poängen med att ha med P(V) i detta fall?</li>
+<li>Skillnanden mellan Pearls “rung 2” och “rung 3”, dvs. “interventional” och “counterfactual reasoning”.</li>
+<li>Hur jag ska hantera kontinuerliga confounders (t.ex SAPS 3)</li>
+<li>OM pymc-approachen är någorlunda korrekt: hade det inte varit rimligare att ha gemensamma priors för t.ex. parametrarna <span class="math inline">\(\alpha\)</span> och <span class="math inline">\(\beta\)</span> i betafördelningarna? Låt oss exempelvis titta på parametern <span class="math inline">\(P(D=1|S=\text{Jönköping}, H)\)</span>. Jönköping har id = 15.</li>
+</ul>
+<div class="cell" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>az.summary(idata, var_names<span class="op">=</span>[<span class="st">"P_D"</span>]).iloc[<span class="dv">30</span>:<span class="dv">32</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="29">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">hdi_3%</th>
+<th data-quarto-table-cell-role="th">hdi_97%</th>
+<th data-quarto-table-cell-role="th">mcse_mean</th>
+<th data-quarto-table-cell-role="th">mcse_sd</th>
+<th data-quarto-table-cell-role="th">ess_bulk</th>
+<th data-quarto-table-cell-role="th">ess_tail</th>
+<th data-quarto-table-cell-role="th">r_hat</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">P_D[15, 0]</td>
+<td>0.211</td>
+<td>0.053</td>
+<td>0.112</td>
+<td>0.312</td>
+<td>0.001</td>
+<td>0.000</td>
+<td>7796.0</td>
+<td>2690.0</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">P_D[15, 1]</td>
+<td>0.248</td>
+<td>0.148</td>
+<td>0.012</td>
+<td>0.514</td>
+<td>0.002</td>
+<td>0.001</td>
+<td>6848.0</td>
+<td>2233.0</td>
+<td>1.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Dvs. i princip säger modellen (se P_D[15, 1] där 15 = Jönköping, 1 = HEMS) att risken för Jönköpingspatieterna att dö är högre om de flyger. Stämmer det med observationerna?</p>
+<div class="cell" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>cond_prob_table(df, A<span class="op">=</span>[<span class="st">"D"</span>], B<span class="op">=</span>[<span class="st">"S"</span>, <span class="st">"H"</span>]).query(<span class="st">"S == 'Jönköping IVA'"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="30">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">S</th>
+<th data-quarto-table-cell-role="th">H</th>
+<th data-quarto-table-cell-role="th">D</th>
+<th data-quarto-table-cell-role="th">count</th>
+<th data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">60</td>
+<td>Jönköping IVA</td>
+<td>0</td>
+<td>0</td>
+<td>40.01</td>
+<td>0.799880</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">61</td>
+<td>Jönköping IVA</td>
+<td>0</td>
+<td>1</td>
+<td>10.01</td>
+<td>0.200120</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">62</td>
+<td>Jönköping IVA</td>
+<td>1</td>
+<td>0</td>
+<td>1.01</td>
+<td>0.990196</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">63</td>
+<td>Jönköping IVA</td>
+<td>1</td>
+<td>1</td>
+<td>0.01</td>
+<td>0.009804</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Inte särskilt! Först och främst flygs bara 1/51 Jönköpingspatienter. Den patienten överlever. Eftersom det finns så lite data här kommer priorn i princip vara orörd. Det verkar rimligare att estimatet för P_D[15,1] ska påverkas mer av det “nationella värdet” <span class="math inline">\(P(D|S,H=1)\)</span> i avsaknad av annan evidens. Exempelvis genom att definiera parametern som</p>
+<p><span class="math inline">\(P(D|H, S) \sim Beta(\alpha_{H,S} = \tau_{H}, \beta_{H,S} = \phi_{H}),\)</span></p>
+<p><span class="math inline">\(\tau_{H}, \phi_{H} \sim \text{nånting smart...}\)</span></p>
+<p>Låt oss testa. I ett första försök får hyperparametrarna vara fördelade <span class="math inline">\(\sim Unif(0.5, 10)\)</span></p>
+<div class="cell" data-execution_count="31">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> pm.Model(coords<span class="op">=</span>{<span class="st">"i"</span>: [<span class="dv">0</span>]}) <span class="im">as</span> m2:</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    P_V <span class="op">=</span> pm.Beta(<span class="st">"P_V"</span>, alpha <span class="op">=</span> <span class="dv">10</span>, beta <span class="op">=</span> <span class="dv">2</span>)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    V <span class="op">=</span> pm.Bernoulli(<span class="st">"V"</span>, p<span class="op">=</span>P_V, dims<span class="op">=</span><span class="st">"i"</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    P_S <span class="op">=</span> pm.Dirichlet(<span class="st">"P_S"</span>, a<span class="op">=</span>np.ones(shape<span class="op">=</span>(<span class="dv">43</span>,) ))</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    S <span class="op">=</span> pm.Categorical(<span class="st">"S"</span>, p<span class="op">=</span>P_S, dims<span class="op">=</span><span class="st">"i"</span>)</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Priorn för P_H beror på V...</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    P_H_V0 <span class="op">=</span> pm.Beta(<span class="st">"P_H_V0"</span>, alpha <span class="op">=</span> <span class="fl">0.2</span>, beta <span class="op">=</span> <span class="dv">10</span>, shape<span class="op">=</span>(<span class="dv">43</span>,))</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>    P_H_V1 <span class="op">=</span> pm.Beta(<span class="st">"P_H_V1"</span>, alpha <span class="op">=</span> <span class="dv">1</span>, beta <span class="op">=</span> <span class="dv">3</span>, shape<span class="op">=</span>(<span class="dv">43</span>,))</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>    P_H <span class="op">=</span> pm.Deterministic(<span class="st">"P_H"</span>, pm.math.stack([P_H_V0, P_H_V1], axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>    H <span class="op">=</span> pm.Bernoulli(<span class="st">"H"</span>, p<span class="op">=</span>P_H[S, V], dims<span class="op">=</span><span class="st">"i"</span>)</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>    tau_0 <span class="op">=</span> pm.Uniform(<span class="st">"tau_0"</span>, <span class="fl">0.5</span>, <span class="dv">10</span>)</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>    phi_0 <span class="op">=</span> pm.Uniform(<span class="st">"phi_0"</span>, <span class="fl">0.5</span>, <span class="dv">10</span>)</span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>    tau_1 <span class="op">=</span> pm.Uniform(<span class="st">"tau_1"</span>, <span class="fl">0.5</span>, <span class="dv">10</span>)</span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>    phi_1 <span class="op">=</span> pm.Uniform(<span class="st">"phi_1"</span>, <span class="fl">0.5</span>, <span class="dv">10</span>)</span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>    P_D_H0 <span class="op">=</span> pm.Beta(<span class="st">"P_D_H0"</span>, alpha <span class="op">=</span> tau_0, beta <span class="op">=</span> phi_0, shape<span class="op">=</span>(<span class="dv">43</span>,))</span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a>    P_D_H1 <span class="op">=</span> pm.Beta(<span class="st">"P_D_H1"</span>, alpha <span class="op">=</span> tau_1, beta <span class="op">=</span> phi_1, shape<span class="op">=</span>(<span class="dv">43</span>,))</span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a>    P_D <span class="op">=</span> pm.Deterministic(<span class="st">"P_D"</span>, pm.math.stack([P_D_H0, P_D_H1], axis<span class="op">=</span><span class="dv">1</span>))</span>
+<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a>    D <span class="op">=</span> pm.Bernoulli(<span class="st">"D"</span>, p<span class="op">=</span>P_D[S,H], dims<span class="op">=</span><span class="st">"i"</span>)</span>
+<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a>V_obs <span class="op">=</span> df[<span class="st">"V"</span>]</span>
+<span id="cb33-26"><a href="#cb33-26" aria-hidden="true" tabindex="-1"></a>H_obs <span class="op">=</span> df[<span class="st">"H"</span>]</span>
+<span id="cb33-27"><a href="#cb33-27" aria-hidden="true" tabindex="-1"></a>D_obs <span class="op">=</span> df[<span class="st">"D"</span>]</span>
+<span id="cb33-28"><a href="#cb33-28" aria-hidden="true" tabindex="-1"></a>S_obs, S_label <span class="op">=</span> pd.factorize(df[<span class="st">"S"</span>])</span>
+<span id="cb33-29"><a href="#cb33-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-30"><a href="#cb33-30" aria-hidden="true" tabindex="-1"></a>m2_inference <span class="op">=</span> observe(m2, {<span class="st">"S"</span>: S_obs, <span class="st">"V"</span>: V_obs, <span class="st">"H"</span>: H_obs, <span class="st">"D"</span>: D_obs})</span>
+<span id="cb33-31"><a href="#cb33-31" aria-hidden="true" tabindex="-1"></a>m2_inference.set_dim(<span class="st">"i"</span>, <span class="bu">len</span>(df), coord_values<span class="op">=</span>np.arange(<span class="bu">len</span>(df)))</span>
+<span id="cb33-32"><a href="#cb33-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-33"><a href="#cb33-33" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> m2_inference:</span>
+<span id="cb33-34"><a href="#cb33-34" aria-hidden="true" tabindex="-1"></a>    idata2 <span class="op">=</span> pm.sample(idata_kwargs<span class="op">=</span>{<span class="st">"log_likelihood"</span>: <span class="va">True</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>INFO:pymc.sampling.mcmc:Auto-assigning NUTS sampler...
+INFO:pymc.sampling.mcmc:Initializing NUTS using jitter+adapt_diag...
+INFO:pymc.sampling.mcmc:Multiprocess sampling (4 chains in 4 jobs)
+INFO:pymc.sampling.mcmc:NUTS: [P_V, P_S, P_H_V0, P_H_V1, tau_0, phi_0, tau_1, phi_1, P_D_H0, P_D_H1]
+INFO:pymc.sampling.mcmc:Sampling 4 chains for 1_000 tune and 1_000 draw iterations (4_000 + 4_000 draws total) took 94 seconds.</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"103260d515d742829cb378edcb80d8d4","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+</div>
+<p>Det visar sig att <span class="math inline">\(P(D=1|H=1, S=\text{Jönköping})\)</span> hamnar betydligt närmare det nationella snittet (0.141).</p>
+<div class="cell" data-execution_count="32">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>az.summary(idata2, var_names<span class="op">=</span>[<span class="st">"P_D"</span>]).iloc[<span class="dv">30</span>:<span class="dv">32</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="32">
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">mean</th>
+<th data-quarto-table-cell-role="th">sd</th>
+<th data-quarto-table-cell-role="th">hdi_3%</th>
+<th data-quarto-table-cell-role="th">hdi_97%</th>
+<th data-quarto-table-cell-role="th">mcse_mean</th>
+<th data-quarto-table-cell-role="th">mcse_sd</th>
+<th data-quarto-table-cell-role="th">ess_bulk</th>
+<th data-quarto-table-cell-role="th">ess_tail</th>
+<th data-quarto-table-cell-role="th">r_hat</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">P_D[15, 0]</td>
+<td>0.200</td>
+<td>0.050</td>
+<td>0.108</td>
+<td>0.294</td>
+<td>0.001</td>
+<td>0.000</td>
+<td>9543.0</td>
+<td>2689.0</td>
+<td>1.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">P_D[15, 1]</td>
+<td>0.152</td>
+<td>0.113</td>
+<td>0.000</td>
+<td>0.358</td>
+<td>0.002</td>
+<td>0.001</td>
+<td>4273.0</td>
+<td>2139.0</td>
+<td>1.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Vad skulle detta ha för betydelse för den interventionella fördelningen <span class="math inline">\(P(D|do(H=h),S)\)</span>?</p>
+<div class="cell" data-execution_count="33">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>m2_counterfactual <span class="op">=</span> do(m2_inference,{<span class="st">"S"</span>: S_obs, <span class="st">"V"</span>: V_obs})</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>m2_H0 <span class="op">=</span> do(m2_counterfactual, {<span class="st">"H"</span>: np.zeros(<span class="bu">len</span>(df), dtype<span class="op">=</span><span class="st">"int32"</span>)}, prune_vars<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>m2_H1 <span class="op">=</span> do(m2_counterfactual, {<span class="st">"H"</span>: np.ones(<span class="bu">len</span>(df), dtype<span class="op">=</span><span class="st">"int32"</span>)}, prune_vars<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>idata2_H0 <span class="op">=</span> pm.sample_posterior_predictive(</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    idata2,</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>m2_H0,</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    predictions<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>    var_names<span class="op">=</span>[<span class="st">"D"</span>],</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    random_seed<span class="op">=</span>SEED,</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>idata2_H1 <span class="op">=</span> pm.sample_posterior_predictive(</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>    idata2,</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>m2_H1,</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>    predictions<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>    var_names<span class="op">=</span>[<span class="st">"D"</span>],</span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>    random_seed<span class="op">=</span>SEED,</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>ATE2 <span class="op">=</span> idata2_H1.predictions <span class="op">-</span> idata2_H0.predictions</span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>ATE2.D.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>INFO:pymc.sampling.forward:Sampling: [D]
+INFO:pymc.sampling.forward:Sampling: [D]</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"ceb711ca8c8742e6bef6ee154f8e4c03","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"2dc51c35a96942e086cff0842b9d578c","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="33">
+
+<div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
+<defs>
+<symbol id="icon-database" viewbox="0 0 32 32">
+<path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"></path>
+<path d="M16 17c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+<path d="M16 26c-8.837 0-16-2.239-16-5v6c0 2.761 7.163 5 16 5s16-2.239 16-5v-6c0 2.761-7.163 5-16 5z"></path>
+</symbol>
+<symbol id="icon-file-text2" viewbox="0 0 32 32">
+<path d="M28.681 7.159c-0.694-0.947-1.662-2.053-2.724-3.116s-2.169-2.030-3.116-2.724c-1.612-1.182-2.393-1.319-2.841-1.319h-15.5c-1.378 0-2.5 1.121-2.5 2.5v27c0 1.378 1.122 2.5 2.5 2.5h23c1.378 0 2.5-1.122 2.5-2.5v-19.5c0-0.448-0.137-1.23-1.319-2.841zM24.543 5.457c0.959 0.959 1.712 1.825 2.268 2.543h-4.811v-4.811c0.718 0.556 1.584 1.309 2.543 2.268zM28 29.5c0 0.271-0.229 0.5-0.5 0.5h-23c-0.271 0-0.5-0.229-0.5-0.5v-27c0-0.271 0.229-0.5 0.5-0.5 0 0 15.499-0 15.5 0v7c0 0.552 0.448 1 1 1h7v19.5z"></path>
+<path d="M23 26h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 22h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+<path d="M23 18h-14c-0.552 0-1-0.448-1-1s0.448-1 1-1h14c0.552 0 1 0.448 1 1s-0.448 1-1 1z"></path>
+</symbol>
+</defs>
+</svg>
+<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
+ *
+ */
+
+:root {
+  --xr-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
+  --xr-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
+  --xr-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
+  --xr-border-color: var(--jp-border-color2, #e0e0e0);
+  --xr-disabled-color: var(--jp-layout-color3, #bdbdbd);
+  --xr-background-color: var(--jp-layout-color0, white);
+  --xr-background-color-row-even: var(--jp-layout-color1, white);
+  --xr-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
+}
+
+html[theme=dark],
+body[data-theme=dark],
+body.vscode-dark {
+  --xr-font-color0: rgba(255, 255, 255, 1);
+  --xr-font-color2: rgba(255, 255, 255, 0.54);
+  --xr-font-color3: rgba(255, 255, 255, 0.38);
+  --xr-border-color: #1F1F1F;
+  --xr-disabled-color: #515151;
+  --xr-background-color: #111111;
+  --xr-background-color-row-even: #111111;
+  --xr-background-color-row-odd: #313131;
+}
+
+.xr-wrap {
+  display: block !important;
+  min-width: 300px;
+  max-width: 700px;
+}
+
+.xr-text-repr-fallback {
+  /* fallback to plain text repr when CSS is not injected (untrusted notebook) */
+  display: none;
+}
+
+.xr-header {
+  padding-top: 6px;
+  padding-bottom: 6px;
+  margin-bottom: 4px;
+  border-bottom: solid 1px var(--xr-border-color);
+}
+
+.xr-header > div,
+.xr-header > ul {
+  display: inline;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.xr-obj-type,
+.xr-array-name {
+  margin-left: 2px;
+  margin-right: 10px;
+}
+
+.xr-obj-type {
+  color: var(--xr-font-color2);
+}
+
+.xr-sections {
+  padding-left: 0 !important;
+  display: grid;
+  grid-template-columns: 150px auto auto 1fr 20px 20px;
+}
+
+.xr-section-item {
+  display: contents;
+}
+
+.xr-section-item input {
+  display: none;
+}
+
+.xr-section-item input + label {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-item input:enabled + label {
+  cursor: pointer;
+  color: var(--xr-font-color2);
+}
+
+.xr-section-item input:enabled + label:hover {
+  color: var(--xr-font-color0);
+}
+
+.xr-section-summary {
+  grid-column: 1;
+  color: var(--xr-font-color2);
+  font-weight: 500;
+}
+
+.xr-section-summary > span {
+  display: inline-block;
+  padding-left: 0.5em;
+}
+
+.xr-section-summary-in:disabled + label {
+  color: var(--xr-font-color2);
+}
+
+.xr-section-summary-in + label:before {
+  display: inline-block;
+  content: '►';
+  font-size: 11px;
+  width: 15px;
+  text-align: center;
+}
+
+.xr-section-summary-in:disabled + label:before {
+  color: var(--xr-disabled-color);
+}
+
+.xr-section-summary-in:checked + label:before {
+  content: '▼';
+}
+
+.xr-section-summary-in:checked + label > span {
+  display: none;
+}
+
+.xr-section-summary,
+.xr-section-inline-details {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.xr-section-inline-details {
+  grid-column: 2 / -1;
+}
+
+.xr-section-details {
+  display: none;
+  grid-column: 1 / -1;
+  margin-bottom: 5px;
+}
+
+.xr-section-summary-in:checked ~ .xr-section-details {
+  display: contents;
+}
+
+.xr-array-wrap {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 20px auto;
+}
+
+.xr-array-wrap > label {
+  grid-column: 1;
+  vertical-align: top;
+}
+
+.xr-preview {
+  color: var(--xr-font-color3);
+}
+
+.xr-array-preview,
+.xr-array-data {
+  padding: 0 5px !important;
+  grid-column: 2;
+}
+
+.xr-array-data,
+.xr-array-in:checked ~ .xr-array-preview {
+  display: none;
+}
+
+.xr-array-in:checked ~ .xr-array-data,
+.xr-array-preview {
+  display: inline-block;
+}
+
+.xr-dim-list {
+  display: inline-block !important;
+  list-style: none;
+  padding: 0 !important;
+  margin: 0;
+}
+
+.xr-dim-list li {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+}
+
+.xr-dim-list:before {
+  content: '(';
+}
+
+.xr-dim-list:after {
+  content: ')';
+}
+
+.xr-dim-list li:not(:last-child):after {
+  content: ',';
+  padding-right: 5px;
+}
+
+.xr-has-index {
+  font-weight: bold;
+}
+
+.xr-var-list,
+.xr-var-item {
+  display: contents;
+}
+
+.xr-var-item > div,
+.xr-var-item label,
+.xr-var-item > .xr-var-name span {
+  background-color: var(--xr-background-color-row-even);
+  margin-bottom: 0;
+}
+
+.xr-var-item > .xr-var-name:hover span {
+  padding-right: 5px;
+}
+
+.xr-var-list > li:nth-child(odd) > div,
+.xr-var-list > li:nth-child(odd) > label,
+.xr-var-list > li:nth-child(odd) > .xr-var-name span {
+  background-color: var(--xr-background-color-row-odd);
+}
+
+.xr-var-name {
+  grid-column: 1;
+}
+
+.xr-var-dims {
+  grid-column: 2;
+}
+
+.xr-var-dtype {
+  grid-column: 3;
+  text-align: right;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-preview {
+  grid-column: 4;
+}
+
+.xr-index-preview {
+  grid-column: 2 / 5;
+  color: var(--xr-font-color2);
+}
+
+.xr-var-name,
+.xr-var-dims,
+.xr-var-dtype,
+.xr-preview,
+.xr-attrs dt {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 10px;
+}
+
+.xr-var-name:hover,
+.xr-var-dims:hover,
+.xr-var-dtype:hover,
+.xr-attrs dt:hover {
+  overflow: visible;
+  width: auto;
+  z-index: 1;
+}
+
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  display: none;
+  background-color: var(--xr-background-color) !important;
+  padding-bottom: 5px !important;
+}
+
+.xr-var-attrs-in:checked ~ .xr-var-attrs,
+.xr-var-data-in:checked ~ .xr-var-data,
+.xr-index-data-in:checked ~ .xr-index-data {
+  display: block;
+}
+
+.xr-var-data > table {
+  float: right;
+}
+
+.xr-var-name span,
+.xr-var-data,
+.xr-index-name div,
+.xr-index-data,
+.xr-attrs {
+  padding-left: 25px !important;
+}
+
+.xr-attrs,
+.xr-var-attrs,
+.xr-var-data,
+.xr-index-data {
+  grid-column: 1 / -1;
+}
+
+dl.xr-attrs {
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 125px auto;
+}
+
+.xr-attrs dt,
+.xr-attrs dd {
+  padding: 0;
+  margin: 0;
+  float: left;
+  padding-right: 10px;
+  width: auto;
+}
+
+.xr-attrs dt {
+  font-weight: normal;
+  grid-column: 1;
+}
+
+.xr-attrs dt:hover span {
+  display: inline-block;
+  background: var(--xr-background-color);
+  padding-right: 10px;
+}
+
+.xr-attrs dd {
+  grid-column: 2;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.xr-icon-database,
+.xr-icon-file-text2,
+.xr-no-icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1em;
+  height: 1.5em !important;
+  stroke-width: 0;
+  stroke: currentColor;
+  fill: currentColor;
+}
+</style><pre class="xr-text-repr-fallback">&lt;xarray.DataArray 'D' ()&gt; Size: 8B
+array(-0.01924261)</pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.DataArray</div><div class="xr-array-name">'D'</div></div><ul class="xr-sections"><li class="xr-section-item"><div class="xr-array-wrap"><input id="section-7366a546-7b83-47b3-ad91-78952143a226" class="xr-array-in" type="checkbox" checked=""><label for="section-7366a546-7b83-47b3-ad91-78952143a226" title="Show/hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-array-preview xr-preview"><span>-0.01924</span></div><div class="xr-array-data"><pre>array(-0.01924261)</pre></div></div></li><li class="xr-section-item"><input id="section-b8c18b56-3eae-4e52-9ce8-fb25a0e9e7c4" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-b8c18b56-3eae-4e52-9ce8-fb25a0e9e7c4" class="xr-section-summary" title="Expand/collapse section">Coordinates: <span>(0)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"></ul></div></li><li class="xr-section-item"><input id="section-1049ea88-7d9e-408a-81a2-09399915d1f8" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-1049ea88-7d9e-408a-81a2-09399915d1f8" class="xr-section-summary" title="Expand/collapse section">Indexes: <span>(0)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"></ul></div></li><li class="xr-section-item"><input id="section-7af5643e-4048-404e-9f2d-a897c87ca976" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-7af5643e-4048-404e-9f2d-a897c87ca976" class="xr-section-summary" title="Expand/collapse section">Attributes: <span>(0)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"></dl></div></li></ul></div></div>
+</div>
+</div>
+<p>Nu -0.019 jmfört 0.035 i tidigare försök…</p>
+</section>
+<section id="kommande-steg" class="level2">
+<h2 class="anchored" data-anchor-id="kommande-steg">Kommande steg</h2>
+<p>Givet att jag lyckas reda ut kvarvarande frågetecken och är på rätt spår med modellen: 1. Bygg ut den med fler confounders. 2. Bygg ut den med “missing data handling” (andelen patienter med missing data kommer vara 5-15% beroende på hur många variabler som används i modellen)</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
